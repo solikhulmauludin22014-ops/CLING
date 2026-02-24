@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import type { EmailOtpType } from '@supabase/supabase-js'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const token_hash = searchParams.get('token_hash')
