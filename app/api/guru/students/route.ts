@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
+export const dynamic = 'force-dynamic'
+
 // Fungsi helper untuk mendapatkan rentang tanggal hari ini
 function getTodayRange() {
   const today = new Date()
