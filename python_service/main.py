@@ -18,12 +18,14 @@ from pydantic import BaseModel
 app = FastAPI(title="CLING Python API", version="1.0.0")
 
 # CORS — izinkan request dari domain Vercel dan localhost
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+ALLOWED_ORIGINS_RAW = os.getenv("ALLOWED_ORIGINS", "")
+ALLOWED_ORIGINS = ALLOWED_ORIGINS_RAW.split(",") if ALLOWED_ORIGINS_RAW else []
+USE_WILDCARD = len(ALLOWED_ORIGINS) == 0
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_origins=["*"] if USE_WILDCARD else ALLOWED_ORIGINS,
+    allow_credentials=False if USE_WILDCARD else True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
