@@ -73,15 +73,8 @@ def root():
 
 @app.get("/health")
 def health():
-    ver = sys.version.split()[0]
-    try:
-        result = subprocess.run(
-            ["pylint", "--version"], capture_output=True, text=True, timeout=5
-        )
-        pylint_ver = result.stdout.split()[1] if result.stdout else "unknown"
-    except Exception:
-        pylint_ver = "not found"
-    return {"python": ver, "pylint": pylint_ver, "status": "ok"}
+    """Simple health check — tidak jalankan subprocess."""
+    return {"status": "ok", "python": sys.version.split()[0]}
 
 
 # ---------------------------------------------------------------------------
