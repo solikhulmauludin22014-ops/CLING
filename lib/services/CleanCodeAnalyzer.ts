@@ -1,8 +1,9 @@
 import type { CleanCodeAnalysisResult, IndicatorResult } from '@/lib/types/database'
 
-// Wandbox API untuk menjalankan analisis Python secara remote
-const WANDBOX_API_URL = 'https://wandbox.org/api/compile.json'
-const WANDBOX_COMPILER = 'cpython-3.10.15'
+// URL Python API yang di-deploy di Render.com
+const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8000'
+const PYTHON_API_SECRET = process.env.PYTHON_API_SECRET || ''
+const ANALYZE_TIMEOUT = 35000 // 35 detik
 
 // Interface untuk pesan Pylint yang sudah dikategorikan
 interface PylintMessage {
@@ -281,7 +282,7 @@ export class CleanCodeAnalyzer {
   }
 
   constructor() {
-    // No local dependencies needed - menggunakan Wandbox API
+    // Menggunakan Python API yang di-deploy di Render.com
   }
 
   /**
@@ -290,7 +291,7 @@ export class CleanCodeAnalyzer {
    */
   async analyze(code: string): Promise<CleanCodeAnalysisResult> {
     try {
-      // Run analisis via Wandbox API (Python AST-based)
+      // Run analisis via Pylint lokal
       const pylint = await this.runAnalysis(code)
       
       // Kategorikan pesan berdasarkan jenis
@@ -823,204 +824,8 @@ export class CleanCodeAnalyzer {
 
 
   /**
-   * Build Python analysis script yang menggunakan ast module (built-in)
-   * untuk menggantikan Pylint. Kompatibel dengan Wandbox/Vercel.
-   */
-  private buildAnalysisScript(code: string): string {
-    // Base64 encode the student code to avoid escaping issues
-    const base64Code = Buffer.from(code, 'utf-8').toString('base64')
-
-    return `
-import ast
-import re
-import json
-import base64
-import sys
-
-# Decode student code from base64
-CODE = base64.b64decode("${base64Code}").decode("utf-8")
-
-messages = []
-
-def add_msg(code, line, message, category):
-    messages.append({"message-id": code, "type": category, "line": line, "message": message, "symbol": code})
-
-# 1. Check syntax
-try:
-    tree = ast.parse(CODE)
-except SyntaxError as e:
-    add_msg("E0001", e.lineno or 0, f"Syntax error: {e.msg}", "error")
-    print(json.dumps(messages))
-    sys.exit(0)
-
-lines = CODE.split("\\n")
-
-# 2. Check naming conventions
-for node in ast.walk(tree):
-    if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
-        name = node.name
-        if not re.match(r'^[a-z_][a-z0-9_]*$', name) and not name.startswith('__'):
-            add_msg("C0103", node.lineno, f"Nama fungsi '{name}' tidak sesuai snake_case", "convention")
-        # Check missing docstring
-        if not (node.body and isinstance(node.body[0], ast.Expr) and isinstance(getattr(node.body[0], 'value', None), ast.Constant) and isinstance(node.body[0].value.value, str)):
-            add_msg("C0116", node.lineno, f"Fungsi '{name}' tidak punya docstring", "convention")
-        # Check too many parameters
-        total_args = len(node.args.args) + len(node.args.posonlyargs) + len(node.args.kwonlyargs)
-        if total_args > 5:
-            add_msg("R0913", node.lineno, f"Fungsi '{name}' punya {total_args} parameter (max 5)", "refactor")
-        # Check too many statements
-        stmt_count = sum(1 for _ in ast.walk(node) if isinstance(_, ast.stmt))
-        if stmt_count > 50:
-            add_msg("R0915", node.lineno, f"Fungsi '{name}' punya {stmt_count} statements (max 50)", "refactor")
-        # Check too many branches
-        branch_count = sum(1 for n in ast.walk(node) if isinstance(n, (ast.If, ast.For, ast.While, ast.ExceptHandler, ast.With)))
-        if branch_count > 12:
-            add_msg("R0912", node.lineno, f"Fungsi '{name}' punya {branch_count} branches (max 12)", "refactor")
-        # Check too many return
-        return_count = sum(1 for n in ast.walk(node) if isinstance(n, ast.Return))
-        if return_count > 6:
-            add_msg("R0911", node.lineno, f"Fungsi '{name}' punya {return_count} return (max 6)", "refactor")
-
-    if isinstance(node, ast.ClassDef):
-        name = node.name
-        if not re.match(r'^[A-Z][a-zA-Z0-9]*$', name):
-            add_msg("C0103", node.lineno, f"Nama class '{name}' harus PascalCase", "convention")
-        if not (node.body and isinstance(node.body[0], ast.Expr) and isinstance(getattr(node.body[0], 'value', None), ast.Constant) and isinstance(node.body[0].value.value, str)):
-            add_msg("C0115", node.lineno, f"Class '{name}' tidak punya docstring", "convention")
-
-# 3. Check variable names (assignments)
-for node in ast.walk(tree):
-    if isinstance(node, ast.Assign):
-        for target in node.targets:
-            if isinstance(target, ast.Name):
-                name = target.id
-                # Skip constants (ALL_CAPS is OK)
-                if name.isupper():
-                    continue
-                # Skip dunder
-                if name.startswith('__') and name.endswith('__'):
-                    continue
-                # Should be snake_case
-                if not re.match(r'^_?[a-z][a-z0-9_]*$', name) and not re.match(r'^[A-Z_][A-Z0-9_]*$', name):
-                    add_msg("C0103", node.lineno, f"Nama variabel '{name}' tidak sesuai snake_case", "convention")
-                # Single char variable warning (except i, j, k, x, y, etc. in loops)
-                if len(name) == 1 and name not in ('_', 'i', 'j', 'k', 'x', 'y', 'n', 'e'):
-                    add_msg("C0103", node.lineno, f"Nama variabel '{name}' terlalu pendek, gunakan nama deskriptif", "convention")
-
-# 4. Check module docstring
-if not (tree.body and isinstance(tree.body[0], ast.Expr) and isinstance(getattr(tree.body[0], 'value', None), ast.Constant) and isinstance(tree.body[0].value.value, str)):
-    add_msg("C0114", 1, "Module tidak punya docstring di awal file", "convention")
-
-# 5. Check unused imports
-imported_names = {}
-for node in ast.walk(tree):
-    if isinstance(node, ast.Import):
-        for alias in node.names:
-            n = alias.asname or alias.name
-            imported_names[n] = node.lineno
-    elif isinstance(node, ast.ImportFrom):
-        if node.names[0].name == '*':
-            add_msg("W0401", node.lineno, f"Wildcard import 'from {node.module} import *' tidak disarankan", "warning")
-        else:
-            for alias in node.names:
-                n = alias.asname or alias.name
-                imported_names[n] = node.lineno
-
-# Check if imported names are used
-all_names_used = set()
-for node in ast.walk(tree):
-    if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
-        all_names_used.add(node.id)
-    elif isinstance(node, ast.Attribute):
-        # Get the root name of a.b.c
-        n = node
-        while isinstance(n, ast.Attribute):
-            n = n.value
-        if isinstance(n, ast.Name):
-            all_names_used.add(n.id)
-
-for name, lineno in imported_names.items():
-    root_name = name.split('.')[0]
-    if root_name not in all_names_used:
-        add_msg("W0611", lineno, f"Import '{name}' tidak digunakan", "warning")
-
-# 6. Check for bare except
-for node in ast.walk(tree):
-    if isinstance(node, ast.ExceptHandler) and node.type is None:
-        add_msg("W0702", node.lineno, "except tanpa tipe exception (terlalu umum)", "warning")
-
-# 7. Check for eval/exec usage
-for node in ast.walk(tree):
-    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-        if node.func.id == 'eval':
-            add_msg("W0123", node.lineno, "Penggunaan eval() berbahaya", "warning")
-        elif node.func.id == 'exec':
-            add_msg("W0122", node.lineno, "Penggunaan exec() berbahaya", "warning")
-
-# 8. Check for unreachable code after return
-for node in ast.walk(tree):
-    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-        for i, stmt in enumerate(node.body[:-1]):
-            if isinstance(stmt, ast.Return) and i < len(node.body) - 1:
-                add_msg("W0101", node.body[i+1].lineno, "Kode setelah return tidak akan dijalankan", "warning")
-
-# 9. PEP 8 line checks
-for i, line in enumerate(lines):
-    lineno = i + 1
-    if len(line) > 79:
-        add_msg("C0301", lineno, f"Baris terlalu panjang ({len(line)}/79 karakter)", "convention")
-    if line != line.rstrip() and line.strip():
-        add_msg("C0303", lineno, "Trailing whitespace terdeteksi", "convention")
-    indent = re.match(r'^(\\s+)', line)
-    if indent:
-        spaces = indent.group(1)
-        if '\\t' in spaces and ' ' in spaces:
-            add_msg("W0312", lineno, "Campuran tab dan spasi untuk indentasi", "warning")
-        elif ' ' in spaces and len(spaces.replace('\\t', '')) % 4 != 0:
-            space_count = len(spaces.replace('\\t', ''))
-            if space_count > 0 and space_count % 4 != 0:
-                add_msg("W0311", lineno, f"Indentasi {space_count} spasi (seharusnya kelipatan 4)", "warning")
-
-if not CODE.endswith("\\n"):
-    add_msg("C0304", len(lines), "File tidak diakhiri dengan baris kosong", "convention")
-
-# 10. Check duplicate code (simple: identical non-empty lines appearing 3+ times)
-line_counts = {}
-for i, line in enumerate(lines):
-    stripped = line.strip()
-    if stripped and not stripped.startswith('#') and len(stripped) > 10:
-        if stripped not in line_counts:
-            line_counts[stripped] = []
-        line_counts[stripped].append(i + 1)
-for stripped, linenos in line_counts.items():
-    if len(linenos) >= 3:
-        add_msg("R0801", linenos[0], f"Baris duplikat ditemukan ({len(linenos)}x): '{stripped[:40]}...'", "refactor")
-
-# 11. Check unnecessary pass
-for node in ast.walk(tree):
-    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.If, ast.For, ast.While)):
-        if len(node.body) > 1:
-            for stmt in node.body:
-                if isinstance(stmt, ast.Pass):
-                    add_msg("W0107", stmt.lineno, "Statement pass tidak diperlukan", "warning")
-
-# 12. Check global usage
-for node in ast.walk(tree):
-    if isinstance(node, ast.Global):
-        add_msg("W0603", node.lineno, f"Menggunakan keyword global ({', '.join(node.names)})", "warning")
-
-# 13. Multiple imports on one line
-for node in ast.walk(tree):
-    if isinstance(node, ast.Import) and len(node.names) > 1:
-        add_msg("C0410", node.lineno, "Import beberapa module dalam satu baris", "convention")
-
-print(json.dumps(messages))
-`
-  }
-
-  /**
-   * Run analisis kode Python menggunakan Wandbox API
-   * Menggantikan Pylint lokal agar kompatibel dengan Vercel
+   * Run analisis kode Python via Render API (Pylint di server)
+   * Hasil rinci dari Pylint tanpa ketergantungan Python lokal di Vercel
    */
   private async runAnalysis(code: string): Promise<{
     fatal: boolean
@@ -1041,88 +846,64 @@ print(json.dumps(messages))
     const messages: { code: string; line: number; message: string; category: string }[] = []
 
     try {
-      const analysisScript = this.buildAnalysisScript(code)
-
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 15000)
+      const timeoutId = setTimeout(() => controller.abort(), ANALYZE_TIMEOUT)
 
-      const response = await fetch(WANDBOX_API_URL, {
+      const response = await fetch(`${PYTHON_API_URL}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code: analysisScript,
-          compiler: WANDBOX_COMPILER,
-          save: false,
-        }),
+        body: JSON.stringify({ code, api_key: PYTHON_API_SECRET }),
         signal: controller.signal,
       })
 
       clearTimeout(timeoutId)
 
       if (!response.ok) {
-        throw new Error(`Wandbox API error: ${response.status}`)
+        console.error('Analyze API error:', response.status)
+        return this.runFallbackAnalysis(code)
       }
 
-      const result = await response.json()
-      const stdout = result.program_output || ''
-      const stderr = result.program_error || ''
+      const data = await response.json()
 
-      if (result.status !== '0' && !stdout) {
-        fatal = true
-        messages.push({
-          code: 'E-ANALYSIS',
-          line: 0,
-          message: `Analisis gagal: ${stderr || 'Unknown error'}`,
-          category: 'error',
-        })
+      if (!data.success || !Array.isArray(data.messages)) {
+        console.warn('Analyze API returned empty, using fallback')
+        return this.runFallbackAnalysis(code)
       }
 
-      if (stdout) {
-        try {
-          const output = JSON.parse(stdout.trim())
+      for (const item of data.messages) {
+        if (!item || !item.message) continue
 
-          if (Array.isArray(output)) {
-            output.forEach((item: any) => {
-              if (!item || !item.message) return
-              const msg = {
-                code: item['message-id'] || item.symbol || 'unknown',
-                line: item.line || 0,
-                message: item.message || '',
-                category: item.type || 'info',
-              }
-              messages.push(msg)
+        const msg = {
+          code: item['message-id'] || item.symbol || 'unknown',
+          line: item.line || 0,
+          message: item.message || '',
+          category: (item.type || 'info') as string,
+        }
+        messages.push(msg)
 
-              switch (item.type) {
-                case 'fatal':
-                  fatal = true
-                  error += 1
-                  break
-                case 'error':
-                  error += 1
-                  break
-                case 'warning':
-                  warning += 1
-                  break
-                case 'refactor':
-                  refactor += 1
-                  break
-                case 'convention':
-                  convention += 1
-                  break
-                default:
-                  break
-              }
-            })
-          }
-        } catch (parseErr: any) {
-          // Jika JSON parse gagal, gunakan analisis TypeScript fallback
-          console.error('Analysis parse error, using fallback:', parseErr.message)
-          return this.runFallbackAnalysis(code)
+        switch (item.type) {
+          case 'fatal':
+            fatal = true
+            error += 1
+            break
+          case 'error':
+            error += 1
+            break
+          case 'warning':
+            warning += 1
+            break
+          case 'refactor':
+            refactor += 1
+            break
+          case 'convention':
+            convention += 1
+            break
+          default:
+            break
         }
       }
     } catch (err: any) {
-      // Network error / timeout — gunakan analisis fallback berbasis TypeScript
-      console.error('Wandbox API error, using fallback:', err.message)
+      console.error('Render API error, using fallback:', err.message)
       return this.runFallbackAnalysis(code)
     }
 
@@ -1144,7 +925,7 @@ print(json.dumps(messages))
   }
 
   /**
-   * Fallback analisis berbasis TypeScript jika Wandbox API gagal
+   * Fallback analisis berbasis TypeScript jika Pylint lokal gagal
    * Melakukan pengecekan PEP 8 dasar tanpa Python
    */
   private runFallbackAnalysis(code: string): {

@@ -2,7 +2,11 @@
   "framework": "nextjs",
   "functions": {
     "app/api/**/*.ts": {
-      "maxDuration": 30
+      "maxDuration": 60
     }
+  },
+  "env": {
+    "PYTHON_API_URL": "@python-api-url",
+    "PYTHON_API_SECRET": "@python-api-secret"
   }
 }

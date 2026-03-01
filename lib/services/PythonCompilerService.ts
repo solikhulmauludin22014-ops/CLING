@@ -1,48 +1,34 @@
 import type { ExecutionResult } from '@/lib/types/database'
 
-// Wandbox API - gratis, tanpa API key, kompatibel dengan Vercel serverless
-const WANDBOX_API_URL = 'https://wandbox.org/api/compile.json'
-const WANDBOX_COMPILER = 'cpython-3.10.15'
-
-interface WandboxResponse {
-  status: string
-  signal: string
-  compiler_output: string
-  compiler_error: string
-  compiler_message: string
-  program_output: string
-  program_error: string
-  program_message: string
-}
+// URL Python API yang di-deploy di Render.com
+// Set PYTHON_API_URL di .env.local dan di Vercel environment variables
+const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8000'
+const PYTHON_API_SECRET = process.env.PYTHON_API_SECRET || ''
+const REQUEST_TIMEOUT = 30000 // 30 detik
 
 export class PythonCompilerService {
-  private maxExecutionTime: number
+  private apiUrl: string
+  private apiSecret: string
 
   constructor() {
-    this.maxExecutionTime = 15000 // Timeout 15 detik untuk network request
+    this.apiUrl = PYTHON_API_URL
+    this.apiSecret = PYTHON_API_SECRET
   }
 
   /**
-   * Eksekusi kode Python menggunakan Wandbox API
-   * Kompatibel dengan Vercel serverless (tidak butuh Python lokal)
+   * Eksekusi kode Python via Render API
    */
   async execute(code: string): Promise<ExecutionResult> {
     const startTime = Date.now()
 
     try {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), this.maxExecutionTime)
+      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
 
-      const response = await fetch(WANDBOX_API_URL, {
+      const response = await fetch(`${this.apiUrl}/execute`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code,
-          compiler: WANDBOX_COMPILER,
-          save: false,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, api_key: this.apiSecret }),
         signal: controller.signal,
       })
 
@@ -52,138 +38,73 @@ export class PythonCompilerService {
         const text = await response.text().catch(() => '')
         return {
           success: false,
-          error: `API Error: ${response.status} ${response.statusText}${text ? ` - ${text}` : ''}`,
+          error: `API Error ${response.status}: ${text}`,
+          execution_time: Date.now() - startTime,
         }
       }
 
-      const result: WandboxResponse = await response.json()
-      const executionTime = Date.now() - startTime
-
-      // Cek error kompilasi
-      if (result.compiler_error) {
-        return {
-          success: false,
-          error: result.compiler_error,
-          execution_time: executionTime,
-        }
-      }
-
-      // Cek error runtime (status !== "0" berarti ada error)
-      if (result.status !== '0') {
-        const errorMsg = result.program_error || result.program_message || 'Runtime error'
-        // Jika ada output + error, tampilkan keduanya
-        if (result.program_output && result.program_error) {
-          return {
-            success: false,
-            error: result.program_error,
-            output: result.program_output,
-            execution_time: executionTime,
-          }
-        }
-        return {
-          success: false,
-          error: errorMsg,
-          execution_time: executionTime,
-        }
-      }
-
-      // Sukses
+      const result = await response.json()
       return {
-        success: true,
-        output: result.program_output || '',
-        execution_time: executionTime,
+        success: result.success,
+        output: result.output || '',
+        error: result.error || undefined,
+        execution_time: Date.now() - startTime,
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
         return {
           success: false,
-          error: `Execution timeout (max ${this.maxExecutionTime / 1000}s)`,
+          error: `Request timeout (${REQUEST_TIMEOUT / 1000}s)`,
+          execution_time: Date.now() - startTime,
         }
       }
-
       return {
         success: false,
-        error: error.message || 'Failed to execute code',
+        error: `Gagal menghubungi Python API: ${error.message}`,
+        execution_time: Date.now() - startTime,
       }
     }
   }
 
   /**
-   * Validasi sintaks Python menggunakan Wandbox API
-   * Menjalankan ast.parse() untuk cek sintaks tanpa eksekusi
+   * Validasi sintaks Python via Render API
    */
   async validateSyntax(code: string): Promise<{ valid: boolean; error?: string }> {
     try {
-      // Escape kode untuk dimasukkan ke string Python
-      const escapedCode = code
-        .replace(/\\/g, '\\\\')
-        .replace(/"""/g, '\\"\\"\\"')
-
-      const syntaxCheckCode = `
-import ast
-try:
-    ast.parse("""${escapedCode}""")
-    print("SYNTAX_OK")
-except SyntaxError as e:
-    print(f"SyntaxError: line {e.lineno}: {e.msg}")
-`
-
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000)
 
-      const response = await fetch(WANDBOX_API_URL, {
+      const response = await fetch(`${this.apiUrl}/validate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code: syntaxCheckCode,
-          compiler: WANDBOX_COMPILER,
-          save: false,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, api_key: this.apiSecret }),
         signal: controller.signal,
       })
 
       clearTimeout(timeoutId)
 
-      if (!response.ok) {
-        // Jika API error, skip validasi dan biarkan eksekusi yang tangani
-        return { valid: true }
-      }
+      if (!response.ok) return { valid: true }
 
-      const result: WandboxResponse = await response.json()
-
-      if (result.program_output?.includes('SYNTAX_OK')) {
-        return { valid: true }
-      }
-
-      const errorOutput = result.program_output || result.program_error || 'Syntax error'
-      return {
-        valid: false,
-        error: errorOutput.trim(),
-      }
+      const result = await response.json()
+      return { valid: result.valid, error: result.error || undefined }
     } catch {
-      // Jika validasi gagal (network error dll), skip dan biarkan eksekusi yang tangani
+      // Jika API tidak bisa dihubungi, lewati validasi — eksekusi yang akan tangani
       return { valid: true }
     }
   }
 
   /**
-   * Ambil versi Python yang digunakan
+   * Ambil versi Python di Render API
    */
   async getAvailableVersions(): Promise<string[]> {
     try {
-      const response = await fetch('https://wandbox.org/api/list.json', {
+      const response = await fetch(`${this.apiUrl}/health`, {
         signal: AbortSignal.timeout(5000),
       })
-      const runtimes = await response.json()
-
-      return runtimes
-        .filter((r: any) => r.language === 'Python' && r.name.startsWith('cpython-3'))
-        .map((r: any) => r.name.replace('cpython-', ''))
-        .slice(0, 5)
+      const data = await response.json()
+      return [data.python || 'unknown']
     } catch {
-      return ['3.10.15']
+      return ['unknown']
     }
   }
 }
