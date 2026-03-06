@@ -834,49 +834,27 @@ export default function GuruDashboard() {
               <p className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>Belum ada data siswa.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto rounded-xl scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
+              <table className="w-full text-sm">
                 <thead>
-                  <tr className={`border-b ${theme === 'dark' ? 'border-slate-700' : 'border-purple-100'}`}>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      No
-                    </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      Nama Siswa
-                    </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      Kelas
-                    </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      NIS
-                    </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      Submissions
-                    </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      Rata-rata
-                    </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      Persentase
-                    </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      Tertinggi
-                    </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      <div className="flex items-center gap-1">
-                        <span>📊 Skor Hari Ini</span>
-                        <span className="text-xs text-yellow-500">(Real-time)</span>
+                  <tr className={`border-b-2 ${theme === 'dark' ? 'border-slate-600 bg-slate-800/80' : 'border-purple-200 bg-purple-50/80'}`}>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap w-10 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>No</th>
+                    <th className={`text-left py-3 px-3 font-semibold whitespace-nowrap min-w-[140px] ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Nama Siswa</th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Kelas</th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>NIS</th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Submit</th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Rata-rata</th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Progress</th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Tertinggi</th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
+                      <div className="flex flex-col items-center leading-tight">
+                        <span>📊 Skor</span>
+                        <span className="text-[10px] text-yellow-500 font-normal">(Hari Ini)</span>
                       </div>
                     </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      Terakhir Analisis
-                    </th>
-                    <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      Grade
-                    </th>
-                    <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
-                      Aksi
-                    </th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Terakhir</th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Grade</th>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap sticky right-0 ${theme === 'dark' ? 'text-purple-300 bg-slate-800' : 'text-purple-700 bg-purple-50'}`} style={{ boxShadow: '-4px 0 6px -2px rgba(0,0,0,0.1)' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -885,37 +863,35 @@ export default function GuruDashboard() {
                       key={student.id}
                       className={`border-b transition-colors ${theme === 'dark' ? 'border-slate-700 hover:bg-slate-700/50' : 'border-purple-50 hover:bg-purple-50'}`}
                     >
-                      <td className={`py-4 px-4 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{index + 1}</td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                      <td className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{index + 1}</td>
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                             {student.name.charAt(0).toUpperCase()}
                           </div>
-                          <div>
-                            <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                              {student.name}
-                            </p>
-                          </div>
+                          <span className={`font-semibold truncate max-w-[120px] ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`} title={student.name}>
+                            {student.name}
+                          </span>
                         </div>
                       </td>
-                      <td className="py-4 px-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${theme === 'dark' ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
-                          {student.kelas}
+                      <td className="py-3 px-2 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${theme === 'dark' ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                          {student.kelas || '-'}
                         </span>
                       </td>
-                      <td className="py-4 px-4">
-                        <span className={`font-mono text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                          {student.nis}
+                      <td className="py-3 px-2 text-center">
+                        <span className={`font-mono text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                          {student.nis || '-'}
                         </span>
                       </td>
-                      <td className="py-4 px-4">
-                        <span className={`px-3 py-1 rounded-full text-sm ${theme === 'dark' ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
-                          {student.total_submissions} kali
+                      <td className="py-3 px-2 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${theme === 'dark' ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                          {student.total_submissions}x
                         </span>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-3 px-2 text-center">
                         <span
-                          className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                             student.average_score >= 8
                               ? 'bg-green-500/20 text-green-300 border border-green-500/30'
                               : student.average_score >= 6
@@ -928,11 +904,11 @@ export default function GuruDashboard() {
                           {student.average_score.toFixed(1)}/10
                         </span>
                       </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-16 rounded-full h-2 overflow-hidden ${theme === 'dark' ? 'bg-slate-700' : 'bg-purple-100'}`}>
+                      <td className="py-3 px-2">
+                        <div className="flex items-center gap-1.5 justify-center">
+                          <div className={`w-14 rounded-full h-1.5 overflow-hidden ${theme === 'dark' ? 'bg-slate-700' : 'bg-purple-100'}`}>
                             <div
-                              className={`h-2 rounded-full transition-all duration-500 ${
+                              className={`h-1.5 rounded-full transition-all duration-500 ${
                                 student.average_score >= 8
                                   ? 'bg-green-500'
                                   : student.average_score >= 6
@@ -947,7 +923,7 @@ export default function GuruDashboard() {
                             ></div>
                           </div>
                           <span
-                            className={`text-sm font-bold ${
+                            className={`text-xs font-bold ${
                               student.average_score >= 8
                                 ? 'text-green-400'
                                 : student.average_score >= 6
@@ -961,9 +937,9 @@ export default function GuruDashboard() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-3 px-2 text-center">
                         <span
-                          className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                             student.highest_score >= 8
                               ? 'bg-green-500/20 text-green-300 border border-green-500/30'
                               : student.highest_score >= 6
@@ -977,12 +953,12 @@ export default function GuruDashboard() {
                         </span>
                       </td>
                       {/* Daily Score - Real-time score that resets daily */}
-                      <td className="py-4 px-4">
-                        <div className="flex flex-col items-start gap-1">
+                      <td className="py-3 px-2">
+                        <div className="flex flex-col items-center gap-0.5">
                           <span
-                            className={`px-3 py-1 rounded-full text-sm font-bold ${
+                            className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                               (student.daily_score || 0) >= 8
-                                ? 'bg-purple-500/30 text-purple-300 border border-purple-400/40 shadow-lg shadow-purple-500/20'
+                                ? 'bg-purple-500/30 text-purple-300 border border-purple-400/40'
                                 : (student.daily_score || 0) >= 6
                                 ? 'bg-purple-500/30 text-purple-300 border border-purple-400/40'
                                 : (student.daily_score || 0) >= 4
@@ -995,15 +971,15 @@ export default function GuruDashboard() {
                             {(student.daily_score || 0).toFixed(1)}/10
                           </span>
                           {(student.daily_submissions || 0) > 0 && (
-                            <span className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                            <span className={`text-[10px] leading-tight ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                               {student.daily_submissions}x • max: {(student.daily_highest_score || 0).toFixed(1)}
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-3 px-2 text-center">
                         {student.latest_submission ? (
-                          <div className="text-sm">
+                          <div className="text-xs">
                             <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
                               {new Date(student.latest_submission).toLocaleDateString('id-ID', {
                                 day: '2-digit',
@@ -1011,7 +987,7 @@ export default function GuruDashboard() {
                                 year: 'numeric',
                               })}
                             </p>
-                            <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                            <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                               {new Date(student.latest_submission).toLocaleTimeString('id-ID', {
                                 hour: '2-digit',
                                 minute: '2-digit',
@@ -1019,10 +995,10 @@ export default function GuruDashboard() {
                             </p>
                           </div>
                         ) : (
-                          <span className={`text-sm ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>Belum ada</span>
+                          <span className={`text-xs ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>Belum ada</span>
                         )}
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-3 px-2 text-center">
                         {(() => {
                           const score = student.average_score
                           let grade = ''
@@ -1055,16 +1031,16 @@ export default function GuruDashboard() {
                           }
                           
                           return (
-                            <span className={`px-3 py-1 rounded-lg text-sm font-bold border ${gradeClass}`}>
+                            <span className={`px-2.5 py-0.5 rounded-lg text-xs font-bold border ${gradeClass}`}>
                               {grade}
                             </span>
                           )
                         })()}
                       </td>
-                      <td className="py-4 px-4 text-center">
+                      <td className={`py-3 px-2 text-center sticky right-0 ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`} style={{ boxShadow: '-4px 0 6px -2px rgba(0,0,0,0.08)' }}>
                         <button
                           onClick={() => confirmDeleteStudent(student)}
-                          className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                          className="px-2.5 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105"
                           title={`Hapus akun ${student.name}`}
                         >
                           🗑️ Hapus
@@ -1074,6 +1050,13 @@ export default function GuruDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Student Count Footer */}
+          {filteredStudents.length > 0 && (
+            <div className={`mt-4 text-sm text-center ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+              Menampilkan {filteredStudents.length} dari {students.length} siswa
             </div>
           )}
         </div>
