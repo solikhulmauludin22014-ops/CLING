@@ -1,6 +1,6 @@
 """
 CLING Python API Service
-Dijalankan di Render.com — menangani eksekusi Python dan analisis Pylint.
+Dijalankan di Railway.com — menangani eksekusi Python dan analisis Pylint.
 """
 
 import json

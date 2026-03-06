@@ -74,6 +74,9 @@ export default function GuruDashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [materialToDelete, setMaterialToDelete] = useState<Material | null>(null)
+  const [showDeleteStudentModal, setShowDeleteStudentModal] = useState(false)
+  const [studentToDelete, setStudentToDelete] = useState<StudentData | null>(null)
+  const [deleteStudentLoading, setDeleteStudentLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedKelas, setSelectedKelas] = useState<string>('all')
@@ -293,6 +296,42 @@ export default function GuruDashboard() {
     setShowLogoutModal(false)
   }
 
+  // Delete student functions
+  const confirmDeleteStudent = (student: StudentData) => {
+    setStudentToDelete(student)
+    setShowDeleteStudentModal(true)
+  }
+
+  const handleDeleteStudent = async () => {
+    if (!studentToDelete) return
+
+    setDeleteStudentLoading(true)
+    try {
+      const response = await fetch('/api/guru/delete-student', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: studentToDelete.id }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Refresh data setelah hapus
+        loadStudentData()
+        alert(`Akun siswa "${studentToDelete.name}" berhasil dihapus!`)
+      } else {
+        alert(data.error || 'Gagal menghapus akun siswa')
+      }
+    } catch (error) {
+      console.error('Delete student error:', error)
+      alert('Terjadi kesalahan saat menghapus akun siswa')
+    } finally {
+      setDeleteStudentLoading(false)
+      setShowDeleteStudentModal(false)
+      setStudentToDelete(null)
+    }
+  }
+
   const getScoreColor = (score: number) => {
     if (score >= 8) return 'text-green-600 bg-green-100'
     if (score >= 6) return 'text-purple-600 bg-purple-100'
@@ -490,6 +529,46 @@ export default function GuruDashboard() {
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
                   🗑️ Ya, Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Student Confirmation Modal */}
+      {showDeleteStudentModal && studentToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => !deleteStudentLoading && setShowDeleteStudentModal(false)}
+          ></div>
+          <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-red-100'}`}>
+            <div className="text-center">
+              <div className="text-6xl mb-4">⚠️</div>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Hapus Akun Siswa?</h3>
+              <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Apakah Anda yakin ingin menghapus akun siswa:</p>
+              <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-slate-700' : 'bg-red-50'}`}>
+                <p className="text-red-500 font-bold text-lg">{studentToDelete.name}</p>
+                <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>NIS: {studentToDelete.nis} | Kelas: {studentToDelete.kelas}</p>
+              </div>
+              <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-red-400' : 'text-red-500'}`}>
+                ⚠️ Semua data siswa termasuk submissions, skor, dan leaderboard akan dihapus permanen!
+              </p>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => setShowDeleteStudentModal(false)}
+                  disabled={deleteStudentLoading}
+                  className="px-6 py-3 bg-slate-500 hover:bg-slate-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300"
+                >
+                  ❌ Batal
+                </button>
+                <button
+                  onClick={handleDeleteStudent}
+                  disabled={deleteStudentLoading}
+                  className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
+                >
+                  {deleteStudentLoading ? '⏳ Menghapus...' : '🗑️ Ya, Hapus Akun'}
                 </button>
               </div>
             </div>
@@ -795,6 +874,9 @@ export default function GuruDashboard() {
                     <th className={`text-left py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
                       Grade
                     </th>
+                    <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
+                      Aksi
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -978,6 +1060,15 @@ export default function GuruDashboard() {
                             </span>
                           )
                         })()}
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <button
+                          onClick={() => confirmDeleteStudent(student)}
+                          className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+                          title={`Hapus akun ${student.name}`}
+                        >
+                          🗑️ Hapus
+                        </button>
                       </td>
                     </tr>
                   ))}
