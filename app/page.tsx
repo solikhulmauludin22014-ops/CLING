@@ -351,7 +351,7 @@ export default function HomePage() {
       }`}>
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>
-            © 2026 C3-Py Clean Code Compiler Python
+            © 2026 Develop By Solikhul Mauludin, S.Pd.
           </p>
         </div>
       </footer>
