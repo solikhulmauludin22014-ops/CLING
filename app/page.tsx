@@ -41,7 +41,7 @@ export default function HomePage() {
                   CLING
                 </h1>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-500'}`}>
-                  Clean Code Compiler Python
+                  Clean Learning Integrated Gateway (Online Compiler Python)
                 </p>
               </div>
             </div>
