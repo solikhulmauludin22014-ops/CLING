@@ -105,12 +105,11 @@ export default function SiswaLeaderboardPage() {
   }
 
   const getGrade = (score: number) => {
-    if (score >= 9) return { grade: 'A+', color: 'text-green-400' }
-    if (score >= 8) return { grade: 'A', color: 'text-green-400' }
-    if (score >= 7) return { grade: 'B+', color: 'text-purple-400' }
-    if (score >= 6) return { grade: 'B', color: 'text-purple-400' }
-    if (score >= 5) return { grade: 'C', color: 'text-yellow-400' }
-    return { grade: 'D', color: 'text-red-400' }
+    if (score >= 8.1) return { grade: 'Sangat Terampil', color: 'text-green-400' }
+    if (score >= 6.1) return { grade: 'Terampil', color: 'text-purple-400' }
+    if (score >= 4.1) return { grade: 'Cukup Terampil', color: 'text-yellow-400' }
+    if (score >= 2.1) return { grade: 'Kurang Terampil', color: 'text-orange-400' }
+    return { grade: 'Tidak Terampil', color: 'text-red-400' }
   }
 
   if (loading) {

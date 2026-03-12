@@ -1083,7 +1083,7 @@ print(f"Average: {result_avg}")
                   </div>
                 </div>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
-                  💪 Raih skor 7+ untuk mendapatkan kategori score Good!
+                  💪 Raih skor 8.1+ untuk mendapatkan kategori Sangat Terampil!
                 </p>
               </div>
             </div>

@@ -619,28 +619,32 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-    actor User as Pengguna
-    participant FE as Next.js Frontend
-    participant Auth as Supabase Auth
-    participant DB as Supabase DB
+    box Sisi Klien
+        actor User as Pengguna
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant Auth as Autentikasi
+        participant DB as Database
+    end
 
-    User->>FE: Buka halaman /login
-    FE-->>User: Tampilkan form login
-    User->>FE: Input email & password
+    User->>FE: Membuka halaman Login
+    FE-->>User: Menampilkan form login
+    User->>FE: Mengisi email dan password
     User->>FE: Klik tombol Login
-    FE->>Auth: signInWithPassword(email, password)
+    FE->>Auth: Memverifikasi email dan password
     alt Kredensial Valid
-        Auth-->>FE: Session & User data
-        FE->>DB: Query role dari tabel profiles WHERE id = user.id
+        Auth-->>FE: Data sesi pengguna
+        FE->>DB: Mengambil role pengguna
         DB-->>FE: Role (siswa / guru)
-        alt Role = siswa
-            FE-->>User: Redirect ke /siswa/compiler
-        else Role = guru
-            FE-->>User: Redirect ke /guru/dashboard
+        alt Role = Siswa
+            FE-->>User: Mengarahkan ke halaman Compiler
+        else Role = Guru
+            FE-->>User: Mengarahkan ke halaman Dashboard
         end
     else Kredensial Tidak Valid
-        Auth-->>FE: Error: Invalid login credentials
-        FE-->>User: Tampilkan pesan Email atau password salah
+        Auth-->>FE: Kredensial tidak valid
+        FE-->>User: Menampilkan pesan email atau password salah
     end
 ```
 
@@ -650,41 +654,45 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor User as Pengguna
-    participant FE as Next.js Frontend
-    participant API as API Route /api/auth/register
-    participant Auth as Supabase Auth
-    participant DB as Supabase DB
+    box Sisi Klien
+        actor User as Pengguna
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant API as API Server
+        participant Auth as Autentikasi
+        participant DB as Database
+    end
 
-    User->>FE: Buka halaman /register
-    FE-->>User: Tampilkan form registrasi
-    User->>FE: Isi nama, email, password, confirmPassword, role
-    Note over FE: Jika siswa: isi NIS dan Kelas<br>Jika guru: isi Kode Token Sekolah
-    User->>FE: Klik Daftar
-    FE->>FE: Validasi password (min 6 char + angka)
+    User->>FE: Membuka halaman Register
+    FE-->>User: Menampilkan form registrasi
+    User->>FE: Mengisi nama, email, password, role
+    Note over FE: Jika siswa: mengisi NIS dan Kelas<br>Jika guru: mengisi Kode Token Sekolah
+    User->>FE: Klik tombol Daftar
+    FE->>FE: Memvalidasi password (min 6 karakter dan ada angka)
     alt Validasi Gagal
-        FE-->>User: Tampilkan pesan error
-    else Validasi OK
-        FE->>API: POST /api/auth/register {email, password, name, role, nis, kelas, kodeToken}
-        API->>API: Validasi field wajib dan role
-        alt Role = guru
-            API->>API: Validasi kode token sekolah
+        FE-->>User: Menampilkan pesan error
+    else Validasi Berhasil
+        FE->>API: Mengirim data registrasi
+        API->>API: Memvalidasi data wajib dan role
+        alt Role = Guru
+            API->>API: Memvalidasi kode token sekolah
             alt Token Tidak Valid
-                API-->>FE: Error 400: Kode Token tidak valid
-                FE-->>User: Tampilkan error
+                API-->>FE: Kode token tidak valid
+                FE-->>User: Menampilkan pesan error
             end
         end
-        API->>Auth: admin.createUser(email, password, email_confirm: true)
-        alt Email Sudah Ada
-            Auth-->>API: Error: User already exists
-            API-->>FE: Error 400: Email sudah terdaftar
-            FE-->>User: Tampilkan pesan email sudah ada
+        API->>Auth: Membuat akun pengguna baru
+        alt Email Sudah Terdaftar
+            Auth-->>API: Email sudah terdaftar
+            API-->>FE: Menampilkan pesan email sudah ada
+            FE-->>User: Menampilkan pesan error
         else Email Baru
-            Auth-->>API: User created (uid)
-            API->>DB: UPSERT INTO profiles (id, email, name, role, nis, kelas)
-            DB-->>API: OK
-            API-->>FE: Success 200
-            FE-->>User: Tampilkan pesan Registrasi Berhasil
+            Auth-->>API: Akun berhasil dibuat
+            API->>DB: Menyimpan data profil pengguna
+            DB-->>API: Berhasil
+            API-->>FE: Registrasi berhasil
+            FE-->>User: Menampilkan pesan registrasi berhasil
         end
     end
 ```
@@ -695,32 +703,36 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor User as Pengguna
-    participant FE as Next.js Frontend
-    participant API as API Route /api/compiler/execute
-    participant PY as Python API (Railway)
+    box Sisi Klien
+        actor User as Pengguna
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant API as API Server
+        participant PY as Python API
+    end
 
-    User->>FE: Tulis kode Python di code editor
+    User->>FE: Menulis kode Python di code editor
     User->>FE: Klik tombol Run
-    FE->>API: POST /api/compiler/execute {code}
-    API->>PY: POST /validate {code, api_key}
-    PY->>PY: Validasi sintaks dengan py_compile
+    FE->>API: Mengirim kode untuk dieksekusi
+    API->>PY: Memvalidasi sintaks kode
+    PY->>PY: Mengecek sintaks kode Python
     alt Sintaks Error
-        PY-->>API: {valid: false, error: "SyntaxError..."}
-        API-->>FE: {success: false, error, type: syntax_error}
-        FE-->>User: Tampilkan syntax error di panel output
+        PY-->>API: Sintaks tidak valid
+        API-->>FE: Mengembalikan pesan syntax error
+        FE-->>User: Menampilkan syntax error di panel output
     else Sintaks Valid
-        PY-->>API: {valid: true}
-        API->>PY: POST /execute {code, api_key}
-        PY->>PY: Eksekusi subprocess (timeout 10s)
+        PY-->>API: Sintaks valid
+        API->>PY: Mengirim kode untuk dijalankan
+        PY->>PY: Menjalankan kode (batas waktu 10 detik)
         alt Eksekusi Berhasil
-            PY-->>API: {success: true, output: "stdout..."}
-            API-->>FE: {success: true, output}
-            FE-->>User: Tampilkan output di panel terminal
+            PY-->>API: Mengembalikan hasil output
+            API-->>FE: Mengirim hasil output
+            FE-->>User: Menampilkan output di panel terminal
         else Timeout / Runtime Error
-            PY-->>API: {success: false, error: "TimeoutError..."}
-            API-->>FE: {success: false, error}
-            FE-->>User: Tampilkan error di panel terminal
+            PY-->>API: Mengembalikan pesan error
+            API-->>FE: Mengirim pesan error
+            FE-->>User: Menampilkan error di panel terminal
         end
     end
 ```
@@ -731,111 +743,371 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    actor User as Pengguna
-    participant FE as Next.js Frontend
-    participant API as API Route /api/compiler/analyze
-    participant PY as Python API (Railway)
-    participant DB as Supabase DB
+    box Sisi Klien
+        actor User as Pengguna
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant API as API Server
+        participant PY as Python API
+    end
+    box Penyimpanan Data
+        participant DB as Database
+    end
 
-    User->>FE: Tulis kode Python di code editor
+    User->>FE: Menulis kode Python di code editor
     User->>FE: Klik tombol Analyze
-    FE->>API: POST /api/compiler/analyze {code}
-    API->>API: Cek autentikasi user dan query role
-    API->>PY: POST /analyze {code, api_key}
-    PY->>PY: Simpan kode ke file .py sementara
-    PY->>PY: Jalankan pylint --output-format=json
-    PY->>PY: Parse dan kategorikan pesan pylint
-    PY-->>API: {messages[], counts{error, warning, refactor, convention}}
-    API->>API: Hitung skor = max(0, 10 - ((5E+W+R+C)/S)*10)
-    API->>API: Konversi ke persentase (skor * 10)
-    API->>API: Tentukan grade (A/B/C/D/F)
-    alt User login dan role = siswa
-        API->>DB: INSERT INTO code_submissions (student_id, code, score, grade, analysis_result)
-        DB-->>API: OK
-        API->>DB: UPSERT leaderboard (total_points, total_submissions, average_score, highest_score)
-        DB-->>API: OK
+    FE->>API: Mengirim kode untuk dianalisis
+    API->>API: Mengecek autentikasi dan role pengguna
+    API->>PY: Mengirim kode ke layanan analisis
+    PY->>PY: Menyimpan kode sementara
+    PY->>PY: Menjalankan pengecekan kode
+    PY->>PY: Mengkategorikan pesan kesalahan dan peringatan
+    PY-->>API: Mengembalikan hasil analisis
+    API->>API: Menghitung skor clean code
+    API->>API: Menentukan grade (A/B/C/D/F)
+    alt User login dan role = Siswa
+        API->>DB: Menyimpan data submission
+        DB-->>API: Berhasil
+        API->>DB: Memperbarui data leaderboard
+        DB-->>API: Berhasil
     end
-    API-->>FE: {success, analysis{final_score, grade, breakdown, suggestions}}
-    FE-->>User: Tampilkan skor, grade, breakdown, dan saran perbaikan
+    API-->>FE: Mengirim hasil analisis
+    FE-->>User: Menampilkan skor, grade, breakdown, dan saran perbaikan
 ```
 
 ---
 
-### 2.5 Sequence Diagram — Guru Melihat Data Siswa
+### 2.5 Sequence Diagram — Melihat Leaderboard
 
 ```mermaid
 sequenceDiagram
-    actor Guru as Guru
-    participant FE as Next.js Frontend
-    participant API as API Route /api/guru/students
-    participant DB as Supabase DB
+    box Sisi Klien
+        actor User as Pengguna
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant API as API Server
+    end
+    box Penyimpanan Data
+        participant DB as Database
+    end
 
-    Guru->>FE: Buka halaman /guru/dashboard
-    FE->>FE: Cek session dan role dari profiles
+    User->>FE: Klik menu Leaderboard di sidebar
+    FE->>API: Mengambil data leaderboard
+    API->>DB: Mengambil data peringkat berdasarkan total poin
+    DB-->>API: Data peringkat
+    API->>DB: Mengambil data profil (nama, kelas)
+    DB-->>API: Data profil siswa
+    API->>API: Menggabungkan data leaderboard dan profil
+    API->>API: Menghitung ranking dan mengambil Top 3
+    API->>API: Mencari data pengguna saat ini di leaderboard
+    API-->>FE: Mengirim data leaderboard lengkap
+    FE-->>User: Menampilkan podium Top 3 dan tabel ranking
+    User->>FE: Filter berdasarkan kelas
+    FE->>FE: Memfilter data berdasarkan kelas yang dipilih
+    FE-->>User: Menampilkan hasil filter
+```
+
+---
+
+### 2.6 Sequence Diagram — Guru Memantau Siswa
+
+```mermaid
+sequenceDiagram
+    box Sisi Klien
+        actor Guru as Guru
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant API as API Server
+    end
+    box Penyimpanan Data
+        participant DB as Database
+    end
+
+    Guru->>FE: Membuka halaman Dashboard Guru
+    FE->>FE: Mengecek sesi dan role pengguna
     alt Role bukan Guru
-        FE-->>Guru: Redirect ke /login
+        FE-->>Guru: Mengarahkan ke halaman Login
     else Role = Guru
-        FE->>API: GET /api/guru/students
-        API->>API: Verifikasi role = guru
-        API->>DB: SELECT * FROM profiles WHERE role = siswa ORDER BY kelas, name
-        DB-->>API: Daftar siswa (id, name, email, nis, kelas)
-        API->>DB: SELECT * FROM leaderboard
-        DB-->>API: Data leaderboard per siswa
-        API->>DB: SELECT * FROM code_submissions (statistik harian)
-        DB-->>API: Submission hari ini per siswa
-        API->>API: Gabungkan data siswa + leaderboard + statistik harian
-        API->>API: Hitung statistik kelas (total siswa, rata-rata, tertinggi)
-        API-->>FE: {students[], stats{total_students, total_submissions, class_average, highest_score}}
-        FE-->>Guru: Tampilkan dashboard statistik dan tabel siswa
+        FE->>API: Mengambil data siswa
+        API->>API: Memverifikasi role guru
+        API->>DB: Mengambil daftar semua siswa
+        DB-->>API: Daftar siswa
+        API->>DB: Mengambil data peringkat per siswa
+        DB-->>API: Data peringkat
+        API->>DB: Mengambil data statistik harian
+        DB-->>API: Statistik harian
+        API->>API: Menggabungkan data siswa dan statistik
+        API->>API: Menghitung statistik kelas
+        API-->>FE: Mengirim data siswa dan statistik kelas
+        FE-->>Guru: Menampilkan dashboard statistik dan tabel siswa
         Guru->>FE: Filter atau cari siswa
-        FE->>FE: Filter data lokal
-        FE-->>Guru: Tampilkan hasil filter
+        FE->>FE: Memfilter data berdasarkan input
+        FE-->>Guru: Menampilkan hasil filter
     end
 ```
 
 ---
 
-### 2.6 Sequence Diagram — Guru Menghapus Akun Siswa
+### 2.7 Sequence Diagram — Kelola Materi (Guru)
 
 ```mermaid
 sequenceDiagram
-    actor Guru as Guru
-    participant FE as Next.js Frontend
-    participant API as API Route /api/guru/delete-student
-    participant DB as Supabase DB
-    participant Auth as Supabase Auth
-    participant Storage as Supabase Storage
+    box Sisi Klien
+        actor Guru as Guru
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant API as API Server
+    end
+    box Penyimpanan Data
+        participant DB as Database
+        participant Storage as Penyimpanan
+    end
+
+    Guru->>FE: Membuka halaman Kelola Materi
+    FE->>FE: Mengecek role pengguna
+    alt Role bukan Guru
+        FE-->>Guru: Menampilkan pesan akses ditolak
+    else Role = Guru
+        FE->>API: Mengambil daftar materi
+        API->>DB: Mengambil data materi dan nama guru
+        DB-->>API: Daftar materi
+        API-->>FE: Mengirim daftar materi
+        FE-->>Guru: Menampilkan daftar materi dengan info guru
+        Guru->>FE: Mengisi form upload (judul, deskripsi, kategori, file)
+        Guru->>FE: Klik Upload Materi
+        FE->>API: Mengirim data materi baru
+        API->>API: Memvalidasi tipe file (PDF, PPT, PPTX)
+        API->>API: Memvalidasi ukuran file (maks 50MB)
+        alt File Tidak Valid
+            API-->>FE: Menampilkan pesan error
+            FE-->>Guru: Menampilkan pesan error
+        else File Valid
+            API->>Storage: Mengunggah file ke penyimpanan
+            Storage-->>API: Berhasil
+            API->>DB: Menyimpan informasi materi
+            DB-->>API: Berhasil
+            API-->>FE: Materi berhasil diupload
+            FE-->>Guru: Menampilkan daftar materi terbaru
+        end
+        Guru->>FE: Klik Hapus Materi
+        FE->>API: Mengirim permintaan hapus materi
+        API->>API: Memverifikasi kepemilikan materi
+        API->>Storage: Menghapus file dari penyimpanan
+        Storage-->>API: Berhasil
+        API->>DB: Menghapus data materi
+        DB-->>API: Berhasil
+        API-->>FE: Materi berhasil dihapus
+        FE-->>Guru: Memperbarui daftar materi
+    end
+```
+
+---
+
+### 2.8 Sequence Diagram — Lihat Materi (Siswa)
+
+```mermaid
+sequenceDiagram
+    box Sisi Klien
+        actor User as Pengguna
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant API as API Server
+    end
+    box Penyimpanan Data
+        participant DB as Database
+        participant Storage as Penyimpanan
+    end
+
+    User->>FE: Klik menu Materi di sidebar
+    FE->>FE: Mengecek autentikasi pengguna
+    alt Belum Login
+        FE-->>User: Menampilkan pesan belum login
+    else Sudah Login
+        FE->>API: Mengambil daftar materi
+        API->>DB: Mengambil data materi dan nama guru
+        DB-->>API: Daftar materi
+        API->>API: Mengurutkan berdasarkan terbaru
+        API-->>FE: Mengirim daftar materi
+        FE-->>User: Menampilkan daftar materi dengan info guru dan ukuran
+        User->>FE: Filter berdasarkan kategori atau pencarian
+        FE->>FE: Memfilter data berdasarkan kategori atau kata kunci
+        FE-->>User: Menampilkan hasil filter
+        User->>FE: Klik Download atau Buka File
+        FE->>Storage: Membuka file dari penyimpanan
+        Storage-->>FE: File materi
+        FE-->>User: Menampilkan file materi (PDF/PPT/PPTX)
+    end
+```
+
+---
+
+### 2.9 Sequence Diagram — Edit Profil
+
+```mermaid
+sequenceDiagram
+    box Sisi Klien
+        actor User as Pengguna
+        participant FE as Frontend
+    end
+    box Penyimpanan Data
+        participant DB as Database
+        participant Storage as Penyimpanan
+    end
+
+    User->>FE: Klik menu Profil di sidebar
+    FE->>DB: Mengecek sesi pengguna
+    FE->>DB: Mengambil data profil pengguna
+    DB-->>FE: Data profil (nama, email, NIS, kelas)
+    FE-->>User: Menampilkan halaman profil
+    User->>FE: Mengubah nama atau upload foto profil
+    alt Upload Avatar
+        FE->>FE: Memvalidasi tipe file gambar dan ukuran (maks 2MB)
+        alt File Tidak Valid
+            FE-->>User: Menampilkan pesan error
+        else File Valid
+            FE->>Storage: Mengunggah foto ke penyimpanan
+            Storage-->>FE: URL foto profil
+            FE->>DB: Menyimpan URL foto profil
+            DB-->>FE: Berhasil
+        end
+    end
+    User->>FE: Klik Simpan
+    FE->>DB: Menyimpan perubahan data profil
+    DB-->>FE: Berhasil
+    FE-->>User: Menampilkan profil yang sudah diperbarui
+```
+
+---
+
+### 2.10 Sequence Diagram — Progress Clean Code (Riwayat Submission)
+
+```mermaid
+sequenceDiagram
+    box Sisi Klien
+        actor User as Pengguna
+        participant FE as Frontend
+    end
+    box Penyimpanan Data
+        participant DB as Database
+    end
+
+    User->>FE: Membuka halaman Compiler
+    FE->>DB: Mengecek sesi pengguna
+    FE->>DB: Mengambil skor terakhir
+    DB-->>FE: Data skor terakhir
+    FE-->>User: Menampilkan skor dan grade di header compiler
+    User->>FE: Klik tombol Riwayat
+    FE->>DB: Mengambil 50 riwayat submission terakhir
+    DB-->>FE: Daftar riwayat submission
+    FE-->>User: Menampilkan modal daftar riwayat submission
+    User->>FE: Klik salah satu submission
+    FE-->>User: Menampilkan detail kode, skor, grade, dan hasil analisis
+```
+
+---
+
+### 2.11 Sequence Diagram — Hapus Akun
+
+```mermaid
+sequenceDiagram
+    box Sisi Klien
+        actor User as Pengguna
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant API as API Server
+    end
+    box Penyimpanan Data
+        participant DB as Database
+        participant Auth as Autentikasi
+        participant Storage as Penyimpanan
+    end
+
+    User->>FE: Klik menu Profil
+    FE-->>User: Menampilkan halaman profil
+    User->>FE: Klik tombol Hapus Akun
+    FE-->>User: Menampilkan dialog konfirmasi hapus akun
+    User->>FE: Ketik "HAPUS AKUN" untuk konfirmasi
+    User->>FE: Klik Konfirmasi Hapus
+    FE->>API: Mengirim permintaan hapus akun
+    API->>API: Memvalidasi teks konfirmasi
+    alt Konfirmasi Tidak Valid
+        API-->>FE: Konfirmasi tidak valid
+        FE-->>User: Menampilkan pesan error
+    else Konfirmasi Valid
+        API->>DB: Mengecek role pengguna
+        DB-->>API: Role pengguna
+        alt Role = Siswa
+            API->>DB: Menghapus data leaderboard siswa
+            DB-->>API: Berhasil
+            API->>DB: Menghapus data submission siswa
+            DB-->>API: Berhasil
+        end
+        API->>DB: Menghapus data profil pengguna
+        DB-->>API: Berhasil
+        API->>Storage: Menghapus foto profil dari penyimpanan
+        Storage-->>API: Berhasil
+        API->>Auth: Menghapus akun pengguna
+        Auth-->>API: Berhasil
+        API-->>FE: Akun berhasil dihapus
+        FE-->>User: Keluar dan mengarahkan ke halaman login
+    end
+```
+
+---
+
+### 2.12 Sequence Diagram — Guru Menghapus Akun Siswa
+
+```mermaid
+sequenceDiagram
+    box Sisi Klien
+        actor Guru as Guru
+        participant FE as Frontend
+    end
+    box Sisi Server
+        participant API as API Server
+    end
+    box Penyimpanan Data
+        participant DB as Database
+        participant Auth as Autentikasi
+        participant Storage as Penyimpanan
+    end
 
     Guru->>FE: Klik tombol Hapus pada siswa di tabel
-    FE-->>Guru: Tampilkan dialog konfirmasi hapus akun siswa
+    FE-->>Guru: Menampilkan dialog konfirmasi hapus akun siswa
     Guru->>FE: Klik Konfirmasi Hapus
-    FE->>API: DELETE /api/guru/delete-student {studentId}
-    API->>API: Verifikasi autentikasi user
-    API->>DB: Query role dari profiles WHERE id = user.id
+    FE->>API: Mengirim permintaan hapus akun siswa
+    API->>API: Memverifikasi autentikasi pengguna
+    API->>DB: Mengambil role pengguna
     DB-->>API: Role pengguna
     alt Role bukan Guru
-        API-->>FE: Error 403: Forbidden
-        FE-->>Guru: Tampilkan pesan akses ditolak
+        API-->>FE: Akses ditolak
+        FE-->>Guru: Menampilkan pesan akses ditolak
     else Role = Guru
-        API->>DB: Query profiles WHERE id = studentId
+        API->>DB: Memverifikasi data siswa
         DB-->>API: Data profil siswa
         alt Siswa Tidak Ditemukan
-            API-->>FE: Error 404: Siswa tidak ditemukan
-            FE-->>Guru: Tampilkan pesan error
+            API-->>FE: Siswa tidak ditemukan
+            FE-->>Guru: Menampilkan pesan error
         else Siswa Ditemukan
-            API->>DB: DELETE FROM leaderboard WHERE student_id
-            DB-->>API: OK
-            API->>DB: DELETE FROM code_submissions WHERE student_id
-            DB-->>API: OK
-            API->>DB: DELETE FROM profiles WHERE id = studentId
-            DB-->>API: OK
-            API->>Storage: Hapus avatar siswa
-            Storage-->>API: OK
-            API->>Auth: admin.deleteUser(studentId)
-            Auth-->>API: OK
-            API-->>FE: {success: true, message: "Akun siswa berhasil dihapus"}
-            FE->>FE: Refresh data siswa
-            FE-->>Guru: Tampilkan daftar siswa terbaru
+            API->>DB: Menghapus data leaderboard siswa
+            DB-->>API: Berhasil
+            API->>DB: Menghapus data submission siswa
+            DB-->>API: Berhasil
+            API->>DB: Menghapus data profil siswa
+            DB-->>API: Berhasil
+            API->>Storage: Menghapus foto profil siswa
+            Storage-->>API: Berhasil
+            API->>Auth: Menghapus akun siswa
+            Auth-->>API: Berhasil
+            API-->>FE: Akun siswa berhasil dihapus
+            FE->>FE: Memperbarui daftar siswa
+            FE-->>Guru: Menampilkan daftar siswa terbaru
         end
     end
 ```
@@ -877,4 +1149,86 @@ flowchart TB
     style Vercel fill:#f3e5f5,stroke:#7b1fa2
     style Railway fill:#e8f5e9,stroke:#2e7d32
     style Supabase fill:#fff3e0,stroke:#e65100
+```
+
+---
+
+---
+
+## 4. Class Diagram Database (DBML)
+
+Salin kode di bawah ini ke [dbdiagram.io](https://dbdiagram.io) untuk melihat visualisasinya.
+
+```dbml
+Table profiles {
+  id uuid [pk, note: 'Referensi ke auth.users(id)']
+  email text [not null]
+  name text [not null]
+  full_name text
+  role text [not null, note: 'guru atau siswa']
+  avatar_url text [note: 'URL foto profil di Storage']
+  nis varchar [note: 'Nomor Induk Siswa, hanya siswa']
+  kelas varchar [note: 'Kelas siswa, hanya siswa']
+  created_at timestamp
+  updated_at timestamp
+
+  Note: 'Tabel profil pengguna guru dan siswa'
+}
+
+Table code_submissions {
+  id uuid [pk]
+  student_id uuid [not null, ref: > profiles.id]
+  code text [not null]
+  output text
+  clean_code_score float [default: 0]
+  grade text [note: 'A B C D F']
+  analysis_result json [note: 'Hasil analisis clean code']
+  submitted_at timestamp
+
+  indexes {
+    student_id [name: 'idx_submissions_student']
+    submitted_at [name: 'idx_submissions_date']
+  }
+
+  Note: 'Menyimpan submission kode Python beserta hasil analisis clean code'
+}
+
+Table leaderboard {
+  id uuid [pk]
+  student_id uuid [unique, not null, ref: - profiles.id]
+  total_points integer [default: 0]
+  total_submissions integer [default: 0]
+  average_score float [default: 0]
+  highest_score float [default: 0]
+  updated_at timestamp
+
+  indexes {
+    total_points [name: 'idx_leaderboard_points']
+    average_score [name: 'idx_leaderboard_avg']
+  }
+
+  Note: 'Ranking siswa berdasarkan total poin dan skor rata-rata'
+}
+
+Table materials {
+  id uuid [pk]
+  teacher_id uuid [not null, ref: > profiles.id]
+  title varchar [not null]
+  description text
+  file_name varchar [not null]
+  file_url text [not null, note: 'URL file di Storage']
+  file_type varchar [not null, note: 'pdf ppt pptx']
+  file_size bigint [not null, note: 'Ukuran file dalam bytes']
+  category varchar
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    teacher_id [name: 'idx_materials_teacher_id']
+    created_at [name: 'idx_materials_created_at']
+    category [name: 'idx_materials_category']
+  }
+
+  Note: 'Materi pembelajaran yang diunggah oleh guru'
+}
 ```

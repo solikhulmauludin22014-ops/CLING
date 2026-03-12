@@ -1004,30 +1004,21 @@ export default function GuruDashboard() {
                           let grade = ''
                           let gradeClass = ''
                           
-                          if (score >= 9) {
-                            grade = 'A+'
-                            gradeClass = 'bg-purple-500/30 text-purple-300 border-purple-400/50'
-                          } else if (score >= 8) {
-                            grade = 'A'
+                          if (score >= 8.1) {
+                            grade = 'Sangat Terampil'
                             gradeClass = 'bg-green-500/30 text-green-300 border-green-400/50'
-                          } else if (score >= 7) {
-                            grade = 'B+'
+                          } else if (score >= 6.1) {
+                            grade = 'Terampil'
                             gradeClass = 'bg-purple-500/30 text-purple-300 border-purple-400/50'
-                          } else if (score >= 6) {
-                            grade = 'B'
-                            gradeClass = 'bg-purple-500/30 text-purple-300 border-purple-400/50'
-                          } else if (score >= 5) {
-                            grade = 'C+'
+                          } else if (score >= 4.1) {
+                            grade = 'Cukup Terampil'
                             gradeClass = 'bg-yellow-500/30 text-yellow-300 border-yellow-400/50'
-                          } else if (score >= 4) {
-                            grade = 'C'
+                          } else if (score >= 2.1) {
+                            grade = 'Kurang Terampil'
                             gradeClass = 'bg-orange-500/30 text-orange-300 border-orange-400/50'
-                          } else if (score >= 3) {
-                            grade = 'D'
-                            gradeClass = 'bg-red-500/30 text-red-300 border-red-400/50'
                           } else {
-                            grade = 'E'
-                            gradeClass = 'bg-red-700/30 text-red-400 border-red-500/50'
+                            grade = 'Tidak Terampil'
+                            gradeClass = 'bg-red-500/30 text-red-300 border-red-400/50'
                           }
                           
                           return (

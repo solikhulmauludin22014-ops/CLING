@@ -525,32 +525,28 @@ export class CleanCodeAnalyzer {
    * Tentukan kategori grade
    */
   private getGradeCategory(score: number): string {
-    if (score >= 9) return 'Excellent ⭐⭐⭐'
-    if (score >= 8) return 'Very Good ⭐⭐'
-    if (score >= 7) return 'Good ⭐'
-    if (score >= 5.5) return 'Fair 👍'
-    if (score >= 4) return 'Poor ⚠️'
-    return 'Very Poor ❌'
+    if (score >= 8.1) return 'Sangat Terampil ⭐'
+    if (score >= 6.1) return 'Terampil 👍'
+    if (score >= 4.1) return 'Cukup Terampil 💪'
+    if (score >= 2.1) return 'Kurang Terampil ⚠️'
+    return 'Tidak Terampil ❌'
   }
 
   /**
    * Generate motivasi untuk siswa
    */
   private generateMotivation(score: number, category: string): string {
-    if (score >= 9) {
-      return '🎉 Luar biasa! Kode kamu sudah sangat bersih dan profesional. Pertahankan standar ini!'
+    if (score >= 8.1) {
+      return '🎉 Luar biasa! Kode kamu sudah sangat bersih dan profesional — Sangat Terampil! Pertahankan standar ini!'
     }
-    if (score >= 8) {
-      return '👏 Bagus sekali! Kode kamu sudah rapi. Sedikit perbaikan lagi untuk sempurna!'
+    if (score >= 6.1) {
+      return '👍 Kerja bagus! Kode kamu sudah baik dengan sedikit perbaikan minor. Terus tingkatkan!'
     }
-    if (score >= 7) {
-      return '👍 Kerja bagus! Kode kamu cukup baik. Perhatikan naming convention dan struktur kode.'
+    if (score >= 4.1) {
+      return '💪 Cukup Terampil! Perbaiki penamaan variabel dan ikuti standar PEP 8 untuk hasil lebih baik.'
     }
-    if (score >= 5.5) {
-      return '💪 Terus semangat! Perbaiki penamaan variabel dan ikuti standar PEP 8 untuk hasil lebih baik.'
-    }
-    if (score >= 4) {
-      return '📚 Jangan menyerah! Pelajari PEP 8 dan praktikkan naming convention yang benar.'
+    if (score >= 2.1) {
+      return '📚 Kurang Terampil — jangan menyerah! Pelajari PEP 8 dan praktikkan naming convention yang benar.'
     }
     return '🚀 Mulai dari dasar! Fokus pada indentasi 4 spasi dan penamaan yang jelas. Kamu pasti bisa!'
   }
@@ -742,7 +738,7 @@ export class CleanCodeAnalyzer {
     const suggestions: string[] = []
 
     // Header dengan skor dan kategori
-    const gradeEmoji = analysis.score >= 9 ? '⭐' : analysis.score >= 7 ? '👍' : analysis.score >= 5 ? '💪' : '📚'
+    const gradeEmoji = analysis.score >= 8.1 ? '⭐' : analysis.score >= 6.1 ? '👍' : analysis.score >= 4.1 ? '💪' : analysis.score >= 2.1 ? '📚' : '❌'
     suggestions.push(`📊 Skor Clean Code: ${analysis.score.toFixed(2)}/10 (${analysis.grade_category}) ${gradeEmoji}`)
     suggestions.push('')
 
