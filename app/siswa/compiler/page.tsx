@@ -699,19 +699,6 @@ print(f"Average: {result_avg}")
         <div className="max-w-full mx-auto px-6 py-3">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => {
-                    if (window.history.length > 1) {
-                      window.history.back()
-                      return
-                    }
-                    window.location.href = '/siswa/materi'
-                  }}
-                  className={`px-3 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
-                >
-                  ← {tr('Kembali', 'Back')}
-                </button>
-
                 <div className="flex items-center gap-4">
                   <div className="bg-purple-600 text-white p-3 rounded-xl shadow-lg">
                     <svg
