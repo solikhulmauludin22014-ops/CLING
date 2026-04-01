@@ -802,11 +802,12 @@ print(f"Average: {result_avg}")
         )}
 
         <aside
-          className={`fixed left-4 top-24 z-40 w-[86vw] max-w-xs lg:w-72 rounded-2xl border p-4 shadow-xl transition-all duration-300 transform ${
+          className={`fixed left-0 top-0 z-40 h-screen w-72 max-w-[88vw] pt-24 px-4 pb-4 border-r shadow-xl transition-all duration-300 transform ${
             showNavMenu ? 'translate-x-0 opacity-100' : '-translate-x-[120%] opacity-0 pointer-events-none'
           } ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}
         >
-          <div className="space-y-2">
+          <div className={`h-full rounded-2xl border p-3 overflow-y-auto ${theme === 'dark' ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-purple-100'}`}>
+            <div className="space-y-2">
             <p className={`text-xs font-semibold uppercase tracking-wide px-2 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
               {tr('Menu Navigasi', 'Navigation Menu')}
             </p>
@@ -856,6 +857,7 @@ print(f"Average: {result_avg}")
               >
                 🚪 {tr('Logout', 'Logout')}
               </button>
+            </div>
           </div>
         </aside>
 
