@@ -724,12 +724,13 @@ print(f"Average: {result_avg}")
                     </p>
                   </div>
                 </div>
-              </div>
 
-              <div className={`${showNavMenu ? 'flex' : 'hidden'} xl:flex flex-col gap-2 w-full max-w-sm`}>
                 <div className="w-fit">
                   <ThemeToggle />
                 </div>
+              </div>
+
+              <div className={`${showNavMenu ? 'flex' : 'hidden'} lg:hidden flex-col gap-2 w-full max-w-sm`}>
 
                 <a
                   href="/siswa/materi"
@@ -831,9 +832,62 @@ print(f"Average: {result_avg}")
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Code Editor (Left - 2 columns) */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="flex gap-6">
+          {/* Left Sidebar Menu - Desktop */}
+          <aside className={`hidden lg:block w-72 shrink-0 rounded-2xl border p-4 h-fit sticky top-24 shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
+            <div className="space-y-2">
+              <a
+                href="/siswa/materi"
+                className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
+              >
+                📚 {tr('Materi', 'Materials')}
+              </a>
+
+              <a
+                href="/siswa/leaderboard"
+                className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'}`}
+              >
+                🏆 Leaderboard
+              </a>
+
+              <button
+                onClick={() => setShowHistoryModal(true)}
+                className={`w-full px-4 py-2 rounded-xl transition-all duration-300 flex items-center justify-between gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
+              >
+                <span>📜 {tr('Riwayat', 'History')}</span>
+                {history.length > 0 && (
+                  <span className="bg-purple-600 text-white text-xs px-2 py-0.5 rounded-full">
+                    {history.length}
+                  </span>
+                )}
+              </button>
+
+              <a
+                href="/siswa/profile"
+                className={`flex items-center justify-between gap-3 px-4 py-2 rounded-xl transition-all cursor-pointer ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
+              >
+                <div>
+                  <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
+                  <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Siswa', 'Student')}</p>
+                </div>
+                <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+              </a>
+
+              <button
+                onClick={confirmLogout}
+                className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300 text-left"
+              >
+                🚪 {tr('Logout', 'Logout')}
+              </button>
+            </div>
+          </aside>
+
+          <div className="flex-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Code Editor (Left - 2 columns) */}
+              <div className="lg:col-span-2 space-y-6">
             {/* Editor Card */}
             <div className={`rounded-2xl border overflow-hidden shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
               <div className={`flex justify-between items-center px-6 py-4 border-b ${theme === 'dark' ? 'bg-slate-700/50 border-slate-600' : 'bg-purple-50 border-purple-100'}`}>
@@ -1040,8 +1094,8 @@ print(f"Average: {result_avg}")
             </div>
           </div>
 
-          {/* Right Sidebar */}
-          <div className="space-y-6">
+              {/* Right Sidebar */}
+              <div className="space-y-6">
             {/* Progress Chart Mini */}
             {history.length > 0 && (
               <div className={`rounded-2xl border p-6 shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
@@ -1148,6 +1202,8 @@ print(f"Average: {result_avg}")
                   <span>{tr('Max 79 karakter per baris', 'Max 79 characters per line')}</span>
                 </li>
               </ul>
+            </div>
+              </div>
             </div>
           </div>
         </div>
