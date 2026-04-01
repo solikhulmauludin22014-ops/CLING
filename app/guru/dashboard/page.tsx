@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import * as XLSX from 'xlsx'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 import ThemeToggle from '@/components/ThemeToggle'
 
 interface StudentData {
@@ -47,6 +48,8 @@ interface Material {
 
 export default function GuruDashboard() {
   const { theme } = useTheme()
+  const { language } = useLanguage()
+  const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [userName, setUserName] = useState('Guru')
   const [userId, setUserId] = useState('')
   const [students, setStudents] = useState<StudentData[]>([])
@@ -170,12 +173,12 @@ export default function GuruDashboard() {
       // Validate file type
       const allowedTypes = ['application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
       if (!allowedTypes.includes(file.type)) {
-        alert('Format file tidak didukung. Hanya PDF, PPT, dan PPTX yang diperbolehkan.')
+        alert(tr('Format file tidak didukung. Hanya PDF, PPT, dan PPTX yang diperbolehkan.', 'Unsupported file format. Only PDF, PPT, and PPTX are allowed.'))
         return
       }
       // Validate file size (max 50MB)
       if (file.size > 50 * 1024 * 1024) {
-        alert('Ukuran file terlalu besar. Maksimal 50MB.')
+        alert(tr('Ukuran file terlalu besar. Maksimal 50MB.', 'File is too large. Maximum size is 50MB.'))
         return
       }
       setSelectedFile(file)
@@ -184,7 +187,7 @@ export default function GuruDashboard() {
 
   const handleUploadMaterial = async () => {
     if (!selectedFile || !uploadForm.title.trim()) {
-      alert('Judul dan file harus diisi!')
+      alert(tr('Judul dan file harus diisi!', 'Title and file are required!'))
       return
     }
 
@@ -219,13 +222,13 @@ export default function GuruDashboard() {
         }
         // Reload materials
         loadMaterials()
-        alert('Materi berhasil diupload!')
+        alert(tr('Materi berhasil diupload!', 'Material uploaded successfully!'))
       } else {
-        alert(data.error || 'Gagal mengupload materi')
+        alert(data.error || tr('Gagal mengupload materi', 'Failed to upload material'))
       }
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Terjadi kesalahan saat mengupload materi')
+      alert(tr('Terjadi kesalahan saat mengupload materi', 'An error occurred while uploading material'))
     } finally {
       setIsUploading(false)
       setUploadProgress(0)
@@ -249,13 +252,13 @@ export default function GuruDashboard() {
 
       if (data.success) {
         loadMaterials()
-        alert('Materi berhasil dihapus!')
+        alert(tr('Materi berhasil dihapus!', 'Material deleted successfully!'))
       } else {
-        alert(data.error || 'Gagal menghapus materi')
+        alert(data.error || tr('Gagal menghapus materi', 'Failed to delete material'))
       }
     } catch (error) {
       console.error('Delete error:', error)
-      alert('Terjadi kesalahan saat menghapus materi')
+      alert(tr('Terjadi kesalahan saat menghapus materi', 'An error occurred while deleting material'))
     } finally {
       setShowDeleteModal(false)
       setMaterialToDelete(null)
@@ -318,13 +321,13 @@ export default function GuruDashboard() {
       if (data.success) {
         // Refresh data setelah hapus
         loadStudentData()
-        alert(`Akun siswa "${studentToDelete.name}" berhasil dihapus!`)
+        alert(language === 'id' ? `Akun siswa "${studentToDelete.name}" berhasil dihapus!` : `Student account "${studentToDelete.name}" deleted successfully!`)
       } else {
-        alert(data.error || 'Gagal menghapus akun siswa')
+        alert(data.error || tr('Gagal menghapus akun siswa', 'Failed to delete student account'))
       }
     } catch (error) {
       console.error('Delete student error:', error)
-      alert('Terjadi kesalahan saat menghapus akun siswa')
+      alert(tr('Terjadi kesalahan saat menghapus akun siswa', 'An error occurred while deleting student account'))
     } finally {
       setDeleteStudentLoading(false)
       setShowDeleteStudentModal(false)
@@ -483,20 +486,20 @@ export default function GuruDashboard() {
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-center">
               <div className="text-6xl mb-4">🚪</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Logout?</h3>
-              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Apakah Anda yakin ingin keluar dari aplikasi?</p>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Logout?', 'Logout?')}</h3>
+              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin keluar dari aplikasi?', 'Are you sure you want to logout from the app?')}</p>
               <div className="flex gap-4 justify-center">
                 <button
                   onClick={cancelLogout}
                   className="px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  ❌ Tidak
+                  {tr('❌ Tidak', '❌ No')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
-                  ✅ Ya, Logout
+                  {tr('✅ Ya, Logout', '✅ Yes, Logout')}
                 </button>
               </div>
             </div>
@@ -514,21 +517,21 @@ export default function GuruDashboard() {
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-center">
               <div className="text-6xl mb-4">🗑️</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Hapus Materi?</h3>
-              <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Apakah Anda yakin ingin menghapus materi:</p>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Hapus Materi?', 'Delete Material?')}</h3>
+              <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin menghapus materi:', 'Are you sure you want to delete material:')}</p>
               <p className="text-purple-600 font-semibold mb-6">&quot;{materialToDelete.title}&quot;</p>
               <div className="flex gap-4 justify-center">
                 <button
                   onClick={() => setShowDeleteModal(false)}
                   className="px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  ❌ Batal
+                  {tr('❌ Batal', '❌ Cancel')}
                 </button>
                 <button
                   onClick={handleDeleteMaterial}
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
-                  🗑️ Ya, Hapus
+                  {tr('🗑️ Ya, Hapus', '🗑️ Yes, Delete')}
                 </button>
               </div>
             </div>
@@ -546,14 +549,14 @@ export default function GuruDashboard() {
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-red-100'}`}>
             <div className="text-center">
               <div className="text-6xl mb-4">⚠️</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Hapus Akun Siswa?</h3>
-              <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Apakah Anda yakin ingin menghapus akun siswa:</p>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Hapus Akun Siswa?', 'Delete Student Account?')}</h3>
+              <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin menghapus akun siswa:', 'Are you sure you want to delete this student account:')}</p>
               <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-slate-700' : 'bg-red-50'}`}>
                 <p className="text-red-500 font-bold text-lg">{studentToDelete.name}</p>
                 <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>NIS: {studentToDelete.nis} | Kelas: {studentToDelete.kelas}</p>
               </div>
               <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-red-400' : 'text-red-500'}`}>
-                ⚠️ Semua data siswa termasuk submissions, skor, dan leaderboard akan dihapus permanen!
+                {tr('⚠️ Semua data siswa termasuk submissions, skor, dan leaderboard akan dihapus permanen!', '⚠️ All student data including submissions, scores, and leaderboard entries will be permanently deleted!')}
               </p>
               <div className="flex gap-4 justify-center">
                 <button
@@ -561,14 +564,14 @@ export default function GuruDashboard() {
                   disabled={deleteStudentLoading}
                   className="px-6 py-3 bg-slate-500 hover:bg-slate-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  ❌ Batal
+                  {tr('❌ Batal', '❌ Cancel')}
                 </button>
                 <button
                   onClick={handleDeleteStudent}
                   disabled={deleteStudentLoading}
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
-                  {deleteStudentLoading ? '⏳ Menghapus...' : '🗑️ Ya, Hapus Akun'}
+                  {deleteStudentLoading ? tr('⏳ Menghapus...', '⏳ Deleting...') : tr('🗑️ Ya, Hapus Akun', '🗑️ Yes, Delete Account')}
                 </button>
               </div>
             </div>
@@ -607,10 +610,10 @@ export default function GuruDashboard() {
               </div>
               <div>
                 <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                  👨‍🏫 Dashboard Guru
+                  👨‍🏫 {tr('Dashboard Guru', 'Teacher Dashboard')}
                 </h1>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
-                  Monitor Progress Clean Code Siswa
+                  {tr('Monitor Progress Clean Code Siswa', 'Monitor Student Clean Code Progress')}
                 </p>
               </div>
             </div>

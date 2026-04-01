@@ -2,9 +2,12 @@
 
 import Link from 'next/link'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 
 export default function HomePage() {
   const { theme, toggleTheme } = useTheme()
+  const { language } = useLanguage()
+  const tr = (id: string, en: string) => (language === 'id' ? id : en)
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
@@ -54,7 +57,7 @@ export default function HomePage() {
                     ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400'
                     : 'bg-purple-100 hover:bg-purple-200 text-purple-600'
                 }`}
-                title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+                title={theme === 'dark' ? tr('Mode Terang', 'Light Mode') : tr('Mode Gelap', 'Dark Mode')}
               >
                 {theme === 'dark' ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,7 +73,7 @@ export default function HomePage() {
                 href="/login"
                 className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
               >
-                Login
+                {tr('Login', 'Login')}
               </Link>
             </div>
           </div>
@@ -81,11 +84,13 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center">
           <h2 className={`text-5xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-            Belajar <span className="text-purple-600">Clean Code</span> Python
+            {tr('Belajar ', 'Learn ')}<span className="text-purple-600">Clean Code</span> Python
           </h2>
           <p className={`text-xl mb-8 max-w-2xl mx-auto ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-            Platform pembelajaran untuk menulis kode Python yang bersih,
-            efisien, dan sesuai standar PEP 8 menggunakan analisis Pylint.
+            {tr(
+              'Platform pembelajaran untuk menulis kode Python yang bersih, efisien, dan sesuai standar PEP 8 menggunakan analisis Pylint.',
+              'A learning platform to write clean, efficient Python code following PEP 8 standards with Pylint analysis.'
+            )}
           </p>
 
           <div className="flex justify-center gap-4 mb-16">
@@ -93,7 +98,7 @@ export default function HomePage() {
               href="/login"
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors shadow-lg shadow-purple-600/30"
             >
-              Mulai Sekarang
+              {tr('Mulai Sekarang', 'Get Started')}
             </Link>
             <a
               href="#features"
@@ -103,7 +108,7 @@ export default function HomePage() {
                   : 'border-purple-600 text-purple-600 hover:bg-purple-50'
               }`}
             >
-              Pelajari Lebih Lanjut
+              {tr('Pelajari Lebih Lanjut', 'Learn More')}
             </a>
           </div>
 
@@ -157,7 +162,7 @@ export default function HomePage() {
           <h3 className={`text-3xl font-bold text-center mb-12 ${
             theme === 'dark' ? 'text-white' : 'text-slate-800'
           }`}>
-            Fitur Utama
+            {tr('Fitur Utama', 'Key Features')}
           </h3>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -192,8 +197,10 @@ export default function HomePage() {
                 Python Compiler
               </h4>
               <p className={theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}>
-                Jalankan kode Python langsung di browser tanpa perlu instalasi.
-                Output ditampilkan secara real-time.
+                {tr(
+                  'Jalankan kode Python langsung di browser tanpa perlu instalasi. Output ditampilkan secara real-time.',
+                  'Run Python code directly in your browser without installation. Output is shown in real-time.'
+                )}
               </p>
             </div>
 
@@ -222,8 +229,10 @@ export default function HomePage() {
                 Analisis PEP 8 & Pylint
               </h4>
               <p className={theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}>
-                Dapatkan skor kualitas kode berdasarkan standar PEP 8 dan
-                analisis Pylint dengan detail masalah dan saran.
+                {tr(
+                  'Dapatkan skor kualitas kode berdasarkan standar PEP 8 dan analisis Pylint dengan detail masalah dan saran.',
+                  'Get code quality scores based on PEP 8 and Pylint analysis with detailed issues and suggestions.'
+                )}
               </p>
             </div>
 
@@ -252,8 +261,10 @@ export default function HomePage() {
                 Progress & Leaderboard
               </h4>
               <p className={theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}>
-                Lacak kemajuan belajar dan bandingkan dengan siswa lain melalui
-                sistem poin dan leaderboard.
+                {tr(
+                  'Lacak kemajuan belajar dan bandingkan dengan siswa lain melalui sistem poin dan leaderboard.',
+                  'Track learning progress and compare with other students through points and leaderboard.'
+                )}
               </p>
             </div>
           </div>
@@ -268,7 +279,7 @@ export default function HomePage() {
           <h3 className={`text-3xl font-bold text-center mb-12 ${
             theme === 'dark' ? 'text-white' : 'text-slate-800'
           }`}>
-            Untuk Siapa?
+            {tr('Untuk Siapa?', 'Who Is It For?')}
           </h3>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -284,24 +295,24 @@ export default function HomePage() {
               <h4 className={`text-2xl font-bold text-center mb-4 ${
                 theme === 'dark' ? 'text-white' : 'text-slate-800'
               }`}>
-                Siswa
+                {tr('Siswa', 'Student')}
               </h4>
               <ul className={`space-y-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500">✓</span>
-                  Tulis dan jalankan kode Python
+                  {tr('Tulis dan jalankan kode Python', 'Write and run Python code')}
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500">✓</span>
-                  Analisis kualitas kode otomatis
+                  {tr('Analisis kualitas kode otomatis', 'Automatic code quality analysis')}
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500">✓</span>
-                  Dapatkan saran perbaikan
+                  {tr('Dapatkan saran perbaikan', 'Get improvement suggestions')}
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500">✓</span>
-                  Kumpulkan poin dan naik peringkat
+                  {tr('Kumpulkan poin dan naik peringkat', 'Collect points and climb ranks')}
                 </li>
               </ul>
             </div>
@@ -318,24 +329,24 @@ export default function HomePage() {
               <h4 className={`text-2xl font-bold text-center mb-4 ${
                 theme === 'dark' ? 'text-white' : 'text-slate-800'
               }`}>
-                Guru
+                {tr('Guru', 'Teacher')}
               </h4>
               <ul className={`space-y-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500">✓</span>
-                  Monitor progress semua siswa
+                  {tr('Monitor progress semua siswa', 'Monitor all student progress')}
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500">✓</span>
-                  Lihat persentase clean code
+                  {tr('Lihat persentase clean code', 'View clean code percentage')}
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500">✓</span>
-                  Analisis statistik kelas
+                  {tr('Analisis statistik kelas', 'Analyze class statistics')}
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-500">✓</span>
-                  Identifikasi siswa yang perlu bantuan
+                  {tr('Identifikasi siswa yang perlu bantuan', 'Identify students who need help')}
                 </li>
               </ul>
             </div>

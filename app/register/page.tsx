@@ -3,9 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 
 export default function RegisterPage() {
   const { theme, toggleTheme } = useTheme()
+  const { language } = useLanguage()
+  const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,10 +31,10 @@ export default function RegisterPage() {
 
   const validatePassword = (password: string) => {
     if (password.length < 6) {
-      return 'Password minimal 6 karakter'
+      return tr('Password minimal 6 karakter', 'Password must be at least 6 characters')
     }
     if (!/\d/.test(password)) {
-      return 'Password harus mengandung minimal 1 angka'
+      return tr('Password harus mengandung minimal 1 angka', 'Password must contain at least 1 number')
     }
     return null
   }
@@ -42,7 +45,7 @@ export default function RegisterPage() {
     setLoading(true)
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Password dan konfirmasi password tidak sama')
+      setError(tr('Password dan konfirmasi password tidak sama', 'Password and confirmation do not match'))
       setLoading(false)
       return
     }
@@ -72,14 +75,14 @@ export default function RegisterPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Registrasi gagal')
+        setError(data.error || tr('Registrasi gagal', 'Registration failed'))
         setLoading(false)
         return
       }
 
       setSuccess(true)
     } catch (err) {
-      setError('Terjadi kesalahan. Silakan coba lagi.')
+      setError(tr('Terjadi kesalahan. Silakan coba lagi.', 'An error occurred. Please try again.'))
     } finally {
       setLoading(false)
     }
@@ -100,17 +103,17 @@ export default function RegisterPage() {
           theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'
         }`}>
           <div className="text-6xl mb-4">✅</div>
-          <h2 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-            Registrasi Berhasil!
-          </h2>
+            <h2 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
+              {tr('Registrasi Berhasil!', 'Registration Successful!')}
+            </h2>
           <p className={`mb-6 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-            Akun Anda telah berhasil dibuat. Silakan login untuk melanjutkan.
+              {tr('Akun Anda telah berhasil dibuat. Silakan login untuk melanjutkan.', 'Your account has been created successfully. Please login to continue.')}
           </p>
           <Link
             href="/login"
             className="block w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-xl font-semibold transition-all shadow-lg shadow-purple-600/30"
           >
-            🔑 Login Sekarang
+              {tr('🔑 Login Sekarang', '🔑 Login Now')}
           </Link>
         </div>
       </div>
@@ -129,7 +132,7 @@ export default function RegisterPage() {
             ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400'
             : 'bg-white hover:bg-purple-100 text-purple-600'
         }`}
-        title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+        title={theme === 'dark' ? tr('Mode Terang', 'Light Mode') : tr('Mode Gelap', 'Dark Mode')}
       >
         {theme === 'dark' ? (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +156,7 @@ export default function RegisterPage() {
             </svg>
           </div>
           <h1 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-            Daftar Akun
+            {tr('Daftar Akun', 'Create Account')}
           </h1>
           <p className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>
             Clean Code Analyzer
@@ -172,14 +175,14 @@ export default function RegisterPage() {
           {/* Nama Lengkap */}
           <div>
             <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-              👤 Nama Lengkap
+              {tr('👤 Nama Lengkap', '👤 Full Name')}
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className={inputClasses}
-              placeholder="Masukkan nama lengkap"
+              placeholder={tr('Masukkan nama lengkap', 'Enter full name')}
               required
             />
           </div>
@@ -202,7 +205,7 @@ export default function RegisterPage() {
           {/* Role Selection */}
           <div>
             <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-              🎭 Daftar Sebagai
+              {tr('🎭 Daftar Sebagai', '🎭 Register As')}
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -216,7 +219,7 @@ export default function RegisterPage() {
                       : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                 }`}
               >
-                👨‍🎓 Siswa
+                {tr('👨‍🎓 Siswa', '👨‍🎓 Student')}
               </button>
               <button
                 type="button"
@@ -229,7 +232,7 @@ export default function RegisterPage() {
                       : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                 }`}
               >
-                👨‍🏫 Guru
+                {tr('👨‍🏫 Guru', '👨‍🏫 Teacher')}
               </button>
             </div>
           </div>
@@ -240,14 +243,14 @@ export default function RegisterPage() {
               {/* NIS */}
               <div>
                 <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                  🔢 NIS (Nomor Induk Siswa)
+                  {tr('🔢 NIS (Nomor Induk Siswa)', '🔢 Student ID')}
                 </label>
                 <input
                   type="text"
                   value={formData.nis}
                   onChange={(e) => setFormData({ ...formData, nis: e.target.value })}
                   className={inputClasses}
-                  placeholder="Masukkan NIS"
+                  placeholder={tr('Masukkan NIS', 'Enter student ID')}
                   required
                 />
               </div>
@@ -255,7 +258,7 @@ export default function RegisterPage() {
               {/* Kelas */}
               <div>
                 <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                  🏫 Kelas
+                  {tr('🏫 Kelas', '🏫 Class')}
                 </label>
                 <select
                   value={formData.kelas}
@@ -263,7 +266,7 @@ export default function RegisterPage() {
                   className={inputClasses}
                   required
                 >
-                  <option value="">Pilih Kelas</option>
+                  <option value="">{tr('Pilih Kelas', 'Select Class')}</option>
                   {kelasOptions.map((kelas) => (
                     <option key={kelas} value={kelas}>
                       {kelas}
@@ -275,7 +278,7 @@ export default function RegisterPage() {
           ) : (
             <div>
               <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                🔑 Kode Token Sekolah
+                {tr('🔑 Kode Token Sekolah', '🔑 School Token Code')}
               </label>
               <input
                 type="text"
@@ -286,7 +289,7 @@ export default function RegisterPage() {
                 required
               />
               <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                ⚠️ Kode rahasia dari administrator sekolah
+                {tr('⚠️ Kode rahasia dari administrator sekolah', '⚠️ Secret code from school administrator')}
               </p>
             </div>
           )}
@@ -294,32 +297,32 @@ export default function RegisterPage() {
           {/* Password */}
           <div>
             <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-              🔒 Password
+              {tr('🔒 Password', '🔒 Password')}
             </label>
             <input
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className={inputClasses}
-              placeholder="Minimal 6 karakter + angka"
+              placeholder={tr('Minimal 6 karakter + angka', 'Minimum 6 characters + number')}
               required
             />
             <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-              Min. 6 karakter dan harus ada angka
+              {tr('Min. 6 karakter dan harus ada angka', 'Min. 6 characters and must include a number')}
             </p>
           </div>
 
           {/* Confirm Password */}
           <div>
             <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-              🔒 Konfirmasi Password
+              {tr('🔒 Konfirmasi Password', '🔒 Confirm Password')}
             </label>
             <input
               type="password"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               className={inputClasses}
-              placeholder="Ulangi password"
+              placeholder={tr('Ulangi password', 'Repeat password')}
               required
             />
           </div>
@@ -336,10 +339,10 @@ export default function RegisterPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Mendaftar...
+                {tr('Mendaftar...', 'Registering...')}
               </span>
             ) : (
-              '📝 Daftar Sekarang'
+              tr('📝 Daftar Sekarang', '📝 Register Now')
             )}
           </button>
         </form>
@@ -347,9 +350,9 @@ export default function RegisterPage() {
         {/* Login Link */}
         <div className={`mt-6 text-center border-t pt-6 ${theme === 'dark' ? 'border-slate-700' : 'border-purple-100'}`}>
           <p className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>
-            Sudah punya akun?{' '}
+            {tr('Sudah punya akun?', 'Already have an account?')}{' '}
             <Link href="/login" className="text-purple-600 hover:text-purple-700 font-semibold">
-              Login di sini
+              {tr('Login di sini', 'Login here')}
             </Link>
           </p>
         </div>

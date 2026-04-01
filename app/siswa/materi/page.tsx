@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 import ThemeToggle from '@/components/ThemeToggle'
 
 interface Material {
@@ -22,6 +23,8 @@ interface Material {
 
 export default function SiswaMateriPage() {
   const { theme } = useTheme()
+  const { language } = useLanguage()
+  const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -133,14 +136,14 @@ export default function SiswaMateriPage() {
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-center">
               <div className="text-6xl mb-4">🚪</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Logout?</h3>
-              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Apakah Anda yakin ingin keluar?</p>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Logout?', 'Logout?')}</h3>
+              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin keluar?', 'Are you sure you want to logout?')}</p>
               <div className="flex gap-4 justify-center">
                 <button onClick={() => setShowLogoutModal(false)} className={`px-6 py-3 rounded-xl font-semibold transition-all ${theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-slate-800'}`}>
-                  ❌ Tidak
+                  {tr('❌ Tidak', '❌ No')}
                 </button>
                 <button onClick={handleLogout} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-red-500/30">
-                  ✅ Ya, Logout
+                  {tr('✅ Ya, Logout', '✅ Yes, Logout')}
                 </button>
               </div>
             </div>
@@ -165,7 +168,7 @@ export default function SiswaMateriPage() {
                 <span className="text-2xl">📚</span>
               </div>
               <div>
-                <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Materi Pembelajaran</h1>
+                <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Materi Pembelajaran', 'Learning Materials')}</h1>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>C3-Py Clean Code Analyzer</p>
               </div>
             </div>
@@ -175,13 +178,13 @@ export default function SiswaMateriPage() {
                 href="/siswa/compiler"
                 className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
               >
-                💻 Compiler
+                💻 {tr('Compiler', 'Compiler')}
               </Link>
               <Link
                 href="/siswa/leaderboard"
                 className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-600 rounded-xl font-medium transition-all flex items-center gap-2 border border-amber-500/30"
               >
-                🏆 Leaderboard
+                🏆 {tr('Leaderboard', 'Leaderboard')}
               </Link>
               <Link href="/siswa/profile" className={`flex items-center gap-3 px-4 py-2 rounded-xl ${theme === 'dark' ? 'bg-slate-700 text-white' : 'bg-purple-100 text-purple-700'}`}>
                 <span className="text-2xl">👨‍🎓</span>
@@ -203,8 +206,8 @@ export default function SiswaMateriPage() {
       <main className="relative max-w-7xl mx-auto px-6 py-8">
         {/* Header & Search */}
         <div className="mb-8">
-          <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>📖 Materi dari Guru</h2>
-          <p className={`mb-6 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Pelajari materi yang telah disiapkan oleh guru untuk meningkatkan kemampuan coding kamu</p>
+          <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>📖 {tr('Materi dari Guru', 'Materials from Teachers')}</h2>
+          <p className={`mb-6 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Pelajari materi yang telah disiapkan oleh guru untuk meningkatkan kemampuan coding kamu', 'Study the materials prepared by teachers to improve your coding skills')}</p>
           
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
@@ -212,7 +215,7 @@ export default function SiswaMateriPage() {
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">🔍</span>
               <input
                 type="text"
-                placeholder="Cari materi..."
+                placeholder={tr('Cari materi...', 'Search materials...')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400' : 'bg-white border-purple-200 text-slate-800 placeholder-slate-500'}`}
@@ -225,7 +228,7 @@ export default function SiswaMateriPage() {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className={`px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
             >
-              <option value="all" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>Semua Kategori</option>
+              <option value="all" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>{tr('Semua Kategori', 'All Categories')}</option>
               {categories.map(cat => (
                 <option key={cat} value={cat!} className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>{cat}</option>
               ))}
@@ -237,16 +240,16 @@ export default function SiswaMateriPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="text-6xl animate-bounce mb-4">📚</div>
-            <p className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Memuat materi...</p>
+            <p className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Memuat materi...', 'Loading materials...')}</p>
           </div>
         ) : filteredMaterials.length === 0 ? (
           <div className={`flex flex-col items-center justify-center py-20 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-6xl mb-4">📭</div>
-            <h3 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Belum Ada Materi</h3>
+            <h3 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Belum Ada Materi', 'No Materials Yet')}</h3>
             <p className={theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}>
               {searchTerm || selectedCategory !== 'all' 
-                ? 'Tidak ada materi yang cocok dengan pencarian Anda' 
-                : 'Guru belum mengupload materi pembelajaran'}
+                ? tr('Tidak ada materi yang cocok dengan pencarian Anda', 'No materials match your search') 
+                : tr('Guru belum mengupload materi pembelajaran', 'Teachers have not uploaded any materials yet')}
             </p>
           </div>
         ) : (
@@ -309,13 +312,13 @@ export default function SiswaMateriPage() {
                       rel="noopener noreferrer"
                       className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-xl font-semibold text-center transition-all shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2"
                     >
-                      👁️ Lihat Materi
+                      👁️ {tr('Lihat Materi', 'View Material')}
                     </a>
                     <a
                       href={material.file_url}
                       download={material.file_name}
                       className={`py-3 px-4 rounded-xl font-semibold transition-all flex items-center justify-center ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
-                      title="Download"
+                      title={tr('Download', 'Download')}
                     >
                       ⬇️
                     </a>
@@ -330,7 +333,7 @@ export default function SiswaMateriPage() {
         {materials.length > 0 && (
           <div className={`mt-8 text-center ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
             <p>
-              Menampilkan {filteredMaterials.length} dari {materials.length} materi
+              {tr(`Menampilkan ${filteredMaterials.length} dari ${materials.length} materi`, `Showing ${filteredMaterials.length} of ${materials.length} materials`)}
             </p>
           </div>
         )}

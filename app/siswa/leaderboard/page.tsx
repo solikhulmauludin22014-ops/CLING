@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 import ThemeToggle from '@/components/ThemeToggle'
 
 interface LeaderboardEntry {
@@ -21,6 +22,8 @@ interface LeaderboardEntry {
 
 export default function SiswaLeaderboardPage() {
   const { theme } = useTheme()
+  const { language } = useLanguage()
+  const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [userName, setUserName] = useState('Siswa')
   const [userId, setUserId] = useState('')
   const [userKelas, setUserKelas] = useState('')
@@ -105,11 +108,11 @@ export default function SiswaLeaderboardPage() {
   }
 
   const getGrade = (score: number) => {
-    if (score >= 8.1) return { grade: 'Sangat Terampil', color: 'text-green-400' }
-    if (score >= 6.1) return { grade: 'Terampil', color: 'text-purple-400' }
-    if (score >= 4.1) return { grade: 'Cukup Terampil', color: 'text-yellow-400' }
-    if (score >= 2.1) return { grade: 'Kurang Terampil', color: 'text-orange-400' }
-    return { grade: 'Tidak Terampil', color: 'text-red-400' }
+    if (score >= 8.1) return { grade: tr('Sangat Terampil', 'Highly Skilled'), color: 'text-green-400' }
+    if (score >= 6.1) return { grade: tr('Terampil', 'Skilled'), color: 'text-purple-400' }
+    if (score >= 4.1) return { grade: tr('Cukup Terampil', 'Fairly Skilled'), color: 'text-yellow-400' }
+    if (score >= 2.1) return { grade: tr('Kurang Terampil', 'Less Skilled'), color: 'text-orange-400' }
+    return { grade: tr('Tidak Terampil', 'Unskilled'), color: 'text-red-400' }
   }
 
   if (loading) {
@@ -117,7 +120,7 @@ export default function SiswaLeaderboardPage() {
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-slate-900' : 'bg-gray-50'}`}>
         <div className="text-center">
           <div className="text-6xl mb-4 animate-bounce">🏆</div>
-          <div className={`text-xl ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Memuat leaderboard...</div>
+          <div className={`text-xl ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Memuat leaderboard...', 'Loading leaderboard...')}</div>
         </div>
       </div>
     )
@@ -132,14 +135,14 @@ export default function SiswaLeaderboardPage() {
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-center">
               <div className="text-6xl mb-4">🚪</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Logout?</h3>
-              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Apakah Anda yakin ingin keluar?</p>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Logout?', 'Logout?')}</h3>
+              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin keluar?', 'Are you sure you want to logout?')}</p>
               <div className="flex gap-4 justify-center">
                 <button onClick={() => setShowLogoutModal(false)} className={`px-6 py-3 rounded-xl font-semibold transition-all ${theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-slate-800'}`}>
-                  ❌ Tidak
+                  {tr('❌ Tidak', '❌ No')}
                 </button>
                 <button onClick={handleLogout} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-red-500/30">
-                  ✅ Ya, Logout
+                  {tr('✅ Ya, Logout', '✅ Yes, Logout')}
                 </button>
               </div>
             </div>
@@ -167,20 +170,20 @@ export default function SiswaLeaderboardPage() {
               <div>
                 <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Leaderboard</h1>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
-                  {userKelas ? `Peringkat Kelas ${userKelas}` : 'Peringkat Semua Siswa'}
+                  {userKelas ? tr(`Peringkat Kelas ${userKelas}`, `Class Ranking ${userKelas}`) : tr('Peringkat Semua Siswa', 'All Students Ranking')}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
               <Link href="/siswa/materi" className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}>
-                📚 Materi
+                📚 {tr('Materi', 'Materials')}
               </Link>
               <Link href="/siswa/compiler" className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}>
                 💻 Compiler
               </Link>
               <Link href="/siswa/profile" className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}>
-                👤 Profil
+                👤 {tr('Profil', 'Profile')}
               </Link>
               <button onClick={() => setShowLogoutModal(true)} className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-xl transition-all" title="Logout">
                 🚪
@@ -201,15 +204,15 @@ export default function SiswaLeaderboardPage() {
                   {currentUserRank.rank <= 3 ? getRankBadge(currentUserRank.rank).emoji : currentUserRank.rank}
                 </div>
                 <div>
-                  <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Peringkat Kamu</p>
+                  <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Peringkat Kamu', 'Your Rank')}</p>
                   <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</h2>
-                  <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>#{currentUserRank.rank} dari {leaderboard.length} siswa</p>
+                  <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>#{currentUserRank.rank} {tr('dari', 'of')} {leaderboard.length} {tr('siswa', 'students')}</p>
                 </div>
               </div>
               <div className="flex gap-6 text-center">
                 <div>
                   <p className="text-3xl font-bold text-amber-500">{currentUserRank.total_points}</p>
-                  <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Total Poin</p>
+                  <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Total Poin', 'Total Points')}</p>
                 </div>
                 <div>
                   <p className="text-3xl font-bold text-green-500">{currentUserRank.total_submissions}</p>
@@ -219,7 +222,7 @@ export default function SiswaLeaderboardPage() {
                   <p className={`text-3xl font-bold ${getGrade(currentUserRank.highest_score).color}`}>
                     {currentUserRank.highest_score.toFixed(1)}
                   </p>
-                  <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Skor Tertinggi</p>
+                  <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Skor Tertinggi', 'Highest Score')}</p>
                 </div>
               </div>
             </div>
@@ -229,7 +232,7 @@ export default function SiswaLeaderboardPage() {
         {/* Top 3 Podium */}
         {leaderboard.length >= 3 && (
           <div className="mb-8">
-            <h3 className={`text-xl font-bold mb-6 text-center ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>🌟 Top 3 Terbaik</h3>
+            <h3 className={`text-xl font-bold mb-6 text-center ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>🌟 {tr('Top 3 Terbaik', 'Top 3 Best')}</h3>
             <div className="flex justify-center items-end gap-4">
               {/* 2nd Place */}
               <div className="flex flex-col items-center">
@@ -264,7 +267,7 @@ export default function SiswaLeaderboardPage() {
                 <div className="mt-2 bg-gradient-to-b from-yellow-500 to-amber-600 rounded-t-lg px-8 py-4 text-center h-32">
                   <p className="text-white font-bold truncate max-w-28">{leaderboard[0].name}</p>
                   <p className="text-yellow-100 text-lg font-semibold">{leaderboard[0].total_points} pts</p>
-                  <p className="text-yellow-200 text-xs">👑 Juara 1</p>
+                  <p className="text-yellow-200 text-xs">👑 {tr('Juara 1', 'Champion')}</p>
                 </div>
               </div>
 
@@ -293,10 +296,10 @@ export default function SiswaLeaderboardPage() {
         <div className={`rounded-2xl border shadow-lg overflow-hidden ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
           <div className={`p-6 border-b ${theme === 'dark' ? 'border-slate-700' : 'border-purple-100'}`}>
             <h3 className={`text-xl font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-              📊 Peringkat Lengkap
+              📊 {tr('Peringkat Lengkap', 'Full Ranking')}
               {userKelas && (
                 <span className={`text-sm font-normal px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-purple-500/30 text-purple-200' : 'bg-purple-100 text-purple-700'}`}>
-                  Kelas {userKelas}
+                  {tr('Kelas', 'Class')} {userKelas}
                 </span>
               )}
             </h3>
@@ -305,10 +308,10 @@ export default function SiswaLeaderboardPage() {
           {leaderboard.length === 0 ? (
             <div className="p-12 text-center">
               <div className="text-6xl mb-4">📭</div>
-              <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Belum ada data leaderboard</p>
-              <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>Mulai submit kode untuk muncul di leaderboard!</p>
+              <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{tr('Belum ada data leaderboard', 'No leaderboard data yet')}</p>
+              <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>{tr('Mulai submit kode untuk muncul di leaderboard!', 'Start submitting code to appear on the leaderboard!')}</p>
               <Link href="/siswa/compiler" className="inline-block mt-4 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-all">
-                💻 Buka Compiler
+                💻 {tr('Buka Compiler', 'Open Compiler')}
               </Link>
             </div>
           ) : (
@@ -340,7 +343,7 @@ export default function SiswaLeaderboardPage() {
                       <p className={`font-semibold truncate ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
                         {entry.name}
                         {entry.student_id === userId && (
-                          <span className="ml-2 text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full">Kamu</span>
+                          <span className="ml-2 text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full">{tr('Kamu', 'You')}</span>
                         )}
                       </p>
                       <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{entry.total_submissions} submissions</p>
@@ -351,19 +354,19 @@ export default function SiswaLeaderboardPage() {
                   <div className="flex gap-6 text-right flex-shrink-0">
                     <div>
                       <p className="text-amber-500 font-bold text-lg">{entry.total_points}</p>
-                      <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Poin</p>
+                      <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Poin', 'Points')}</p>
                     </div>
                     <div>
                       <p className={`font-bold text-lg ${getGrade(entry.average_score).color}`}>
                         {entry.average_score.toFixed(1)}
                       </p>
-                      <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Rata-rata</p>
+                      <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Rata-rata', 'Average')}</p>
                     </div>
                     <div>
                       <p className={`font-bold text-lg ${getGrade(entry.highest_score).color}`}>
                         {entry.highest_score.toFixed(1)}
                       </p>
-                      <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Tertinggi</p>
+                      <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Tertinggi', 'Highest')}</p>
                     </div>
                   </div>
                 </div>
@@ -375,14 +378,14 @@ export default function SiswaLeaderboardPage() {
         {/* Info Card */}
         <div className={`mt-8 rounded-2xl p-6 border ${theme === 'dark' ? 'bg-purple-900/20 border-purple-700/30' : 'bg-purple-50 border-purple-200'}`}>
           <h4 className={`font-semibold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-            💡 Cara Meningkatkan Peringkat
+            💡 {tr('Cara Meningkatkan Peringkat', 'How to Improve Rank')}
           </h4>
           <ul className={`space-y-2 text-sm ${theme === 'dark' ? 'text-purple-200' : 'text-purple-700'}`}>
-            <li>✅ Submit kode Python secara rutin untuk menambah poin</li>
-            <li>✅ Ikuti prinsip Clean Code untuk mendapat skor tinggi</li>
-            <li>✅ Gunakan nama variabel dan fungsi yang deskriptif</li>
-            <li>✅ Tambahkan docstring pada setiap fungsi</li>
-            <li>✅ Hindari duplikasi kode dengan membuat fungsi reusable</li>
+            <li>{tr('✅ Submit kode Python secara rutin untuk menambah poin', '✅ Submit Python code regularly to gain points')}</li>
+            <li>{tr('✅ Ikuti prinsip Clean Code untuk mendapat skor tinggi', '✅ Follow Clean Code principles for higher scores')}</li>
+            <li>{tr('✅ Gunakan nama variabel dan fungsi yang deskriptif', '✅ Use descriptive variable and function names')}</li>
+            <li>{tr('✅ Tambahkan docstring pada setiap fungsi', '✅ Add docstrings to every function')}</li>
+            <li>{tr('✅ Hindari duplikasi kode dengan membuat fungsi reusable', '✅ Avoid code duplication by creating reusable functions')}</li>
           </ul>
         </div>
       </main>

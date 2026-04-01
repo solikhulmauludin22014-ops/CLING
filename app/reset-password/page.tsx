@@ -5,9 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 
 export default function ResetPasswordPage() {
   const { theme, toggleTheme } = useTheme()
+  const { language } = useLanguage()
+  const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -28,7 +31,7 @@ export default function ResetPasswordPage() {
         setIsAuthenticated(true)
       } else {
         // No session, user might not have a valid recovery token
-        setError('Sesi tidak valid. Silakan kirim ulang link reset password.')
+        setError(tr('Sesi tidak valid. Silakan kirim ulang link reset password.', 'Invalid session. Please request a new reset password link.'))
       }
       setChecking(false)
     }
@@ -41,12 +44,12 @@ export default function ResetPasswordPage() {
     setError('')
 
     if (password.length < 6) {
-      setError('Password minimal 6 karakter.')
+      setError(tr('Password minimal 6 karakter.', 'Password must be at least 6 characters.'))
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Password dan konfirmasi password tidak cocok.')
+      setError(tr('Password dan konfirmasi password tidak cocok.', 'Password and confirmation do not match.'))
       return
     }
 
@@ -61,7 +64,7 @@ export default function ResetPasswordPage() {
 
       if (updateError) {
         if (updateError.message.includes('should be different')) {
-          setError('Password baru harus berbeda dari password lama.')
+          setError(tr('Password baru harus berbeda dari password lama.', 'New password must be different from the old password.'))
         } else {
           setError(updateError.message)
         }
@@ -71,7 +74,7 @@ export default function ResetPasswordPage() {
 
       setSuccess(true)
     } catch (err) {
-      setError('Terjadi kesalahan. Silakan coba lagi.')
+      setError(tr('Terjadi kesalahan. Silakan coba lagi.', 'An error occurred. Please try again.'))
     } finally {
       setLoading(false)
     }
@@ -89,7 +92,7 @@ export default function ResetPasswordPage() {
             ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400'
             : 'bg-white hover:bg-purple-100 text-purple-600'
         }`}
-        title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+        title={theme === 'dark' ? tr('Mode Terang', 'Light Mode') : tr('Mode Gelap', 'Dark Mode')}
       >
         {theme === 'dark' ? (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,39 +150,39 @@ export default function ResetPasswordPage() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               <p className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>
-                Memverifikasi sesi...
+                {tr('Memverifikasi sesi...', 'Verifying session...')}
               </p>
             </div>
           ) : !isAuthenticated && !success ? (
             <div className="text-center">
               <div className="bg-yellow-100 border border-yellow-300 text-yellow-700 px-4 py-4 rounded-xl mb-6 flex flex-col items-center gap-2">
                 <span className="text-3xl">⚠️</span>
-                <p className="font-semibold">Sesi tidak valid</p>
+                <p className="font-semibold">{tr('Sesi tidak valid', 'Invalid session')}</p>
                 <p className="text-sm">
-                  Link reset password sudah kadaluarsa atau tidak valid. Silakan kirim ulang link reset password.
+                  {tr('Link reset password sudah kadaluarsa atau tidak valid. Silakan kirim ulang link reset password.', 'Reset password link has expired or is invalid. Please request a new reset link.')}
                 </p>
               </div>
               <Link
                 href="/lupa-password"
                 className="inline-flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-purple-600/30"
               >
-                📨 Kirim Ulang Link Reset
+                {tr('📨 Kirim Ulang Link Reset', '📨 Send Reset Link Again')}
               </Link>
             </div>
           ) : success ? (
             <div className="text-center">
               <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-4 rounded-xl mb-6 flex flex-col items-center gap-2">
                 <span className="text-3xl">✅</span>
-                <p className="font-semibold">Password berhasil diubah!</p>
+                <p className="font-semibold">{tr('Password berhasil diubah!', 'Password updated successfully!')}</p>
                 <p className="text-sm">
-                  Password Anda telah diperbarui. Silakan masuk dengan password baru Anda.
+                  {tr('Password Anda telah diperbarui. Silakan masuk dengan password baru Anda.', 'Your password has been updated. Please login with your new password.')}
                 </p>
               </div>
               <Link
                 href="/login"
                 className="inline-flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg shadow-purple-600/30"
               >
-                🚀 Masuk Sekarang
+                {tr('🚀 Masuk Sekarang', '🚀 Login Now')}
               </Link>
             </div>
           ) : (
@@ -187,10 +190,10 @@ export default function ResetPasswordPage() {
               <h2 className={`text-2xl font-bold text-center mb-2 ${
                 theme === 'dark' ? 'text-white' : 'text-slate-800'
               }`}>
-                Reset Password
+                {tr('Reset Password', 'Reset Password')}
               </h2>
               <p className={`text-center mb-6 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                Masukkan password baru Anda
+                {tr('Masukkan password baru Anda', 'Enter your new password')}
               </p>
 
               {error && (
@@ -208,7 +211,7 @@ export default function ResetPasswordPage() {
                       theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
                     }`}
                   >
-                    🔒 Password Baru
+                    {tr('🔒 Password Baru', '🔒 New Password')}
                   </label>
                   <div className="relative">
                     <input
@@ -216,7 +219,7 @@ export default function ResetPasswordPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Minimal 6 karakter"
+                      placeholder={tr('Minimal 6 karakter', 'Minimum 6 characters')}
                       required
                       minLength={6}
                       className={`w-full px-4 py-3 pr-12 rounded-xl border focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${
@@ -253,7 +256,7 @@ export default function ResetPasswordPage() {
                       theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
                     }`}
                   >
-                    🔒 Konfirmasi Password Baru
+                    {tr('🔒 Konfirmasi Password Baru', '🔒 Confirm New Password')}
                   </label>
                   <div className="relative">
                     <input
@@ -261,7 +264,7 @@ export default function ResetPasswordPage() {
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Ulangi password baru"
+                      placeholder={tr('Ulangi password baru', 'Repeat new password')}
                       required
                       minLength={6}
                       className={`w-full px-4 py-3 pr-12 rounded-xl border focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${
@@ -320,12 +323,12 @@ export default function ResetPasswordPage() {
                           : 'text-red-500'
                     }`}>
                       {password.length >= 12
-                        ? '💪 Password sangat kuat'
+                        ? tr('💪 Password sangat kuat', '💪 Very strong password')
                         : password.length >= 8
-                          ? '👍 Password cukup kuat'
+                          ? tr('👍 Password cukup kuat', '👍 Strong enough password')
                           : password.length >= 6
-                            ? '⚠️ Password lemah'
-                            : '❌ Minimal 6 karakter'}
+                            ? tr('⚠️ Password lemah', '⚠️ Weak password')
+                            : tr('❌ Minimal 6 karakter', '❌ Minimum 6 characters')}
                     </p>
                   </div>
                 )}
@@ -356,10 +359,10 @@ export default function ResetPasswordPage() {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Menyimpan...
+                      {tr('Menyimpan...', 'Saving...')}
                     </span>
                   ) : (
-                    '🔐 Simpan Password Baru'
+                    tr('🔐 Simpan Password Baru', '🔐 Save New Password')
                   )}
                 </button>
               </form>
@@ -375,7 +378,7 @@ export default function ResetPasswordPage() {
               theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'
             }`}
           >
-            ← Kembali ke Login
+            {tr('← Kembali ke Login', '← Back to Login')}
           </Link>
         </div>
       </div>

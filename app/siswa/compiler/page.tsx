@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 import ThemeToggle from '@/components/ThemeToggle'
 
 interface AnalysisResult {
@@ -27,6 +28,8 @@ interface HistoryEntry {
 }
 
 export default function SiswaCompilerPage() {
+  const { language } = useLanguage()
+  const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [userName, setUserName] = useState('Siswa')
   const [code, setCode] = useState(`# 🎯 Selamat datang di Clean Code Analyzer!
 # Tulis kode Python yang bersih dan efisien
@@ -217,12 +220,12 @@ print(f"Average: {result_avg}")
 
   const handleExecute = async () => {
     if (!code.trim()) {
-      showAlertMessage('⚠️ Tulis kode terlebih dahulu!', 'warning')
+      showAlertMessage(tr('⚠️ Tulis kode terlebih dahulu!', '⚠️ Please write code first!'), 'warning')
       return
     }
 
     setLoading(true)
-    setOutput('⏳ Menjalankan kode...')
+    setOutput(tr('⏳ Menjalankan kode...', '⏳ Running code...'))
     setExecutionTime('')
     setActiveTab('output')
 
@@ -240,14 +243,14 @@ print(f"Average: {result_avg}")
         if (data.execution_time) {
           setExecutionTime(`⚡ ${data.execution_time}ms`)
         }
-        showAlertMessage('✅ Kode berhasil dijalankan!', 'success')
+        showAlertMessage(tr('✅ Kode berhasil dijalankan!', '✅ Code executed successfully!'), 'success')
       } else {
         setOutput(`❌ Error:\n${data.error}`)
-        showAlertMessage('❌ Ada error dalam kode', 'error')
+        showAlertMessage(tr('❌ Ada error dalam kode', '❌ There is an error in the code'), 'error')
       }
     } catch (error) {
-      setOutput('🌐 Network error. Silakan coba lagi.')
-      showAlertMessage('🌐 Koneksi bermasalah', 'error')
+      setOutput(tr('🌐 Network error. Silakan coba lagi.', '🌐 Network error. Please try again.'))
+      showAlertMessage(tr('🌐 Koneksi bermasalah', '🌐 Network connection issue'), 'error')
     } finally {
       setLoading(false)
     }
@@ -255,7 +258,7 @@ print(f"Average: {result_avg}")
 
   const handleAnalyze = async () => {
     if (!code.trim()) {
-      showAlertMessage('⚠️ Tulis kode terlebih dahulu!', 'warning')
+      showAlertMessage(tr('⚠️ Tulis kode terlebih dahulu!', '⚠️ Please write code first!'), 'warning')
       return
     }
 
@@ -295,22 +298,22 @@ print(f"Average: {result_avg}")
           // Reload history setelah analisis baru
           loadHistory()
         } else {
-          showAlertMessage('✅ Analisis selesai!', 'success')
+          showAlertMessage(tr('✅ Analisis selesai!', '✅ Analysis complete!'), 'success')
           setCleanCodeScore(data.analysis?.final_score || 0)
           setLastAnalysisTime(new Date().toISOString())
         }
       } else {
-        showAlertMessage('❌ Analisis gagal: ' + (data.error || 'Unknown error'), 'error')
+        showAlertMessage(tr('❌ Analisis gagal: ', '❌ Analysis failed: ') + (data.error || 'Unknown error'), 'error')
       }
     } catch (error) {
-      showAlertMessage('🌐 Network error. Silakan coba lagi.', 'error')
+      showAlertMessage(tr('🌐 Network error. Silakan coba lagi.', '🌐 Network error. Please try again.'), 'error')
     } finally {
       setAnalysisLoading(false)
     }
   }
 
   const handleClear = () => {
-    if (confirm('🗑️ Yakin ingin menghapus semua kode?')) {
+    if (confirm(tr('🗑️ Yakin ingin menghapus semua kode?', '🗑️ Are you sure you want to clear all code?'))) {
       setCode('')
       setOutput('')
       setExecutionTime('')
@@ -334,10 +337,10 @@ print(f"Average: {result_avg}")
   }
 
   const getScoreMessage = (score: number) => {
-    if (score >= 9) return 'Luar Biasa!'
-    if (score >= 7) return 'Bagus Sekali!'
-    if (score >= 5) return 'Cukup Baik'
-    return 'Terus Belajar!'
+    if (score >= 9) return tr('Luar Biasa!', 'Excellent!')
+    if (score >= 7) return tr('Bagus Sekali!', 'Great Job!')
+    if (score >= 5) return tr('Cukup Baik', 'Good Enough')
+    return tr('Terus Belajar!', 'Keep Learning!')
   }
 
   // Format tanggal untuk riwayat
@@ -349,10 +352,10 @@ print(f"Average: {result_avg}")
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return 'Baru saja'
-    if (diffMins < 60) return `${diffMins} menit lalu`
-    if (diffHours < 24) return `${diffHours} jam lalu`
-    if (diffDays < 7) return `${diffDays} hari lalu`
+    if (diffMins < 1) return tr('Baru saja', 'Just now')
+    if (diffMins < 60) return language === 'id' ? `${diffMins} menit lalu` : `${diffMins} minutes ago`
+    if (diffHours < 24) return language === 'id' ? `${diffHours} jam lalu` : `${diffHours} hours ago`
+    if (diffDays < 7) return language === 'id' ? `${diffDays} hari lalu` : `${diffDays} days ago`
     
     return date.toLocaleDateString('id-ID', {
       day: '2-digit',
@@ -390,7 +393,7 @@ print(f"Average: {result_avg}")
 
   // Load kode dari riwayat ke editor
   const loadFromHistory = (entry: HistoryEntry) => {
-    if (confirm('📝 Muat kode dari riwayat ini ke editor? Kode saat ini akan diganti.')) {
+    if (confirm(tr('📝 Muat kode dari riwayat ini ke editor? Kode saat ini akan diganti.', '📝 Load this history code into editor? Current code will be replaced.'))) {
       setCode(entry.code)
       if (entry.analysis_result) {
         setAnalysis(entry.analysis_result)
@@ -398,7 +401,7 @@ print(f"Average: {result_avg}")
         setActiveTab('analysis')
       }
       setShowHistoryModal(false)
-      showAlertMessage('✅ Kode berhasil dimuat dari riwayat!', 'success')
+      showAlertMessage(tr('✅ Kode berhasil dimuat dari riwayat!', '✅ Code loaded from history successfully!'), 'success')
     }
   }
 
@@ -419,20 +422,20 @@ print(f"Average: {result_avg}")
           }`}>
             <div className="text-center">
               <div className="text-6xl mb-4">🚪</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Logout?</h3>
-              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Apakah kamu yakin ingin keluar dari aplikasi?</p>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Logout?', 'Logout?')}</h3>
+              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah kamu yakin ingin keluar dari aplikasi?', 'Are you sure you want to logout from the app?')}</p>
               <div className="flex gap-4 justify-center">
                 <button
                   onClick={cancelLogout}
                   className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  ❌ Tidak
+                  {tr('❌ Tidak', '❌ No')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
-                  ✅ Ya, Logout
+                  {tr('✅ Ya, Logout', '✅ Yes, Logout')}
                 </button>
               </div>
             </div>
@@ -454,8 +457,8 @@ print(f"Average: {result_avg}")
                 <div className="flex items-center gap-3">
                   <span className="text-4xl">📜</span>
                   <div>
-                    <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Riwayat Clean Code</h2>
-                    <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Pantau perkembangan nilai clean code kamu</p>
+                    <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Riwayat Clean Code', 'Clean Code History')}</h2>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Pantau perkembangan nilai clean code kamu', 'Track your clean code score progress')}</p>
                   </div>
                 </div>
                 <button
@@ -470,27 +473,27 @@ print(f"Average: {result_avg}")
               {history.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
                   <div className={`rounded-xl p-3 text-center ${theme === 'dark' ? 'bg-slate-700' : 'bg-white'}`}>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Total Submit</p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Total Submit', 'Total Submissions')}</p>
                     <p className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{getHistoryStats().total}</p>
                   </div>
                   <div className={`rounded-xl p-3 text-center ${theme === 'dark' ? 'bg-slate-700' : 'bg-white'}`}>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Rata-rata</p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Rata-rata', 'Average')}</p>
                     <p className="text-xl font-bold text-purple-500">{getHistoryStats().avg.toFixed(2)}</p>
                   </div>
                   <div className={`rounded-xl p-3 text-center ${theme === 'dark' ? 'bg-slate-700' : 'bg-white'}`}>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Tertinggi</p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Tertinggi', 'Highest')}</p>
                     <p className="text-xl font-bold text-green-500">{getHistoryStats().highest.toFixed(2)}</p>
                   </div>
                   <div className={`rounded-xl p-3 text-center ${theme === 'dark' ? 'bg-slate-700' : 'bg-white'}`}>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Terendah</p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Terendah', 'Lowest')}</p>
                     <p className="text-xl font-bold text-red-500">{getHistoryStats().lowest.toFixed(2)}</p>
                   </div>
                   <div className={`rounded-xl p-3 text-center ${theme === 'dark' ? 'bg-slate-700' : 'bg-white'}`}>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Trend</p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Trend', 'Trend')}</p>
                     <p className="text-xl font-bold">
-                      {getHistoryStats().trend === 'up' && <span className="text-green-500">📈 Naik</span>}
-                      {getHistoryStats().trend === 'down' && <span className="text-red-500">📉 Turun</span>}
-                      {getHistoryStats().trend === 'stable' && <span className="text-yellow-500">➡️ Stabil</span>}
+                      {getHistoryStats().trend === 'up' && <span className="text-green-500">📈 {tr('Naik', 'Up')}</span>}
+                      {getHistoryStats().trend === 'down' && <span className="text-red-500">📉 {tr('Turun', 'Down')}</span>}
+                      {getHistoryStats().trend === 'stable' && <span className="text-yellow-500">➡️ {tr('Stabil', 'Stable')}</span>}
                     </p>
                   </div>
                 </div>
@@ -502,13 +505,13 @@ print(f"Average: {result_avg}")
               {historyLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="text-5xl animate-bounce">📊</div>
-                  <p className={`mt-4 ${theme === 'dark' ? 'text-white' : 'text-slate-600'}`}>Memuat riwayat...</p>
+                  <p className={`mt-4 ${theme === 'dark' ? 'text-white' : 'text-slate-600'}`}>{tr('Memuat riwayat...', 'Loading history...')}</p>
                 </div>
               ) : history.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="text-6xl mb-4">📭</div>
-                  <p className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Belum ada riwayat</p>
-                  <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Klik "Analyze" untuk mulai menganalisis kode</p>
+                  <p className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Belum ada riwayat', 'No history yet')}</p>
+                  <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Klik "Analyze" untuk mulai menganalisis kode', 'Click "Analyze" to start analyzing code')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -581,7 +584,7 @@ print(f"Average: {result_avg}")
                         <div className="mt-4 pt-4 border-t border-white/10">
                           {/* Code Preview */}
                           <div className="mb-3">
-                            <p className="text-xs text-slate-400 mb-1">Preview Kode:</p>
+                            <p className="text-xs text-slate-400 mb-1">{tr('Preview Kode:', 'Code Preview:')}</p>
                             <pre className="bg-slate-900/50 rounded-lg p-3 text-xs text-green-400 font-mono overflow-x-auto max-h-32 overflow-y-auto">
                               {entry.code.slice(0, 500)}{entry.code.length > 500 ? '...' : ''}
                             </pre>
@@ -596,17 +599,17 @@ print(f"Average: {result_avg}")
                               }}
                               className="flex-1 bg-gradient-to-r from-purple-500 to-purple-500 hover:from-purple-600 hover:to-purple-600 text-white py-2 px-4 rounded-lg text-sm font-semibold transition-all"
                             >
-                              📝 Muat ke Editor
+                              📝 {tr('Muat ke Editor', 'Load to Editor')}
                             </button>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
                                 navigator.clipboard.writeText(entry.code)
-                                showAlertMessage('📋 Kode disalin ke clipboard!', 'success')
+                                showAlertMessage(tr('📋 Kode disalin ke clipboard!', '📋 Code copied to clipboard!'), 'success')
                               }}
                               className="bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg text-sm transition-all"
                             >
-                              📋 Salin
+                              📋 {tr('Salin', 'Copy')}
                             </button>
                           </div>
                         </div>
@@ -621,16 +624,16 @@ print(f"Average: {result_avg}")
             <div className={`p-4 border-t ${theme === 'dark' ? 'border-slate-700 bg-slate-800/50' : 'border-purple-100 bg-purple-50'}`}>
               <div className="flex justify-between items-center">
                 <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                  💡 Klik item untuk melihat detail dan memuat kode ke editor
+                  💡 {tr('Klik item untuk melihat detail dan memuat kode ke editor', 'Click an item to view details and load code to editor')}
                 </p>
                 <button
                   onClick={() => {
                     loadHistory()
-                    showAlertMessage('🔄 Riwayat diperbarui!', 'success')
+                    showAlertMessage(tr('🔄 Riwayat diperbarui!', '🔄 History refreshed!'), 'success')
                   }}
                   className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
                 >
-                  🔄 Refresh
+                  🔄 {tr('Refresh', 'Refresh')}
                 </button>
               </div>
             </div>
@@ -705,7 +708,7 @@ print(f"Average: {result_avg}")
                 href="/siswa/materi"
                 className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
               >
-                📚 Materi
+                📚 {tr('Materi', 'Materials')}
               </a>
 
               {/* Link to Leaderboard Page */}
@@ -721,7 +724,7 @@ print(f"Average: {result_avg}")
                 onClick={() => setShowHistoryModal(true)}
                 className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
               >
-                📜 Riwayat
+                📜 {tr('Riwayat', 'History')}
                 {history.length > 0 && (
                   <span className="bg-purple-600 text-white text-xs px-2 py-0.5 rounded-full">
                     {history.length}
@@ -739,7 +742,7 @@ print(f"Average: {result_avg}")
                   </div>
                   {lastAnalysisTime && (
                     <div className="border-l border-white/30 pl-3 ml-1">
-                      <p className="text-xs text-green-100">Terakhir</p>
+                      <p className="text-xs text-green-100">{tr('Terakhir', 'Last')}</p>
                       <p className="text-xs font-medium text-white">
                         {new Date(lastAnalysisTime).toLocaleDateString('id-ID', {
                           day: '2-digit',
@@ -762,7 +765,7 @@ print(f"Average: {result_avg}")
               >
                 <div className="text-right">
                   <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
-                  <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Siswa</p>
+                  <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Siswa', 'Student')}</p>
                 </div>
                 <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
                   {userName.charAt(0).toUpperCase()}
@@ -773,7 +776,7 @@ print(f"Average: {result_avg}")
                 onClick={confirmLogout}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300"
               >
-                🚪 Logout
+                🚪 {tr('Logout', 'Logout')}
               </button>
             </div>
           </div>
@@ -824,14 +827,14 @@ print(f"Average: {result_avg}")
                     disabled={loading}
                     className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl hover:shadow-lg transition-all duration-300 disabled:opacity-50 font-semibold"
                   >
-                    {loading ? '⏳ Running...' : '▶️ Run'}
+                    {loading ? tr('⏳ Menjalankan...', '⏳ Running...') : tr('▶️ Jalankan', '▶️ Run')}
                   </button>
                   <button
                     onClick={handleAnalyze}
                     disabled={analysisLoading}
                     className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl hover:shadow-lg transition-all duration-300 disabled:opacity-50 font-semibold"
                   >
-                    {analysisLoading ? '⏳ Analyzing...' : '📊 Analyze'}
+                    {analysisLoading ? tr('⏳ Menganalisis...', '⏳ Analyzing...') : tr('📊 Analisis', '📊 Analyze')}
                   </button>
                   <button
                     onClick={handleClear}
@@ -861,7 +864,7 @@ print(f"Average: {result_avg}")
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   onScroll={syncGutterScroll}
-                  placeholder="# ✨ Tulis kode Python di sini..."
+                  placeholder={tr('# ✨ Tulis kode Python di sini...', '# ✨ Write Python code here...')}
                   className="w-full h-[400px] pl-16 pr-4 py-4 font-mono text-sm focus:outline-none bg-transparent text-green-400 leading-6 resize-none"
                   spellCheck={false}
                   style={{
@@ -883,7 +886,7 @@ print(f"Average: {result_avg}")
                       : theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  💻 Output Console
+                  💻 {tr('Output Console', 'Output Console')}
                 </button>
                 <button
                   onClick={() => setActiveTab('analysis')}
@@ -893,7 +896,7 @@ print(f"Average: {result_avg}")
                       : theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  📊 Analysis Result
+                  📊 {tr('Hasil Analisis', 'Analysis Result')}
                 </button>
               </div>
 

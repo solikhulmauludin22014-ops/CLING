@@ -4,9 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 
 export default function ForgotPasswordPage() {
   const { theme, toggleTheme } = useTheme()
+  const { language } = useLanguage()
+  const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -32,7 +35,7 @@ export default function ForgotPasswordPage() {
 
       setSuccess(true)
     } catch (err) {
-      setError('Terjadi kesalahan. Silakan coba lagi.')
+      setError(tr('Terjadi kesalahan. Silakan coba lagi.', 'An error occurred. Please try again.'))
     } finally {
       setLoading(false)
     }
@@ -50,7 +53,7 @@ export default function ForgotPasswordPage() {
             ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400'
             : 'bg-white hover:bg-purple-100 text-purple-600'
         }`}
-        title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+        title={theme === 'dark' ? tr('Mode Terang', 'Light Mode') : tr('Mode Gelap', 'Dark Mode')}
       >
         {theme === 'dark' ? (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,26 +107,26 @@ export default function ForgotPasswordPage() {
           <h2 className={`text-2xl font-bold text-center mb-2 ${
             theme === 'dark' ? 'text-white' : 'text-slate-800'
           }`}>
-            Lupa Password?
+            {tr('Lupa Password?', 'Forgot Password?')}
           </h2>
           <p className={`text-center mb-6 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-            Masukkan email untuk reset password
+            {tr('Masukkan email untuk reset password', 'Enter your email to reset password')}
           </p>
 
           {success ? (
             <div className="text-center">
               <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-4 rounded-xl mb-6 flex flex-col items-center gap-2">
                 <span className="text-3xl">📧</span>
-                <p className="font-semibold">Email terkirim!</p>
+                <p className="font-semibold">{tr('Email terkirim!', 'Email sent!')}</p>
                 <p className="text-sm">
-                  Kami telah mengirim link reset password ke <strong>{email}</strong>. Silakan cek inbox atau folder spam Anda.
+                  {tr('Kami telah mengirim link reset password ke ', 'We have sent a reset link to ')}<strong>{email}</strong>. {tr('Silakan cek inbox atau folder spam Anda.', 'Please check your inbox or spam folder.')}
                 </p>
               </div>
               <Link
                 href="/login"
                 className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-semibold transition-colors"
               >
-                ← Kembali ke Login
+                {tr('← Kembali ke Login', '← Back to Login')}
               </Link>
             </div>
           ) : (
@@ -186,19 +189,19 @@ export default function ForgotPasswordPage() {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Mengirim...
+                      {tr('Mengirim...', 'Sending...')}
                     </span>
                   ) : (
-                    '📨 Kirim Link Reset'
+                    tr('📨 Kirim Link Reset', '📨 Send Reset Link')
                   )}
                 </button>
               </form>
 
               <div className={`mt-6 pt-6 border-t ${theme === 'dark' ? 'border-slate-700' : 'border-purple-100'}`}>
                 <p className={`text-sm text-center ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                  Sudah ingat password?{' '}
+                  {tr('Sudah ingat password?', 'Remembered your password?')}{' '}
                   <Link href="/login" className="text-purple-600 hover:text-purple-700 font-semibold">
-                    Masuk di sini
+                    {tr('Masuk di sini', 'Login here')}
                   </Link>
                 </p>
               </div>
@@ -214,7 +217,7 @@ export default function ForgotPasswordPage() {
               theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'
             }`}
           >
-            ← Kembali ke Beranda
+            {tr('← Kembali ke Beranda', '← Back to Home')}
           </Link>
         </div>
       </div>

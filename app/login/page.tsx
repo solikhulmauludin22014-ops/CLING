@@ -4,9 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 
 export default function LoginPage() {
   const { theme, toggleTheme } = useTheme()
+  const { language } = useLanguage()
+  const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -39,7 +42,7 @@ export default function LoginPage() {
 
       setForgotSuccess(true)
     } catch (err) {
-      setForgotError('Terjadi kesalahan. Silakan coba lagi.')
+      setForgotError(tr('Terjadi kesalahan. Silakan coba lagi.', 'An error occurred. Please try again.'))
     } finally {
       setForgotLoading(false)
     }
@@ -68,7 +71,7 @@ export default function LoginPage() {
 
       if (signInError) {
         if (signInError.message.includes('Invalid login credentials')) {
-          setError('Email atau password salah.')
+          setError(tr('Email atau password salah.', 'Incorrect email or password.'))
         } else {
           setError(signInError.message)
         }
@@ -92,7 +95,7 @@ export default function LoginPage() {
         }
       }
     } catch (err) {
-      setError('Terjadi kesalahan. Silakan coba lagi.')
+      setError(tr('Terjadi kesalahan. Silakan coba lagi.', 'An error occurred. Please try again.'))
       setLoading(false)
     }
   }
@@ -109,7 +112,7 @@ export default function LoginPage() {
             ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400'
             : 'bg-white hover:bg-purple-100 text-purple-600'
         }`}
-        title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+        title={theme === 'dark' ? tr('Mode Terang', 'Light Mode') : tr('Mode Gelap', 'Dark Mode')}
       >
         {theme === 'dark' ? (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,10 +166,10 @@ export default function LoginPage() {
           <h2 className={`text-2xl font-bold text-center mb-2 ${
             theme === 'dark' ? 'text-white' : 'text-slate-800'
           }`}>
-            Selamat Datang!
+            {tr('Selamat Datang!', 'Welcome Back!')}
           </h2>
           <p className={`text-center mb-6 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-            Masuk untuk mulai coding
+            {tr('Masuk untuk mulai coding', 'Sign in to start coding')}
           </p>
 
           {error && (
@@ -184,7 +187,7 @@ export default function LoginPage() {
                   theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
                 }`}
               >
-                📧 Email
+                {tr('📧 Email', '📧 Email')}
               </label>
               <input
                 id="email"
@@ -208,7 +211,7 @@ export default function LoginPage() {
                   theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
                 }`}
               >
-                🔒 Password
+                {tr('🔒 Password', '🔒 Password')}
               </label>
               <input
                 id="password"
@@ -251,10 +254,10 @@ export default function LoginPage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Memproses...
+                  {tr('Memproses...', 'Processing...')}
                 </span>
               ) : (
-                '🚀 Masuk'
+                tr('🚀 Masuk', '🚀 Login')
               )}
             </button>
           </form>
@@ -269,13 +272,13 @@ export default function LoginPage() {
                 }}
                 className={`text-sm transition-colors cursor-pointer ${theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-500 hover:text-purple-700'}`}
               >
-                Lupa password?
+                {tr('Lupa password?', 'Forgot password?')}
               </button>
             </div>
             <p className={`text-sm text-center ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-              Belum punya akun?{' '}
+              {tr('Belum punya akun?', "Don't have an account?")}{' '}
               <Link href="/register" className="text-purple-600 hover:text-purple-700 font-semibold">
-                Daftar di sini
+                {tr('Daftar di sini', 'Register here')}
               </Link>
             </p>
           </div>
@@ -289,7 +292,7 @@ export default function LoginPage() {
               theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'
             }`}
           >
-            ← Kembali ke Beranda
+            {tr('← Kembali ke Beranda', '← Back to Home')}
           </Link>
         </div>
       </div>
@@ -335,10 +338,13 @@ export default function LoginPage() {
             <h3 className={`text-2xl font-bold text-center mb-2 ${
               theme === 'dark' ? 'text-white' : 'text-slate-800'
             }`}>
-              Lupa Password?
+              {tr('Lupa Password?', 'Forgot Password?')}
             </h3>
             <p className={`text-center mb-6 text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-              Masukkan email yang terdaftar, kami akan mengirim link untuk reset password Anda.
+              {tr(
+                'Masukkan email yang terdaftar, kami akan mengirim link untuk reset password Anda.',
+                'Enter your registered email and we will send a reset password link.'
+              )}
             </p>
 
             {forgotSuccess ? (
@@ -349,19 +355,19 @@ export default function LoginPage() {
                     : 'bg-green-100 border border-green-300 text-green-700'
                 }`}>
                   <span className="text-4xl">📧</span>
-                  <p className="font-semibold text-lg">Email Terkirim!</p>
+                  <p className="font-semibold text-lg">{tr('Email Terkirim!', 'Email Sent!')}</p>
                   <p className="text-sm">
-                    Link reset password telah dikirim ke <strong>{forgotEmail}</strong>.
+                    {tr('Link reset password telah dikirim ke ', 'Reset password link has been sent to ')}<strong>{forgotEmail}</strong>.
                   </p>
                   <p className="text-xs mt-1 opacity-75">
-                    Cek inbox atau folder spam Anda.
+                    {tr('Cek inbox atau folder spam Anda.', 'Check your inbox or spam folder.')}
                   </p>
                 </div>
                 <button
                   onClick={closeForgotPassword}
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-purple-600/30"
                 >
-                  ← Kembali ke Login
+                  {tr('← Kembali ke Login', '← Back to Login')}
                 </button>
               </div>
             ) : (
@@ -385,7 +391,7 @@ export default function LoginPage() {
                         theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
                       }`}
                     >
-                      📧 Email Terdaftar
+                      {tr('📧 Email Terdaftar', '📧 Registered Email')}
                     </label>
                     <input
                       id="forgot-email"
@@ -429,10 +435,10 @@ export default function LoginPage() {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           ></path>
                         </svg>
-                        Mengirim...
+                        {tr('Mengirim...', 'Sending...')}
                       </span>
                     ) : (
-                      '📨 Kirim Link Reset Password'
+                      tr('📨 Kirim Link Reset Password', '📨 Send Reset Link')
                     )}
                   </button>
                 </form>
@@ -446,7 +452,7 @@ export default function LoginPage() {
                       : 'text-slate-500 hover:text-slate-700 hover:bg-purple-50'
                   }`}
                 >
-                  Batal
+                  {tr('Batal', 'Cancel')}
                 </button>
               </>
             )}
