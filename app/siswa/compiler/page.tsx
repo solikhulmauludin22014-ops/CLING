@@ -677,6 +677,24 @@ print(f"Average: {result_avg}")
       )}
 
       {/* Navbar */}
+      <button
+        onClick={() => setShowNavMenu((prev) => !prev)}
+        className={`fixed top-5 left-4 z-[70] p-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 ${
+          showNavMenu ? 'rotate-90' : 'rotate-0'
+        } ${theme === 'dark' ? 'bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 border border-emerald-400/40' : 'bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-500'}`}
+        aria-label={tr('Buka menu navigasi', 'Toggle navigation menu')}
+      >
+        {showNavMenu ? (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        )}
+      </button>
+
       <nav className={`relative border-b transition-colors ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100 shadow-sm'}`}>
         <div className="max-w-full mx-auto px-6 py-3">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -692,22 +710,6 @@ print(f"Average: {result_avg}")
                   className={`px-3 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
                 >
                   ← {tr('Kembali', 'Back')}
-                </button>
-
-                <button
-                  onClick={() => setShowNavMenu((prev) => !prev)}
-                  className={`p-2 rounded-xl transition-all ${theme === 'dark' ? 'bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border border-emerald-300'}`}
-                  aria-label={tr('Buka menu navigasi', 'Toggle navigation menu')}
-                >
-                  {showNavMenu ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  )}
                 </button>
 
                 <div className="flex items-center gap-4">
