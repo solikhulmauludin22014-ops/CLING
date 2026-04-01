@@ -4,10 +4,12 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 import ThemeToggle from '@/components/ThemeToggle'
 
 export default function GuruProfilePage() {
   const { theme } = useTheme()
+  const { language, setLanguage } = useLanguage()
   const [userName, setUserName] = useState('Guru')
   const [userId, setUserId] = useState('')
   const [profile, setProfile] = useState({
@@ -150,6 +152,11 @@ export default function GuruProfilePage() {
   const showAlert = (message: string, type: 'success' | 'error') => {
     setAlert({ message, type })
     setTimeout(() => setAlert(null), 3000)
+  }
+
+  const handleLanguageChange = (value: 'id' | 'en') => {
+    setLanguage(value)
+    showAlert(value === 'id' ? 'Bahasa berhasil diubah ke Indonesia' : 'Language changed to English', 'success')
   }
 
   const handleLogout = async () => {
@@ -382,6 +389,26 @@ export default function GuruProfilePage() {
                   className={`w-full px-4 py-3 border rounded-xl cursor-not-allowed ${theme === 'dark' ? 'bg-slate-700/50 border-slate-600 text-slate-400' : 'bg-gray-100 border-purple-200 text-slate-500'}`}
                 />
               </div>
+            </div>
+
+            {/* Language Settings */}
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
+                {language === 'id' ? 'Bahasa Aplikasi' : 'Application Language'}
+              </label>
+              <select
+                value={language}
+                onChange={(e) => handleLanguageChange(e.target.value as 'id' | 'en')}
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
+              >
+                <option value="id">Indonesia</option>
+                <option value="en">English</option>
+              </select>
+              <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                {language === 'id'
+                  ? 'Pilihan bahasa akan disimpan untuk sesi berikutnya.'
+                  : 'Language selection will be saved for your next sessions.'}
+              </p>
             </div>
 
             {/* Save Button */}

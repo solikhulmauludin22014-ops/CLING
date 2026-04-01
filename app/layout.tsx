@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/lib/context/ThemeContext'
+import { LanguageProvider } from '@/lib/context/LanguageContext'
 import AuthListener from '@/components/AuthListener'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -19,10 +20,12 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body className={`${inter.className} bg-white dark:bg-slate-900 transition-colors duration-300`}>
-        <ThemeProvider>
-          <AuthListener />
-          {children}
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <AuthListener />
+            {children}
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   )
