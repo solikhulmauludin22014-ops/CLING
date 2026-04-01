@@ -76,6 +76,7 @@ print(f"Average: {result_avg}")
   const [lineNumbers, setLineNumbers] = useState<string[]>(['1'])
   const [activeTab, setActiveTab] = useState<'output' | 'analysis'>('output')
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [showNavMenu, setShowNavMenu] = useState(false)
   
   // Theme hook
   const { theme } = useTheme()
@@ -688,6 +689,16 @@ print(f"Average: {result_avg}")
                   ← {tr('Kembali', 'Back')}
                 </button>
 
+                <button
+                  onClick={() => setShowNavMenu((prev) => !prev)}
+                  className={`p-2 rounded-xl transition-all xl:hidden ${theme === 'dark' ? 'bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border border-emerald-300'}`}
+                  aria-label={tr('Buka menu navigasi', 'Toggle navigation menu')}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+
                 <div className="flex items-center gap-4">
                   <div className="bg-purple-600 text-white p-3 rounded-xl shadow-lg">
                     <svg
@@ -715,7 +726,7 @@ print(f"Average: {result_avg}")
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 w-full max-w-sm">
+              <div className={`${showNavMenu ? 'flex' : 'hidden'} xl:flex flex-col gap-2 w-full max-w-sm`}>
                 <div className="w-fit">
                   <ThemeToggle />
                 </div>
