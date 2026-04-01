@@ -672,38 +672,49 @@ print(f"Average: {result_avg}")
       {/* Navbar */}
       <nav className={`relative border-b transition-colors ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100 shadow-sm'}`}>
         <div className="max-w-full mx-auto px-6 py-3">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <div className="bg-purple-600 text-white p-3 rounded-xl shadow-lg">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-purple-700'}`}>
-                  Python Compiler
-                </h1>
-                <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-500'}`}>
-                  Clean Code Analyzer • PEP 8 • Pylint
-                </p>
-              </div>
-            </div>
+          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => {
+                  if (window.history.length > 1) {
+                    window.history.back()
+                    return
+                  }
+                  window.location.href = '/siswa/materi'
+                }}
+                className={`px-3 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+              >
+                ← {tr('Kembali', 'Back')}
+              </button>
 
-            <div className="flex items-center space-x-4">
-              {/* Theme Toggle */}
+              <div className="flex items-center gap-4 mr-2">
+                <div className="bg-purple-600 text-white p-3 rounded-xl shadow-lg">
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-purple-700'}`}>
+                    Python Compiler
+                  </h1>
+                  <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-500'}`}>
+                    Clean Code Analyzer • PEP 8 • Pylint
+                  </p>
+                </div>
+              </div>
+
               <ThemeToggle />
-              
-              {/* Link to Materials Page */}
+
               <a
                 href="/siswa/materi"
                 className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
@@ -711,7 +722,6 @@ print(f"Average: {result_avg}")
                 📚 {tr('Materi', 'Materials')}
               </a>
 
-              {/* Link to Leaderboard Page */}
               <a
                 href="/siswa/leaderboard"
                 className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'}`}
@@ -719,7 +729,6 @@ print(f"Average: {result_avg}")
                 🏆 Leaderboard
               </a>
 
-              {/* History Button */}
               <button
                 onClick={() => setShowHistoryModal(true)}
                 className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
@@ -732,7 +741,28 @@ print(f"Average: {result_avg}")
                 )}
               </button>
 
-              {/* Clean Code Score Badge with Timestamp */}
+              <a
+                href="/siswa/profile"
+                className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all cursor-pointer ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
+              >
+                <div className="text-right">
+                  <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
+                  <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Siswa', 'Student')}</p>
+                </div>
+                <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+              </a>
+
+              <button
+                onClick={confirmLogout}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300"
+              >
+                🚪 {tr('Logout', 'Logout')}
+              </button>
+            </div>
+
+            <div className="xl:ml-auto">
               <div className="bg-gradient-to-r from-green-500 to-purple-500 px-4 py-2 rounded-xl shadow-lg shadow-purple-500/30">
                 <div className="flex items-center gap-3">
                   <span className="text-xl">📊</span>
@@ -757,27 +787,6 @@ print(f"Average: {result_avg}")
                   )}
                 </div>
               </div>
-
-              {/* User Info */}
-              <a
-                href="/siswa/profile"
-                className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all cursor-pointer ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
-              >
-                <div className="text-right">
-                  <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
-                  <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Siswa', 'Student')}</p>
-                </div>
-                <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                  {userName.charAt(0).toUpperCase()}
-                </div>
-              </a>
-
-              <button
-                onClick={confirmLogout}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300"
-              >
-                🚪 {tr('Logout', 'Logout')}
-              </button>
             </div>
           </div>
         </div>

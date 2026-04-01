@@ -14,6 +14,7 @@ const translations = {
     navMaterials: 'Materi',
     navCompiler: 'Compiler',
     navLeaderboard: 'Leaderboard',
+    back: 'Kembali',
     labelFullName: 'Nama Lengkap',
     placeholderFullName: 'Nama lengkap Anda',
     labelNick: 'Nama Panggilan',
@@ -66,6 +67,7 @@ const translations = {
     navMaterials: 'Materials',
     navCompiler: 'Compiler',
     navLeaderboard: 'Leaderboard',
+    back: 'Back',
     labelFullName: 'Full Name',
     placeholderFullName: 'Your full name',
     labelNick: 'Nickname',
@@ -410,6 +412,19 @@ export default function SiswaProfilePage() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => {
+                  if (window.history.length > 1) {
+                    window.history.back()
+                    return
+                  }
+                  window.location.href = '/siswa/compiler'
+                }}
+                className={`px-3 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+              >
+                ← {t('back')}
+              </button>
+
               <div className="bg-purple-600 p-3 rounded-xl shadow-lg">
                 <span className="text-2xl">👤</span>
               </div>
