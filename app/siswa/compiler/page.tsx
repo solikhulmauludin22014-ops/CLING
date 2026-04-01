@@ -127,6 +127,12 @@ print(f"Average: {result_avg}")
     loadUserData()
   }, [])
 
+  useEffect(() => {
+    if (window.innerWidth >= 1024) {
+      setShowNavMenu(true)
+    }
+  }, [])
+
   // Load submission history
   const loadHistory = async () => {
     setHistoryLoading(true)
@@ -673,9 +679,8 @@ print(f"Average: {result_avg}")
       {/* Navbar */}
       <nav className={`relative border-b transition-colors ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100 shadow-sm'}`}>
         <div className="max-w-full mx-auto px-6 py-3">
-          <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
-            <div className="flex-1 flex flex-col gap-3">
-              <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => {
                     if (window.history.length > 1) {
@@ -691,12 +696,18 @@ print(f"Average: {result_avg}")
 
                 <button
                   onClick={() => setShowNavMenu((prev) => !prev)}
-                  className={`p-2 rounded-xl transition-all xl:hidden ${theme === 'dark' ? 'bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border border-emerald-300'}`}
+                  className={`p-2 rounded-xl transition-all ${theme === 'dark' ? 'bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border border-emerald-300'}`}
                   aria-label={tr('Buka menu navigasi', 'Toggle navigation menu')}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
+                  {showNavMenu ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  )}
                 </button>
 
                 <div className="flex items-center gap-4">
@@ -730,57 +741,7 @@ print(f"Average: {result_avg}")
                 </div>
               </div>
 
-              <div className={`${showNavMenu ? 'flex' : 'hidden'} lg:hidden flex-col gap-2 w-full max-w-sm`}>
-
-                <a
-                  href="/siswa/materi"
-                  className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
-                >
-                  📚 {tr('Materi', 'Materials')}
-                </a>
-
-                <a
-                  href="/siswa/leaderboard"
-                  className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'}`}
-                >
-                  🏆 Leaderboard
-                </a>
-
-                <button
-                  onClick={() => setShowHistoryModal(true)}
-                  className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center justify-between gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
-                >
-                  <span>📜 {tr('Riwayat', 'History')}</span>
-                  {history.length > 0 && (
-                    <span className="bg-purple-600 text-white text-xs px-2 py-0.5 rounded-full">
-                      {history.length}
-                    </span>
-                  )}
-                </button>
-
-                <a
-                  href="/siswa/profile"
-                  className={`flex items-center justify-between gap-3 px-4 py-2 rounded-xl transition-all cursor-pointer ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
-                >
-                  <div>
-                    <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Siswa', 'Student')}</p>
-                  </div>
-                  <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                    {userName.charAt(0).toUpperCase()}
-                  </div>
-                </a>
-
-                <button
-                  onClick={confirmLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300 text-left"
-                >
-                  🚪 {tr('Logout', 'Logout')}
-                </button>
-              </div>
-            </div>
-
-            <div className="xl:ml-auto">
+            <div className="ml-auto">
               <div className="bg-gradient-to-r from-green-500 to-purple-500 px-4 py-2 rounded-xl shadow-lg shadow-purple-500/30">
                 <div className="flex items-center gap-3">
                   <span className="text-xl">📊</span>
@@ -832,10 +793,24 @@ print(f"Average: {result_avg}")
           </div>
         )}
 
-        <div className="flex gap-6">
-          {/* Left Sidebar Menu - Desktop */}
-          <aside className={`hidden lg:block w-72 shrink-0 rounded-2xl border p-4 h-fit sticky top-24 shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
-            <div className="space-y-2">
+        {showNavMenu && (
+          <button
+            onClick={() => setShowNavMenu(false)}
+            className="fixed inset-0 z-30 bg-black/30 lg:hidden"
+            aria-label={tr('Tutup menu navigasi', 'Close navigation menu')}
+          />
+        )}
+
+        <aside
+          className={`fixed left-4 top-24 z-40 w-[86vw] max-w-xs lg:w-72 rounded-2xl border p-4 shadow-xl transition-all duration-300 transform ${
+            showNavMenu ? 'translate-x-0 opacity-100' : '-translate-x-[120%] opacity-0 pointer-events-none'
+          } ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}
+        >
+          <div className="space-y-2">
+            <p className={`text-xs font-semibold uppercase tracking-wide px-2 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
+              {tr('Menu Navigasi', 'Navigation Menu')}
+            </p>
+
               <a
                 href="/siswa/materi"
                 className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
@@ -881,11 +856,10 @@ print(f"Average: {result_avg}")
               >
                 🚪 {tr('Logout', 'Logout')}
               </button>
-            </div>
-          </aside>
+          </div>
+        </aside>
 
-          <div className="flex-1">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 transition-all duration-300 ${showNavMenu ? 'lg:pl-80' : 'lg:pl-0'}`}>
               {/* Code Editor (Left - 2 columns) */}
               <div className="lg:col-span-2 space-y-6">
             {/* Editor Card */}
@@ -1202,8 +1176,6 @@ print(f"Average: {result_avg}")
                   <span>{tr('Max 79 karakter per baris', 'Max 79 characters per line')}</span>
                 </li>
               </ul>
-            </div>
-              </div>
             </div>
           </div>
         </div>
