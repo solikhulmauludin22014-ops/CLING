@@ -7,9 +7,101 @@ import { useTheme } from '@/lib/context/ThemeContext'
 import { useLanguage } from '@/lib/context/LanguageContext'
 import ThemeToggle from '@/components/ThemeToggle'
 
+const translations = {
+  id: {
+    title: 'Profil Saya',
+    subtitle: 'Kelola informasi pribadi Anda',
+    navDashboard: 'Dashboard',
+    labelFullName: 'Nama Lengkap',
+    placeholderFullName: 'Nama lengkap Anda',
+    labelNick: 'Nama Panggilan',
+    placeholderNick: 'Nama panggilan',
+    labelRole: 'Role',
+    roleTeacher: 'Guru / Pengajar',
+    labelLanguage: 'Bahasa Aplikasi',
+    languageNote: 'Pilihan bahasa akan disimpan untuk sesi berikutnya.',
+    btnCancel: 'Batal',
+    btnSave: '💾 Simpan Perubahan',
+    btnSaving: '💾 Menyimpan...',
+    cameraHint: 'Klik icon kamera untuk mengubah foto',
+    loadingProfile: 'Memuat profil...',
+    alertNameRequired: 'Nama harus diisi!',
+    alertProfileUpdated: 'Profil berhasil diperbarui!',
+    alertProfileFailed: 'Gagal memperbarui profil',
+    alertFileType: 'File harus berupa gambar!',
+    alertFileSize: 'Ukuran file maksimal 2MB!',
+    alertAvatarSuccess: 'Foto profil berhasil diperbarui!',
+    alertAvatarFailed: 'Gagal mengupload foto profil',
+    deleteModalTitle: 'Hapus Akun?',
+    deleteModalDesc: 'Tindakan ini tidak dapat dibatalkan. Semua data Anda akan dihapus permanen, termasuk:',
+    deleteModalList1: 'Profil dan foto profil',
+    deleteModalList2: 'Data akun guru',
+    deleteModalPrompt: 'Ketik kata kunci untuk konfirmasi:',
+    deleteConfirmKeyword: 'HAPUS AKUN',
+    deleteModalPlaceholder: 'Ketik HAPUS AKUN',
+    deleteModalCancel: 'Batal',
+    deleteModalDelete: '🗑️ Hapus Akun',
+    deleteModalDeleting: '🗑️ Menghapus...',
+    deleteConfirmReminder: 'Ketik "HAPUS AKUN" untuk mengkonfirmasi penghapusan.',
+    warningTitle: 'Peringatan',
+    warningDesc: 'Menghapus akun akan menghapus semua data Anda secara permanen termasuk profil dan data akun. Tindakan ini tidak dapat dibatalkan.',
+    btnDeleteAccount: 'Hapus Akun Saya',
+    logoutTitle: 'Logout?',
+    logoutDesc: 'Apakah Anda yakin ingin keluar?',
+    logoutCancel: '❌ Tidak',
+    logoutConfirm: '✅ Ya, Logout',
+    fileDeleteError: 'Gagal menghapus akun',
+  },
+  en: {
+    title: 'My Profile',
+    subtitle: 'Manage your personal information',
+    navDashboard: 'Dashboard',
+    labelFullName: 'Full Name',
+    placeholderFullName: 'Your full name',
+    labelNick: 'Nickname',
+    placeholderNick: 'Preferred name',
+    labelRole: 'Role',
+    roleTeacher: 'Teacher / Instructor',
+    labelLanguage: 'Application Language',
+    languageNote: 'Language selection will be saved for your next sessions.',
+    btnCancel: 'Cancel',
+    btnSave: '💾 Save Changes',
+    btnSaving: '💾 Saving...',
+    cameraHint: 'Click the camera icon to change photo',
+    loadingProfile: 'Loading profile...',
+    alertNameRequired: 'Name is required!',
+    alertProfileUpdated: 'Profile updated successfully!',
+    alertProfileFailed: 'Failed to update profile',
+    alertFileType: 'File must be an image!',
+    alertFileSize: 'Maximum file size is 2MB!',
+    alertAvatarSuccess: 'Profile photo updated successfully!',
+    alertAvatarFailed: 'Failed to upload profile photo',
+    deleteModalTitle: 'Delete Account?',
+    deleteModalDesc: 'This action cannot be undone. All your data will be permanently deleted, including:',
+    deleteModalList1: 'Profile and avatar',
+    deleteModalList2: 'Teacher account data',
+    deleteModalPrompt: 'Type the keyword to confirm:',
+    deleteConfirmKeyword: 'DELETE ACCOUNT',
+    deleteModalPlaceholder: 'Type DELETE ACCOUNT',
+    deleteModalCancel: 'Cancel',
+    deleteModalDelete: '🗑️ Delete Account',
+    deleteModalDeleting: '🗑️ Deleting...',
+    deleteConfirmReminder: 'Type "DELETE ACCOUNT" to confirm deletion.',
+    warningTitle: 'Warning',
+    warningDesc: 'Deleting your account will permanently remove all data including profile and account data. This action cannot be undone.',
+    btnDeleteAccount: 'Delete My Account',
+    logoutTitle: 'Logout?',
+    logoutDesc: 'Are you sure you want to logout?',
+    logoutCancel: '❌ No',
+    logoutConfirm: '✅ Yes, Logout',
+    fileDeleteError: 'Failed to delete account',
+  }
+}
+
 export default function GuruProfilePage() {
   const { theme } = useTheme()
   const { language, setLanguage } = useLanguage()
+  const t = (key: keyof typeof translations['id']) => translations[language][key]
   const [userName, setUserName] = useState('Guru')
   const [userId, setUserId] = useState('')
   const [profile, setProfile] = useState({
@@ -67,7 +159,7 @@ export default function GuruProfilePage() {
 
   const handleSaveProfile = async () => {
     if (!profile.name.trim()) {
-      showAlert('Nama harus diisi!', 'error')
+      showAlert(t('alertNameRequired'), 'error')
       return
     }
 
@@ -86,10 +178,10 @@ export default function GuruProfilePage() {
       if (error) throw error
 
       setUserName(profile.full_name || profile.name)
-      showAlert('Profil berhasil diperbarui!', 'success')
+      showAlert(t('alertProfileUpdated'), 'success')
     } catch (error: any) {
       console.error('Error saving profile:', error)
-      showAlert('Gagal memperbarui profil', 'error')
+      showAlert(t('alertProfileFailed'), 'error')
     } finally {
       setSaving(false)
     }
@@ -101,13 +193,13 @@ export default function GuruProfilePage() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      showAlert('File harus berupa gambar!', 'error')
+      showAlert(t('alertFileType'), 'error')
       return
     }
 
     // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      showAlert('Ukuran file maksimal 2MB!', 'error')
+      showAlert(t('alertFileSize'), 'error')
       return
     }
 
@@ -140,10 +232,10 @@ export default function GuruProfilePage() {
       if (updateError) throw updateError
 
       setProfile({ ...profile, avatar_url: urlData.publicUrl })
-      showAlert('Foto profil berhasil diperbarui!', 'success')
+      showAlert(t('alertAvatarSuccess'), 'success')
     } catch (error: any) {
       console.error('Error uploading avatar:', error)
-      showAlert('Gagal mengupload foto profil', 'error')
+      showAlert(t('alertAvatarFailed'), 'error')
     } finally {
       setUploading(false)
     }
@@ -166,8 +258,9 @@ export default function GuruProfilePage() {
   }
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== 'HAPUS AKUN') {
-      showAlert('Ketik "HAPUS AKUN" untuk mengkonfirmasi penghapusan.', 'error')
+    const isValidKeyword = [translations.id.deleteConfirmKeyword, translations.en.deleteConfirmKeyword].includes(deleteConfirmText.trim())
+    if (!isValidKeyword) {
+      showAlert(t('deleteConfirmReminder'), 'error')
       return
     }
 
@@ -182,7 +275,7 @@ export default function GuruProfilePage() {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || 'Gagal menghapus akun')
+        throw new Error(data.error || t('fileDeleteError'))
       }
 
       // Sign out and redirect
@@ -191,7 +284,7 @@ export default function GuruProfilePage() {
       window.location.replace('/login')
     } catch (error: any) {
       console.error('Error deleting account:', error)
-      showAlert(error.message || 'Gagal menghapus akun', 'error')
+      showAlert(error.message || t('fileDeleteError'), 'error')
     } finally {
       setDeleting(false)
     }
@@ -200,7 +293,7 @@ export default function GuruProfilePage() {
   if (loading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-slate-900' : 'bg-gray-50'}`}>
-        <div className={`text-xl ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Memuat profil...</div>
+        <div className={`text-xl ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{t('loadingProfile')}</div>
       </div>
     )
   }
@@ -214,30 +307,32 @@ export default function GuruProfilePage() {
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-red-100'}`}>
             <div className="text-center">
               <div className="text-6xl mb-4">⚠️</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Hapus Akun?</h3>
-              <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Tindakan ini tidak dapat dibatalkan. Semua data Anda akan dihapus permanen, termasuk:</p>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{t('deleteModalTitle')}</h3>
+              <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{t('deleteModalDesc')}</p>
               <ul className={`text-sm mb-4 text-left list-disc list-inside ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                <li>Profil dan foto profil</li>
-                <li>Data akun guru</li>
+                <li>{t('deleteModalList1')}</li>
+                <li>{t('deleteModalList2')}</li>
               </ul>
-              <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Ketik <strong className="text-red-500">HAPUS AKUN</strong> untuk mengkonfirmasi:</p>
+              <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+                {t('deleteModalPrompt')} <strong className="text-red-500">{t('deleteConfirmKeyword')}</strong>
+              </p>
               <input
                 type="text"
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder="Ketik HAPUS AKUN"
+                placeholder={t('deleteModalPlaceholder')}
                 className={`w-full px-4 py-3 border rounded-xl mb-6 text-center font-mono focus:ring-2 focus:ring-red-500 focus:border-transparent ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400' : 'bg-white border-red-200 text-slate-800 placeholder-slate-400'}`}
               />
               <div className="flex gap-4 justify-center">
                 <button onClick={() => { setShowDeleteModal(false); setDeleteConfirmText('') }} className={`px-6 py-3 rounded-xl font-semibold transition-all ${theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-slate-800'}`}>
-                  Batal
+                  {t('deleteModalCancel')}
                 </button>
                 <button
                   onClick={handleDeleteAccount}
-                  disabled={deleting || deleteConfirmText !== 'HAPUS AKUN'}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all ${deleting || deleteConfirmText !== 'HAPUS AKUN' ? 'bg-red-300 text-white cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/30'}`}
+                  disabled={deleting || ![translations.id.deleteConfirmKeyword, translations.en.deleteConfirmKeyword].includes(deleteConfirmText.trim())}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all ${deleting || ![translations.id.deleteConfirmKeyword, translations.en.deleteConfirmKeyword].includes(deleteConfirmText.trim()) ? 'bg-red-300 text-white cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/30'}`}
                 >
-                  {deleting ? '🗑️ Menghapus...' : '🗑️ Hapus Akun'}
+                  {deleting ? t('deleteModalDeleting') : t('deleteModalDelete')}
                 </button>
               </div>
             </div>
@@ -252,14 +347,14 @@ export default function GuruProfilePage() {
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-center">
               <div className="text-6xl mb-4">🚪</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Logout?</h3>
-              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Apakah Anda yakin ingin keluar?</p>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{t('logoutTitle')}</h3>
+              <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{t('logoutDesc')}</p>
               <div className="flex gap-4 justify-center">
                 <button onClick={() => setShowLogoutModal(false)} className="px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white rounded-xl font-semibold transition-all">
-                  ❌ Tidak
+                  {t('logoutCancel')}
                 </button>
                 <button onClick={handleLogout} className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all shadow-lg">
-                  ✅ Ya, Logout
+                  {t('logoutConfirm')}
                 </button>
               </div>
             </div>
@@ -295,14 +390,14 @@ export default function GuruProfilePage() {
                 <span className="text-2xl">👤</span>
               </div>
               <div>
-                <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Profil Saya</h1>
-                <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Kelola informasi pribadi Anda</p>
+                <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{t('title')}</h1>
+                <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{t('subtitle')}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
               <Link href="/guru/dashboard" className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-purple-50 hover:bg-purple-100 text-purple-700'}`}>
-                📊 Dashboard
+                📊 {t('navDashboard')}
               </Link>
               <button onClick={() => setShowLogoutModal(true)} className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all" title="Logout">
                 🚪
@@ -340,31 +435,31 @@ export default function GuruProfilePage() {
                 className="hidden"
               />
             </div>
-            <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Klik icon kamera untuk mengubah foto</p>
+            <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{t('cameraHint')}</p>
           </div>
 
           {/* Form */}
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>Nama Lengkap <span className="text-red-500">*</span></label>
+                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>{t('labelFullName')} <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={profile.full_name}
                   onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
                   className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400' : 'bg-white border-purple-200 text-slate-800 placeholder-slate-400'}`}
-                  placeholder="Nama lengkap Anda"
+                  placeholder={t('placeholderFullName')}
                 />
               </div>
 
               <div>
-                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>Nama Panggilan <span className="text-red-500">*</span></label>
+                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>{t('labelNick')} <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={profile.name}
                   onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                   className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400' : 'bg-white border-purple-200 text-slate-800 placeholder-slate-400'}`}
-                  placeholder="Nama panggilan"
+                  placeholder={t('placeholderNick')}
                 />
               </div>
             </div>
@@ -381,10 +476,10 @@ export default function GuruProfilePage() {
               </div>
 
               <div>
-                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>Role</label>
+                <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>{t('labelRole')}</label>
                 <input
                   type="text"
-                  value="Guru / Pengajar"
+                  value={t('roleTeacher')}
                   disabled
                   className={`w-full px-4 py-3 border rounded-xl cursor-not-allowed ${theme === 'dark' ? 'bg-slate-700/50 border-slate-600 text-slate-400' : 'bg-gray-100 border-purple-200 text-slate-500'}`}
                 />
@@ -394,7 +489,7 @@ export default function GuruProfilePage() {
             {/* Language Settings */}
             <div>
               <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                {language === 'id' ? 'Bahasa Aplikasi' : 'Application Language'}
+                {t('labelLanguage')}
               </label>
               <select
                 value={language}
@@ -405,9 +500,7 @@ export default function GuruProfilePage() {
                 <option value="en">English</option>
               </select>
               <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                {language === 'id'
-                  ? 'Pilihan bahasa akan disimpan untuk sesi berikutnya.'
-                  : 'Language selection will be saved for your next sessions.'}
+                {t('languageNote')}
               </p>
             </div>
 
@@ -417,7 +510,7 @@ export default function GuruProfilePage() {
                 href="/guru/dashboard"
                 className={`px-6 py-3 rounded-xl font-semibold transition-all ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-slate-700'}`}
               >
-                Batal
+                {t('btnCancel')}
               </Link>
               <button
                 onClick={handleSaveProfile}
@@ -428,7 +521,7 @@ export default function GuruProfilePage() {
                     : 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg'
                 }`}
               >
-                {saving ? '💾 Menyimpan...' : '💾 Simpan Perubahan'}
+                {saving ? t('btnSaving') : t('btnSave')}
               </button>
             </div>
           </div>
@@ -436,15 +529,15 @@ export default function GuruProfilePage() {
 
         {/* Delete Account Section */}
         <div className={`mt-6 rounded-2xl p-8 border shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-red-900/50' : 'bg-white border-red-200'}`}>
-          <h3 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>⚠️ Warning</h3>
+          <h3 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>⚠️ {t('warningTitle')}</h3>
           <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-            Menghapus akun akan menghapus semua data Anda secara permanen termasuk profil dan data akun. Tindakan ini tidak dapat dibatalkan.
+            {t('warningDesc')}
           </p>
           <button
             onClick={() => setShowDeleteModal(true)}
             className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-red-500/30"
           >
-            🗑️ Hapus Akun Saya
+            🗑️ {t('btnDeleteAccount')}
           </button>
         </div>
       </main>
