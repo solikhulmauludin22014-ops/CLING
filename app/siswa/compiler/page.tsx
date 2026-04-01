@@ -812,7 +812,7 @@ print(f"Average: {result_avg}")
                 href="/siswa/leaderboard"
                 className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'}`}
               >
-                🏆 Leaderboard
+                🏆 {tr('Peringkat', 'Leaderboard')}
               </a>
 
               <button
