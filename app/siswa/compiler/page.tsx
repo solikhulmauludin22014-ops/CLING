@@ -912,7 +912,7 @@ print(f"Average: {result_avg}")
                       <pre className="whitespace-pre-wrap text-green-400">{output}</pre>
                     ) : (
                       <div className="text-slate-400 flex items-center gap-2">
-                        <span>🚀</span> Klik "Run" untuk menjalankan kode
+                        <span>🚀</span> {tr('Klik "Run" untuk menjalankan kode', 'Click "Run" to execute code')}
                       </div>
                     )}
                   </div>
@@ -958,7 +958,7 @@ print(f"Average: {result_avg}")
                           <div className={`rounded-xl p-4 ${theme === 'dark' ? 'bg-slate-800/50' : 'bg-yellow-50 border border-yellow-200'}`}>
                             <h4 className={`font-semibold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-700'}`}>
                               💡 Saran Perbaikan:
-                              <span className={`text-xs font-normal ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>(scroll untuk melihat semua)</span>
+                              <span className={`text-xs font-normal ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('(scroll untuk melihat semua)', '(scroll to view all)')}</span>
                             </h4>
                             <div className="max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
                               <ul className={`space-y-2 text-sm ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
@@ -998,7 +998,7 @@ print(f"Average: {result_avg}")
                     ) : (
                       <div className="flex flex-col items-center justify-center py-12 text-slate-400">
                         <span className="text-6xl mb-4">📊</span>
-                        <p>Klik "Analyze" untuk mendapatkan skor clean code</p>
+                        <p>{tr('Klik "Analyze" untuk mendapatkan skor clean code', 'Click "Analyze" to get your clean code score')}</p>
                       </div>
                     )}
                   </div>
@@ -1021,13 +1021,13 @@ print(f"Average: {result_avg}")
               <div className={`rounded-2xl border p-6 shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className={`text-lg font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                    📈 Progress Terbaru
+                    📈 {tr('Progress Terbaru', 'Latest Progress')}
                   </h3>
                   <button
                     onClick={() => setShowHistoryModal(true)}
                     className="text-xs text-purple-600 hover:text-purple-700 transition-colors"
                   >
-                    Lihat Semua →
+                    {tr('Lihat Semua', 'View All')} →
                   </button>
                 </div>
                 
@@ -1059,11 +1059,11 @@ print(f"Average: {result_avg}")
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-2 text-center">
                   <div className={`rounded-lg p-2 ${theme === 'dark' ? 'bg-slate-700' : 'bg-purple-50'}`}>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Rata-rata</p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Rata-rata', 'Average')}</p>
                     <p className="text-lg font-bold text-purple-600">{getHistoryStats().avg.toFixed(1)}</p>
                   </div>
                   <div className={`rounded-lg p-2 ${theme === 'dark' ? 'bg-slate-700' : 'bg-green-50'}`}>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Tertinggi</p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('Tertinggi', 'Highest')}</p>
                     <p className="text-lg font-bold text-green-600">{getHistoryStats().highest.toFixed(1)}</p>
                   </div>
                 </div>
@@ -1073,12 +1073,12 @@ print(f"Average: {result_avg}")
             {/* Quick Stats */}
             <div className={`rounded-2xl border p-6 shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
               <h3 className={`text-lg font-bold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                🎯 Target Hari Ini
+                🎯 {tr('Target Hari Ini', 'Today\'s Target')}
               </h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className={theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}>Skor Minimum</span>
+                    <span className={theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}>{tr('Skor Minimum', 'Minimum Score')}</span>
                     <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>7/10</span>
                   </div>
                   <div className={`h-2 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-slate-700' : 'bg-purple-100'}`}>
@@ -1086,7 +1086,7 @@ print(f"Average: {result_avg}")
                   </div>
                 </div>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
-                  💪 Raih skor 8.1+ untuk mendapatkan kategori Sangat Terampil!
+                  💪 {tr('Raih skor 8.1+ untuk mendapatkan kategori Sangat Terampil!', 'Reach 8.1+ to achieve the Highly Skilled category!')}
                 </p>
               </div>
             </div>
@@ -1094,32 +1094,32 @@ print(f"Average: {result_avg}")
             {/* Tips Card */}
             <div className={`rounded-2xl border p-6 shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
               <h3 className={`text-lg font-bold mb-4 flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                📚 Tips Clean Code
+                📚 {tr('Tips Clean Code', 'Clean Code Tips')}
               </h3>
               <ul className="space-y-3 text-sm">
                 <li className={`flex items-start gap-3 transition-colors ${theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-800'}`}>
                   <span className="text-green-500 text-lg">✓</span>
-                  <span>Gunakan nama variabel yang deskriptif</span>
+                  <span>{tr('Gunakan nama variabel yang deskriptif', 'Use descriptive variable names')}</span>
                 </li>
                 <li className={`flex items-start gap-3 transition-colors ${theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-800'}`}>
                   <span className="text-green-500 text-lg">✓</span>
-                  <span>Fungsi harus kecil dan fokus</span>
+                  <span>{tr('Fungsi harus kecil dan fokus', 'Functions should be small and focused')}</span>
                 </li>
                 <li className={`flex items-start gap-3 transition-colors ${theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-800'}`}>
                   <span className="text-green-500 text-lg">✓</span>
-                  <span>Ikuti PEP 8 style guide</span>
+                  <span>{tr('Ikuti PEP 8 style guide', 'Follow the PEP 8 style guide')}</span>
                 </li>
                 <li className={`flex items-start gap-3 transition-colors ${theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-800'}`}>
                   <span className="text-green-500 text-lg">✓</span>
-                  <span>Tambahkan docstring pada fungsi</span>
+                  <span>{tr('Tambahkan docstring pada fungsi', 'Add docstrings to functions')}</span>
                 </li>
                 <li className={`flex items-start gap-3 transition-colors ${theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-800'}`}>
                   <span className="text-green-500 text-lg">✓</span>
-                  <span>Hindari duplikasi kode</span>
+                  <span>{tr('Hindari duplikasi kode', 'Avoid code duplication')}</span>
                 </li>
                 <li className={`flex items-start gap-3 transition-colors ${theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-800'}`}>
                   <span className="text-green-500 text-lg">✓</span>
-                  <span>Max 79 karakter per baris</span>
+                  <span>{tr('Max 79 karakter per baris', 'Max 79 characters per line')}</span>
                 </li>
               </ul>
             </div>
