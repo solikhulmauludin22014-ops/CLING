@@ -14,6 +14,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showVisualFallback, setShowVisualFallback] = useState(false)
+  const loginVisualSrc = '/images/login-coding.gif'
 
   // Forgot password states
   const [showForgotPassword, setShowForgotPassword] = useState(false)
@@ -101,9 +103,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-300 ${
+    <div className={`min-h-screen relative overflow-hidden flex items-center justify-center px-4 py-10 transition-colors duration-300 ${
       theme === 'dark' ? 'bg-slate-900' : 'bg-purple-50'
     }`}>
+      <div className="pointer-events-none absolute inset-0">
+        <div className={`absolute -top-20 -left-24 w-72 h-72 rounded-full blur-3xl opacity-60 animate-pulse ${theme === 'dark' ? 'bg-purple-900/50' : 'bg-purple-200'}`}></div>
+        <div className={`absolute -bottom-20 -right-16 w-80 h-80 rounded-full blur-3xl opacity-60 animate-pulse ${theme === 'dark' ? 'bg-fuchsia-900/40' : 'bg-fuchsia-200'}`} style={{ animationDelay: '0.8s' }}></div>
+        <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.08),transparent_60%)]' : 'bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.12),transparent_65%)]'}`}></div>
+      </div>
+
       {/* Theme Toggle */}
       <button
         onClick={toggleTheme}
@@ -125,7 +133,9 @@ export default function LoginPage() {
         )}
       </button>
 
-      <div className="max-w-md w-full">
+      <div className="w-full max-w-6xl relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.02fr] gap-8 lg:gap-10 items-center">
+        <div className="w-full max-w-md lg:max-w-xl mx-auto login-panel">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
@@ -148,10 +158,10 @@ export default function LoginPage() {
             </div>
             <div className="mt-4">
               <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-purple-700'}`}>
-                Clean Code Analyzer
+                CLING
               </h1>
               <p className={theme === 'dark' ? 'text-purple-300' : 'text-purple-500'}>
-                Python • PEP 8 • Pylint
+                Clean Learning Integrated Gateway (Online Compiler Python)
               </p>
             </div>
           </Link>
@@ -294,6 +304,52 @@ export default function LoginPage() {
           >
             {tr('← Kembali ke Beranda', '← Back to Home')}
           </Link>
+        </div>
+
+        </div>
+
+        <div className="w-full max-w-xl lg:max-w-none mx-auto visual-panel">
+          <div
+            className={`relative overflow-hidden rounded-3xl border shadow-2xl h-[320px] sm:h-[380px] lg:h-[640px] ${
+              theme === 'dark'
+                ? 'bg-slate-800 border-purple-700/40 shadow-purple-900/40'
+                : 'bg-white border-purple-200 shadow-purple-200/70'
+            }`}
+          >
+            <div className={`absolute inset-0 pointer-events-none ${theme === 'dark' ? 'bg-gradient-to-br from-purple-500/20 via-transparent to-fuchsia-500/20' : 'bg-gradient-to-br from-purple-100/60 via-transparent to-fuchsia-100/70'}`}></div>
+            <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full text-xs font-semibold bg-purple-600 text-white tracking-wide">
+              LIVE
+            </div>
+
+            {showVisualFallback ? (
+              <div className={`h-full w-full flex flex-col items-center justify-center gap-3 ${theme === 'dark' ? 'text-purple-200' : 'text-purple-700'}`}>
+                <div className="text-5xl">🎮</div>
+                <p className="text-lg font-bold">{tr('Visual Coding Aktif', 'Coding Visual Active')}</p>
+                <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
+                  {tr('Tambahkan file GIF ke public/images/login-coding.gif', 'Add GIF file to public/images/login-coding.gif')}
+                </p>
+              </div>
+            ) : (
+              <img
+                src={loginVisualSrc}
+                alt={tr('Animasi suasana coding', 'Coding atmosphere animation')}
+                className="h-full w-full object-cover object-center"
+                onError={() => setShowVisualFallback(true)}
+              />
+            )}
+
+            <div className="absolute inset-0 pointer-events-none login-scanlines"></div>
+            <div className="absolute inset-x-4 bottom-4 z-20">
+              <div className={`rounded-2xl px-4 py-3 border backdrop-blur-md ${theme === 'dark' ? 'bg-slate-900/55 border-purple-500/35 text-purple-100' : 'bg-white/75 border-purple-300/70 text-purple-700'}`}>
+                <p className="text-sm font-semibold">{tr('Ruang Fokus Coding', 'Coding Focus Zone')}</p>
+                <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-purple-200/90' : 'text-purple-600'}`}>
+                  {tr('Masuk dan lanjutkan progress Python kamu hari ini.', 'Sign in and continue your Python progress today.')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         </div>
       </div>
 
@@ -459,6 +515,73 @@ export default function LoginPage() {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .login-panel {
+          animation: panelEnter 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .visual-panel {
+          animation: panelEnter 780ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          animation-delay: 120ms;
+        }
+
+        .visual-panel > div {
+          animation: visualFloat 6s ease-in-out infinite;
+        }
+
+        .login-scanlines {
+          background-image: repeating-linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.06),
+            rgba(255, 255, 255, 0.06) 1px,
+            transparent 1px,
+            transparent 4px
+          );
+          mix-blend-mode: soft-light;
+          animation: scanPulse 3.8s ease-in-out infinite;
+        }
+
+        @keyframes panelEnter {
+          from {
+            opacity: 0;
+            transform: translateY(18px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes visualFloat {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+
+        @keyframes scanPulse {
+          0%,
+          100% {
+            opacity: 0.28;
+          }
+          50% {
+            opacity: 0.45;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .login-panel,
+          .visual-panel,
+          .visual-panel > div,
+          .login-scanlines {
+            animation: none !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
