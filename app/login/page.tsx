@@ -14,8 +14,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const primaryLoginVisualSrc = '/images/login-user.gif'
+  const fallbackLoginVisualSrc = '/images/login-coding.gif'
+  const [activeVisualSrc, setActiveVisualSrc] = useState(primaryLoginVisualSrc)
   const [showVisualFallback, setShowVisualFallback] = useState(false)
-  const loginVisualSrc = '/images/login-coding.gif'
 
   // Forgot password states
   const [showForgotPassword, setShowForgotPassword] = useState(false)
@@ -326,15 +328,21 @@ export default function LoginPage() {
                 <div className="text-5xl">🎮</div>
                 <p className="text-lg font-bold">{tr('Visual Coding Aktif', 'Coding Visual Active')}</p>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
-                  {tr('Tambahkan file GIF ke public/images/login-coding.gif', 'Add GIF file to public/images/login-coding.gif')}
+                  {tr('Tambahkan file GIF ke public/images/login-user.gif', 'Add GIF file to public/images/login-user.gif')}
                 </p>
               </div>
             ) : (
               <img
-                src={loginVisualSrc}
+                src={activeVisualSrc}
                 alt={tr('Animasi suasana coding', 'Coding atmosphere animation')}
                 className="h-full w-full object-cover object-center"
-                onError={() => setShowVisualFallback(true)}
+                onError={() => {
+                  if (activeVisualSrc !== fallbackLoginVisualSrc) {
+                    setActiveVisualSrc(fallbackLoginVisualSrc)
+                    return
+                  }
+                  setShowVisualFallback(true)
+                }}
               />
             )}
 
