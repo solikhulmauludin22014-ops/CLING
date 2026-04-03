@@ -121,6 +121,9 @@ export default function SiswaProfilePage() {
   const { language, setLanguage } = useLanguage()
 
   const t = (key: keyof typeof translations['id']) => translations[language][key]
+  const navMenuLabel = language === 'id' ? 'Menu Navigasi' : 'Navigation Menu'
+  const navToggleLabel = language === 'id' ? 'Buka menu navigasi' : 'Toggle navigation menu'
+  const navCloseLabel = language === 'id' ? 'Tutup menu navigasi' : 'Close navigation menu'
   const [userName, setUserName] = useState('Siswa')
   const [userId, setUserId] = useState('')
   const [profile, setProfile] = useState({
@@ -136,6 +139,7 @@ export default function SiswaProfilePage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [showNavMenu, setShowNavMenu] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -211,47 +215,107 @@ export default function SiswaProfilePage() {
       setSaving(false)
     }
   }
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setShowNavMenu((prev) => !prev)}
+                className={`p-2 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 ${
+                  showNavMenu ? 'rotate-90' : 'rotate-0'
+                } ${theme === 'dark' ? 'bg-emerald-900/85 hover:bg-emerald-800 text-emerald-200 border border-emerald-400/40' : 'bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-500'}`}
+                aria-label={navToggleLabel}
+              >
+                {showNavMenu ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      showAlert(t('alertFileType'), 'error')
-      return
-    }
-
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      showAlert(t('alertFileSize'), 'error')
-      return
-    }
-
-    setUploading(true)
-    try {
-      const supabase = createClient()
-      
-      // Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${userId}-${Date.now()}.${fileExt}`
-      const filePath = `avatars/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file)
-
-      if (uploadError) throw uploadError
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath)
-
-      // Update profile
-      const { error: updateError } = await supabase
+              <div className="bg-purple-600 p-3 rounded-xl shadow-lg">
+                <span className="text-2xl">👤</span>
+              </div>
+              <div>
+                <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{t('title')}</h1>
+                <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{t('subtitle')}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+            </div>
+          </div>
         .from('profiles')
         .update({ avatar_url: urlData.publicUrl })
+
+      {showNavMenu && (
+        <button
+          onClick={() => setShowNavMenu(false)}
+          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
+          aria-label={navCloseLabel}
+        />
+      )}
+
+      <aside
+        className={`fixed left-0 top-0 z-40 h-screen w-72 max-w-[88vw] pt-24 px-4 pb-4 border-r shadow-xl transition-all duration-300 transform ${
+          showNavMenu ? 'translate-x-0 opacity-100' : '-translate-x-[120%] opacity-0 pointer-events-none'
+        } ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}
+      >
+        <div className={`h-full rounded-2xl border p-3 overflow-y-auto ${theme === 'dark' ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-purple-100'}`}>
+          <div className="space-y-2">
+            <p className={`text-xs font-semibold uppercase tracking-wide px-2 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
+              {navMenuLabel}
+            </p>
+
+            <Link
+              href="/siswa/compiler"
+              className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-200 border border-emerald-500/30' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700'}`}
+            >
+              💻 {t('navCompiler')}
+            </Link>
+
+            <Link
+              href="/siswa/materi"
+              className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
+            >
+              📚 {t('navMaterials')}
+            </Link>
+
+            <Link
+              href="/siswa/leaderboard"
+              className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'}`}
+            >
+              🏆 {t('navLeaderboard')}
+            </Link>
+
+            <Link
+              href="/siswa/profile"
+              className={`flex items-center justify-between gap-3 px-4 py-2 rounded-xl transition-all cursor-pointer ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
+            >
+              <div>
+                <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
+                <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
+                  {profile.role === 'guru' ? t('roleTeacher') : t('roleStudent')}
+                </p>
+              </div>
+              <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+            </Link>
+
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300 text-left"
+            >
+              🚪 Logout
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <div className={`transition-all duration-300 ${showNavMenu ? 'lg:ml-72' : 'lg:ml-0'}`}>
         .eq('id', userId)
 
       if (updateError) throw updateError
@@ -612,6 +676,7 @@ export default function SiswaProfilePage() {
           </button>
         </div>
       </main>
+      </div>
     </div>
   )
 }
