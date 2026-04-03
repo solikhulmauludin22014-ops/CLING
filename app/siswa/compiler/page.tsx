@@ -1124,10 +1124,10 @@ print(f"Average: {result_avg}")
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className={theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}>{tr('Skor Minimum', 'Minimum Score')}</span>
-                    <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>7/10</span>
+                    <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>6.1/10</span>
                   </div>
                   <div className={`h-2 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-slate-700' : 'bg-purple-100'}`}>
-                    <div className="h-full bg-purple-600 rounded-full" style={{ width: '70%' }}></div>
+                    <div className="h-full bg-purple-600 rounded-full" style={{ width: '61%' }}></div>
                   </div>
                 </div>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
