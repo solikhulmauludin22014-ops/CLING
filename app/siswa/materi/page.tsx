@@ -163,19 +163,24 @@ export default function SiswaMateriPage() {
       {/* Navbar */}
       <nav className={`relative border-b ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100 shadow-sm'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <button
-                onClick={() => {
-                  if (window.history.length > 1) {
-                    window.history.back()
-                    return
-                  }
-                  window.location.href = '/siswa/compiler'
-                }}
-                className={`px-3 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+                onClick={() => setShowNavMenu((prev) => !prev)}
+                className={`p-2 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 ${
+                  showNavMenu ? 'rotate-90' : 'rotate-0'
+                } ${theme === 'dark' ? 'bg-emerald-900/85 hover:bg-emerald-800 text-emerald-200 border border-emerald-400/40' : 'bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-500'}`}
+                aria-label={tr('Buka menu navigasi', 'Toggle navigation menu')}
               >
-                ← {tr('Kembali', 'Back')}
+                {showNavMenu ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
               </button>
 
               <div className="bg-purple-600 p-3 rounded-xl shadow-lg">
@@ -186,141 +191,135 @@ export default function SiswaMateriPage() {
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>C3-Py Clean Code Analyzer</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <ThemeToggle />
-              <Link
-                href="/siswa/compiler"
-                className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
-              >
-                💻 {tr('Compiler', 'Compiler')}
-              </Link>
-              <Link
-                href="/siswa/leaderboard"
-                className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-600 rounded-xl font-medium transition-all flex items-center gap-2 border border-amber-500/30"
-              >
-                🏆 {tr('Leaderboard', 'Leaderboard')}
-              </Link>
-              <Link href="/siswa/profile" className={`flex items-center gap-3 px-4 py-2 rounded-xl ${theme === 'dark' ? 'bg-slate-700 text-white' : 'bg-purple-100 text-purple-700'}`}>
-                <span className="text-2xl">👨‍🎓</span>
-                <span className="font-medium">{userName}</span>
-              </Link>
-              <button
-                onClick={() => setShowLogoutModal(true)}
-                className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-xl transition-all"
-                title="Logout"
-              >
-                🚪
-              </button>
             </div>
           </div>
         </div>
       </nav>
 
+      {showNavMenu && (
+        <button
+          onClick={() => setShowNavMenu(false)}
+          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
+          aria-label={tr('Tutup menu navigasi', 'Close navigation menu')}
+        />
+      )}
+
+      <aside
+        className={`fixed left-0 top-0 z-40 h-screen w-72 max-w-[88vw] pt-24 px-4 pb-4 border-r shadow-xl transition-all duration-300 transform ${
+          showNavMenu ? 'translate-x-0 opacity-100' : '-translate-x-[120%] opacity-0 pointer-events-none'
+        } ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}
+      >
+        <div className={`h-full rounded-2xl border p-3 overflow-y-auto ${theme === 'dark' ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-purple-100'}`}>
+          <div className="space-y-2">
+            <p className={`text-xs font-semibold uppercase tracking-wide px-2 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
+              {tr('Menu Navigasi', 'Navigation Menu')}
+            </p>
+
+            <Link
+              href="/siswa/compiler"
+              className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-200 border border-emerald-500/30' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700'}`}
+            >
+              💻 {tr('Compiler', 'Compiler')}
+            </Link>
+
+            <Link
+              href="/siswa/materi"
+              className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
+            >
+              📚 {tr('Materi', 'Materials')}
+            </Link>
+
+            <Link
+              href="/siswa/leaderboard"
+              className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'}`}
+            >
+              🏆 {tr('Leaderboard', 'Leaderboard')}
+            </Link>
+
+            <Link
+              href="/siswa/profile"
+              className={`flex items-center justify-between gap-3 px-4 py-2 rounded-xl transition-all cursor-pointer ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
+            >
+              <div>
+                <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
+                <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Siswa', 'Student')}</p>
+              </div>
+              <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+            </Link>
+
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300 text-left"
+            >
+              🚪 {tr('Logout', 'Logout')}
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <div className={`transition-all duration-300 ${showNavMenu ? 'lg:ml-72' : 'lg:ml-0'}`}>
       {/* Main Content */}
       <main className="relative max-w-7xl mx-auto px-6 py-8">
         {/* Header & Search */}
         <div className="mb-8">
           <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>📖 {tr('Materi dari Guru', 'Materials from Teachers')}</h2>
           <p className={`mb-6 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Pelajari materi yang telah disiapkan oleh guru untuk meningkatkan kemampuan coding kamu', 'Study the materials prepared by teachers to improve your coding skills')}</p>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => setShowNavMenu((prev) => !prev)}
-                  className={`p-2 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 ${
-                    showNavMenu ? 'rotate-90' : 'rotate-0'
-                  } ${theme === 'dark' ? 'bg-emerald-900/85 hover:bg-emerald-800 text-emerald-200 border border-emerald-400/40' : 'bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-500'}`}
-                  aria-label={tr('Buka menu navigasi', 'Toggle navigation menu')}
-                >
-                  {showNavMenu ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  )}
-                </button>
-
-                <div className="bg-purple-600 p-3 rounded-xl shadow-lg">
-                  <span className="text-2xl">📚</span>
-                </div>
-                <div>
-                  <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Materi Pembelajaran', 'Learning Materials')}</h1>
-                  <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>C3-Py Clean Code Analyzer</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <ThemeToggle />
-              </div>
+          
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">🔍</span>
+              <input
+                type="text"
+                placeholder={tr('Cari materi...', 'Search materials...')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400' : 'bg-white border-purple-200 text-slate-800 placeholder-slate-500'}`}
+              />
             </div>
+            
+            {/* Category Filter */}
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className={`px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
+            >
+              <option value="all" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>{tr('Semua Kategori', 'All Categories')}</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat!} className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>{cat}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Materials Grid */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="text-6xl animate-bounce mb-4">📚</div>
+            <p className={`text-lg ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Memuat materi...', 'Loading materials...')}</p>
+          </div>
+        ) : filteredMaterials.length === 0 ? (
+          <div className={`flex flex-col items-center justify-center py-20 rounded-2xl border ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-purple-100'}`}>
+            <div className="text-6xl mb-4">📭</div>
+            <h3 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Belum Ada Materi', 'No Materials Yet')}</h3>
+            <p className={theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}>
+              {searchTerm || selectedCategory !== 'all' 
+                ? tr('Tidak ada materi yang cocok dengan pencarian Anda', 'No materials match your search') 
+                : tr('Guru belum mengupload materi pembelajaran', 'Teachers have not uploaded any materials yet')}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMaterials.map((material) => (
+              <div
+                key={material.id}
+                className={`rounded-2xl border overflow-hidden transition-all duration-300 group ${theme === 'dark' ? 'bg-slate-800 border-slate-700 hover:border-purple-500' : 'bg-white border-purple-100 hover:border-purple-400 shadow-sm'}`}
               >
                 {/* File Type Header */}
-
-        {showNavMenu && (
-          <button
-            onClick={() => setShowNavMenu(false)}
-            className="fixed inset-0 z-30 bg-black/30 lg:hidden"
-            aria-label={tr('Tutup menu navigasi', 'Close navigation menu')}
-          />
-        )}
-
-        <aside
-          className={`fixed left-0 top-0 z-40 h-screen w-72 max-w-[88vw] pt-24 px-4 pb-4 border-r shadow-xl transition-all duration-300 transform ${
-            showNavMenu ? 'translate-x-0 opacity-100' : '-translate-x-[120%] opacity-0 pointer-events-none'
-          } ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}
-        >
-          <div className={`h-full rounded-2xl border p-3 overflow-y-auto ${theme === 'dark' ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-purple-100'}`}>
-            <div className="space-y-2">
-              <p className={`text-xs font-semibold uppercase tracking-wide px-2 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
-                {tr('Menu Navigasi', 'Navigation Menu')}
-              </p>
-
-              <Link
-                href="/siswa/compiler"
-                className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-200 border border-emerald-500/30' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700'}`}
-              >
-                💻 {tr('Compiler', 'Compiler')}
-              </Link>
-
-              <Link
-                href="/siswa/materi"
-                className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
-              >
-                📚 {tr('Materi', 'Materials')}
-              </Link>
-
-              <Link
-                href="/siswa/leaderboard"
-                className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'}`}
-              >
-                🏆 {tr('Leaderboard', 'Leaderboard')}
-              </Link>
-
-              <Link
-                href="/siswa/profile"
-                className={`flex items-center justify-between gap-3 px-4 py-2 rounded-xl transition-all cursor-pointer ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
-              >
-                <div>
-                  <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
-                  <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Siswa', 'Student')}</p>
-                </div>
-                <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                  {userName.charAt(0).toUpperCase()}
-                </div>
-              </Link>
-
-              <button
-                onClick={() => setShowLogoutModal(true)}
-                className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300 text-left"
-              >
-                🚪 {tr('Logout', 'Logout')}
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        <div className={`transition-all duration-300 ${showNavMenu ? 'lg:ml-72' : 'lg:ml-0'}`}>
                 <div className={`bg-gradient-to-r ${getFileColor(material.file_type)} p-4`}>
                   <div className="flex items-center justify-between">
                     <span className="text-4xl">{getFileIcon(material.file_type)}</span>
