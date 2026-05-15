@@ -450,18 +450,6 @@ export default function GuruDashboard() {
       
       return matchesSearch && matchesKelas && matchesNIS
     })
-
-  const selectedStudents = students.filter((student) => selectedStudentIds.includes(student.id))
-  const allVisibleSelected =
-    filteredStudents.length > 0 &&
-    filteredStudents.every((student) => selectedStudentIds.includes(student.id))
-  const someVisibleSelected = filteredStudents.some((student) => selectedStudentIds.includes(student.id))
-
-  useEffect(() => {
-    if (selectAllRef.current) {
-      selectAllRef.current.indeterminate = !allVisibleSelected && someVisibleSelected
-    }
-  }, [allVisibleSelected, someVisibleSelected])
     .sort((a, b) => {
       switch (sortOrder) {
         case 'score-high':
@@ -476,6 +464,18 @@ export default function GuruDashboard() {
           return 0
       }
     })
+
+  const selectedStudents = students.filter((student) => selectedStudentIds.includes(student.id))
+  const allVisibleSelected =
+    filteredStudents.length > 0 &&
+    filteredStudents.every((student) => selectedStudentIds.includes(student.id))
+  const someVisibleSelected = filteredStudents.some((student) => selectedStudentIds.includes(student.id))
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = !allVisibleSelected && someVisibleSelected
+    }
+  }, [allVisibleSelected, someVisibleSelected])
 
   // Export to Excel function
   const downloadExcel = () => {
