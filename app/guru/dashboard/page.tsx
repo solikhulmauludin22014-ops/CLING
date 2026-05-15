@@ -75,11 +75,15 @@ export default function GuruDashboard() {
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const selectAllRef = useRef<HTMLInputElement>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [materialToDelete, setMaterialToDelete] = useState<Material | null>(null)
   const [showDeleteStudentModal, setShowDeleteStudentModal] = useState(false)
   const [studentToDelete, setStudentToDelete] = useState<StudentData | null>(null)
   const [deleteStudentLoading, setDeleteStudentLoading] = useState(false)
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false)
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedKelas, setSelectedKelas] = useState<string>('all')
@@ -133,6 +137,12 @@ export default function GuruDashboard() {
     
     loadUserAndData()
   }, [])
+
+  useEffect(() => {
+    setSelectedStudentIds((prev) =>
+      prev.filter((id) => students.some((student) => student.id === id))
+    )
+  }, [students])
 
   const loadStudentData = async () => {
     setLoading(true)
@@ -335,6 +345,91 @@ export default function GuruDashboard() {
     }
   }
 
+  const toggleStudentSelection = (studentId: string) => {
+    setSelectedStudentIds((prev) =>
+      prev.includes(studentId) ? prev.filter((id) => id !== studentId) : [...prev, studentId]
+    )
+  }
+
+  const toggleSelectAllVisible = () => {
+    if (filteredStudents.length === 0) return
+
+    const visibleIds = new Set(filteredStudents.map((student) => student.id))
+    const allSelected = filteredStudents.every((student) => selectedStudentIds.includes(student.id))
+
+    if (allSelected) {
+      setSelectedStudentIds((prev) => prev.filter((id) => !visibleIds.has(id)))
+      return
+    }
+
+    setSelectedStudentIds((prev) => {
+      const next = new Set(prev)
+      filteredStudents.forEach((student) => next.add(student.id))
+      return Array.from(next)
+    })
+  }
+
+  const confirmBulkDeleteStudents = () => {
+    if (selectedStudentIds.length === 0) return
+    setShowBulkDeleteModal(true)
+  }
+
+  const handleBulkDeleteStudents = async () => {
+    if (selectedStudentIds.length === 0) return
+
+    const studentsToDelete = students.filter((student) => selectedStudentIds.includes(student.id))
+    if (studentsToDelete.length === 0) {
+      setShowBulkDeleteModal(false)
+      return
+    }
+
+    setBulkDeleteLoading(true)
+    try {
+      let successCount = 0
+      let failedCount = 0
+
+      for (const student of studentsToDelete) {
+        try {
+          const response = await fetch('/api/guru/delete-student', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId: student.id }),
+          })
+
+          const data = await response.json()
+
+          if (response.ok && data.success) {
+            successCount += 1
+          } else {
+            failedCount += 1
+          }
+        } catch (error) {
+          failedCount += 1
+        }
+      }
+
+      if (successCount > 0) {
+        loadStudentData()
+      }
+
+      setSelectedStudentIds([])
+
+      if (failedCount === 0) {
+        alert(tr('Semua akun siswa terpilih berhasil dihapus.', 'All selected student accounts were deleted.'))
+      } else {
+        alert(
+          tr(
+            `${successCount} akun siswa berhasil dihapus, ${failedCount} gagal.`,
+            `${successCount} student accounts deleted, ${failedCount} failed.`
+          )
+        )
+      }
+    } finally {
+      setBulkDeleteLoading(false)
+      setShowBulkDeleteModal(false)
+    }
+  }
+
   const getScoreColor = (score: number) => {
     if (score >= 8) return 'text-green-600 bg-green-100'
     if (score >= 6) return 'text-purple-600 bg-purple-100'
@@ -355,6 +450,18 @@ export default function GuruDashboard() {
       
       return matchesSearch && matchesKelas && matchesNIS
     })
+
+  const selectedStudents = students.filter((student) => selectedStudentIds.includes(student.id))
+  const allVisibleSelected =
+    filteredStudents.length > 0 &&
+    filteredStudents.every((student) => selectedStudentIds.includes(student.id))
+  const someVisibleSelected = filteredStudents.some((student) => selectedStudentIds.includes(student.id))
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = !allVisibleSelected && someVisibleSelected
+    }
+  }, [allVisibleSelected, someVisibleSelected])
     .sort((a, b) => {
       switch (sortOrder) {
         case 'score-high':
@@ -572,6 +679,58 @@ export default function GuruDashboard() {
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
                   {deleteStudentLoading ? tr('⏳ Menghapus...', '⏳ Deleting...') : tr('🗑️ Ya, Hapus Akun', '🗑️ Yes, Delete Account')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => !bulkDeleteLoading && setShowBulkDeleteModal(false)}
+          ></div>
+          <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-red-100'}`}>
+            <div className="text-center">
+              <div className="text-6xl mb-4">⚠️</div>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
+                {tr('Hapus Banyak Akun?', 'Delete Multiple Accounts?')}
+              </h3>
+              <p className={`mb-3 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+                {tr(
+                  `Anda akan menghapus ${selectedStudents.length} akun siswa terpilih.`,
+                  `You are about to delete ${selectedStudents.length} selected student accounts.`
+                )}
+              </p>
+              {selectedStudents.length > 0 && (
+                <div className={`mb-4 max-h-32 overflow-y-auto rounded-xl border px-3 py-2 text-left text-xs ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-slate-200' : 'bg-red-50 border-red-200 text-slate-600'}`}>
+                  {selectedStudents.map((student) => (
+                    <div key={student.id} className="flex justify-between gap-2">
+                      <span className="font-medium truncate">{student.name}</span>
+                      <span className="text-[10px] text-slate-400">{student.nis} • {student.kelas}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-red-400' : 'text-red-500'}`}>
+                {tr('⚠️ Semua data siswa terpilih akan dihapus permanen!', '⚠️ All selected student data will be permanently deleted!')}
+              </p>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => setShowBulkDeleteModal(false)}
+                  disabled={bulkDeleteLoading}
+                  className="px-6 py-3 bg-slate-500 hover:bg-slate-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300"
+                >
+                  {tr('❌ Batal', '❌ Cancel')}
+                </button>
+                <button
+                  onClick={handleBulkDeleteStudents}
+                  disabled={bulkDeleteLoading}
+                  className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
+                >
+                  {bulkDeleteLoading ? tr('⏳ Menghapus...', '⏳ Deleting...') : tr('🗑️ Ya, Hapus Akun', '🗑️ Yes, Delete Accounts')}
                 </button>
               </div>
             </div>
@@ -823,6 +982,13 @@ export default function GuruDashboard() {
               >
                 🔄 Refresh
               </button>
+              <button
+                onClick={confirmBulkDeleteStudents}
+                disabled={selectedStudentIds.length === 0}
+                className="bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl transition-all duration-300 shadow-lg"
+              >
+                🗑️ {tr('Hapus Akun', 'Delete Accounts')}{selectedStudentIds.length > 0 ? ` (${selectedStudentIds.length})` : ''}
+              </button>
             </div>
           </div>
 
@@ -841,6 +1007,17 @@ export default function GuruDashboard() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className={`border-b-2 ${theme === 'dark' ? 'border-slate-600 bg-slate-800/80' : 'border-purple-200 bg-purple-50/80'}`}>
+                    <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap w-10 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
+                      <input
+                        ref={selectAllRef}
+                        type="checkbox"
+                        checked={allVisibleSelected}
+                        disabled={filteredStudents.length === 0}
+                        onChange={toggleSelectAllVisible}
+                        aria-label={tr('Pilih semua siswa yang terlihat', 'Select all visible students')}
+                        className={`h-4 w-4 rounded border ${theme === 'dark' ? 'bg-slate-700 border-slate-500 text-purple-400' : 'bg-white border-purple-300 text-purple-600'}`}
+                      />
+                    </th>
                     <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap w-10 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>No</th>
                     <th className={`text-left py-3 px-3 font-semibold whitespace-nowrap min-w-[140px] ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Nama Siswa</th>
                     <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Kelas</th>
@@ -866,6 +1043,15 @@ export default function GuruDashboard() {
                       key={student.id}
                       className={`border-b transition-colors ${theme === 'dark' ? 'border-slate-700 hover:bg-slate-700/50' : 'border-purple-50 hover:bg-purple-50'}`}
                     >
+                      <td className="py-3 px-2 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedStudentIds.includes(student.id)}
+                          onChange={() => toggleStudentSelection(student.id)}
+                          aria-label={tr('Pilih siswa', 'Select student')}
+                          className={`h-4 w-4 rounded border ${theme === 'dark' ? 'bg-slate-700 border-slate-500 text-purple-400' : 'bg-white border-purple-300 text-purple-600'}`}
+                        />
+                      </td>
                       <td className={`py-3 px-2 text-center ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{index + 1}</td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-2">
