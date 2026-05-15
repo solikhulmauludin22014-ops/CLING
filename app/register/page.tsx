@@ -19,6 +19,8 @@ export default function RegisterPage() {
     kelas: '',
     kodeToken: '',
   })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -278,7 +280,7 @@ export default function RegisterPage() {
           ) : (
             <div>
               <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                {tr('🔑 Kode Token Sekolah', '🔑 School Token Code')}
+                {tr('🔑 Kode Token Sekolah', '🔑 SMK Antartika 2 Sidoarjo Hebat dan Bisa')}
               </label>
               <input
                 type="text"
@@ -299,14 +301,63 @@ export default function RegisterPage() {
             <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
               {tr('🔒 Password', '🔒 Password')}
             </label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className={inputClasses}
-              placeholder={tr('Minimal 6 karakter + angka', 'Minimum 6 characters + number')}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className={`${inputClasses} pr-12`}
+                placeholder={tr('Minimal 6 karakter + angka', 'Minimum 6 characters + number')}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={
+                  showPassword
+                    ? tr('Sembunyikan password', 'Hide password')
+                    : tr('Lihat password', 'Show password')
+                }
+                aria-pressed={showPassword}
+                title={
+                  showPassword
+                    ? tr('Sembunyikan password', 'Hide password')
+                    : tr('Lihat password', 'Show password')
+                }
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition ${
+                  theme === 'dark'
+                    ? 'text-slate-300 hover:text-white hover:bg-slate-600'
+                    : 'text-slate-500 hover:text-purple-700 hover:bg-purple-100'
+                } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500`}
+              >
+                {showPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7.5a12.1 12.1 0 013.256-4.752m3.357-2.27A9.956 9.956 0 0112 5c5 0 9.27 3.11 11 7.5a12.108 12.108 0 01-4.41 5.264M9.88 9.88a3 3 0 104.24 4.24"
+                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
             <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
               {tr('Min. 6 karakter dan harus ada angka', 'Min. 6 characters and must include a number')}
             </p>
@@ -317,14 +368,63 @@ export default function RegisterPage() {
             <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
               {tr('🔒 Konfirmasi Password', '🔒 Confirm Password')}
             </label>
-            <input
-              type="password"
-              value={formData.confirmPassword}
-              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-              className={inputClasses}
-              placeholder={tr('Ulangi password', 'Repeat password')}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                className={`${inputClasses} pr-12`}
+                placeholder={tr('Ulangi password', 'Repeat password')}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                aria-label={
+                  showConfirmPassword
+                    ? tr('Sembunyikan password', 'Hide password')
+                    : tr('Lihat password', 'Show password')
+                }
+                aria-pressed={showConfirmPassword}
+                title={
+                  showConfirmPassword
+                    ? tr('Sembunyikan password', 'Hide password')
+                    : tr('Lihat password', 'Show password')
+                }
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition ${
+                  theme === 'dark'
+                    ? 'text-slate-300 hover:text-white hover:bg-slate-600'
+                    : 'text-slate-500 hover:text-purple-700 hover:bg-purple-100'
+                } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500`}
+              >
+                {showConfirmPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7.5a12.1 12.1 0 013.256-4.752m3.357-2.27A9.956 9.956 0 0112 5c5 0 9.27 3.11 11 7.5a12.108 12.108 0 01-4.41 5.264M9.88 9.88a3 3 0 104.24 4.24"
+                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Submit Button */}
