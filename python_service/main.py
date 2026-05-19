@@ -54,11 +54,25 @@ def check_api_key(submitted: str) -> None:
 
 def write_temp_file(code: str) -> Path:
     """Tulis kode ke file sementara, kembalikan path-nya."""
-    tmp_dir = Path(tempfile.gettempdir()) / "cling"
-    tmp_dir.mkdir(exist_ok=True)
-    tmp_file = tmp_dir / f"{uuid.uuid4().hex}.py"
+    tmp_root = Path(tempfile.gettempdir()) / "cling"
+    request_dir = tmp_root / uuid.uuid4().hex
+    request_dir.mkdir(parents=True, exist_ok=True)
+    tmp_file = request_dir / "student_code.py"
     tmp_file.write_text(code, encoding="utf-8")
     return tmp_file
+
+
+def cleanup_temp_file(tmp_file: Path) -> None:
+    """Hapus file dan folder sementara untuk request ini."""
+    try:
+        tmp_file.unlink(missing_ok=True)
+    finally:
+        try:
+            tmp_dir = tmp_file.parent
+            if tmp_dir.parent.name == "cling":
+                tmp_dir.rmdir()
+        except OSError:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -116,7 +130,7 @@ def execute_code(req: CodeRequest):
     except Exception as exc:
         return {"success": False, "output": None, "error": str(exc), "exit_code": -1}
     finally:
-        tmp_file.unlink(missing_ok=True)
+        cleanup_temp_file(tmp_file)
 
 
 # ---------------------------------------------------------------------------
@@ -144,7 +158,7 @@ def validate_syntax(req: CodeRequest):
     except Exception as exc:
         return {"valid": True, "error": None}  # skip on error
     finally:
-        tmp_file.unlink(missing_ok=True)
+        cleanup_temp_file(tmp_file)
 
 
 # ---------------------------------------------------------------------------
@@ -202,4 +216,4 @@ def analyze_code(req: CodeRequest):
     except Exception as exc:
         return {"success": False, "messages": [], "error": str(exc)}
     finally:
-        tmp_file.unlink(missing_ok=True)
+        cleanup_temp_file(tmp_file)

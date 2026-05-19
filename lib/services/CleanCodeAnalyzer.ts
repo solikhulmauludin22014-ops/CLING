@@ -256,29 +256,29 @@ export class CleanCodeAnalyzer {
 
   // Fix suggestions untuk kode Pylint
   private readonly FIX_SUGGESTIONS: Record<string, string> = {
-    'C0103': 'Ubah nama: my_variable, calculate_total(), MY_CONSTANT',
-    'C0114': "Tambahkan docstring di awal file: '''Deskripsi module.'''",
-    'C0115': "Tambahkan docstring setelah class: '''Deskripsi class.'''",
-    'C0116': "Tambahkan docstring setelah def: '''Deskripsi fungsi.'''",
-    'C0301': 'Pecah baris panjang dengan backslash (\\) atau kurung',
-    'C0303': 'Hapus spasi di akhir baris (trim trailing whitespace)',
-    'C0304': 'Tambahkan baris kosong di akhir file',
-    'C0411': 'Urutkan: import stdlib, import third-party, import local',
-    'W0311': 'Gunakan 4 spasi untuk setiap level indentasi',
-    'W0312': 'Ganti semua tab dengan 4 spasi',
-    'W0401': "Ubah 'from x import *' menjadi 'from x import nama1, nama2'",
-    'W0611': 'Hapus baris import yang tidak digunakan',
-    'W0612': 'Gunakan variabel ini atau hapus jika tidak perlu',
-    'W0613': 'Gunakan parameter ini atau ubah nama jadi _unused',
-    'W0622': 'Ganti nama variabel, hindari: list, dict, str, id, type',
-    'E0001': 'Periksa syntax: kurung, titik dua, indentasi',
-    'E0102': 'Ganti nama fungsi/class yang duplikat',
-    'E0401': 'Install module: pip install nama_module',
-    'E0601': 'Definisikan variabel sebelum menggunakannya',
-    'E0602': 'Cek typo atau definisikan variabel terlebih dahulu',
-    'R0913': 'Kurangi parameter, bisa pakai dict atau class',
-    'R0912': 'Pecah fungsi besar jadi beberapa fungsi kecil',
-    'R0915': 'Pecah fungsi ini jadi beberapa fungsi yang lebih fokus',
+    'C0103': 'Gunakan snake_case untuk variabel/fungsi dan UPPER_CASE untuk konstanta. Contoh: total_nilai, hitung_rata_rata(), NAMA_KONSTANTA.',
+    'C0114': "Tambahkan docstring singkat di awal file. Contoh: '''Modul ini untuk ...'''.",
+    'C0115': "Tambahkan docstring singkat setelah class. Contoh: '''Kelas untuk ...'''.",
+    'C0116': "Tambahkan docstring singkat setelah def. Contoh: '''Fungsi untuk ...'''.",
+    'C0301': 'Pecah baris yang terlalu panjang. Pindahkan sebagian ke baris baru atau bungkus dengan tanda kurung.',
+    'C0303': 'Hapus spasi di akhir baris (rapikan trailing whitespace).',
+    'C0304': 'Tambahkan satu baris kosong di akhir file.',
+    'C0411': 'Urutkan import: pustaka standar, pihak ketiga, lalu modul lokal.',
+    'W0311': 'Gunakan 4 spasi untuk setiap level indentasi.',
+    'W0312': 'Ganti tab dengan 4 spasi agar rapi.',
+    'W0401': "Jangan pakai import *. Tulis nama yang dipakai. Contoh: from x import a, b.",
+    'W0611': 'Hapus import yang tidak dipakai.',
+    'W0612': 'Hapus variabel yang tidak dipakai atau gunakan jika memang perlu.',
+    'W0613': 'Jika parameter tidak dipakai, beri awalan _. Contoh: _unused_param.',
+    'W0622': 'Hindari nama variabel yang menimpa built-in, misalnya: list, dict, str, id, type.',
+    'E0001': 'Periksa kurung, tanda titik dua (:), dan indentasi.',
+    'E0102': 'Ganti nama yang duplikat agar unik.',
+    'E0401': 'Pastikan modul terpasang. Contoh: pip install nama_modul.',
+    'E0601': 'Buat variabel sebelum dipakai.',
+    'E0602': 'Periksa salah ketik atau definisikan variabel terlebih dahulu.',
+    'R0913': 'Kurangi jumlah parameter. Gabungkan jadi objek/dict jika perlu.',
+    'R0912': 'Pecah fungsi besar menjadi beberapa fungsi kecil.',
+    'R0915': 'Pecah fungsi ini agar lebih fokus dan mudah dibaca.',
   }
 
   constructor() {
@@ -748,27 +748,26 @@ export class CleanCodeAnalyzer {
 
     // Gabungkan semua issues dan sort by priority
     const allIssues = [
-      ...analysis.errors.map(e => ({ ...e, priority: 4, categoryLabel: 'KESALAHAN' })),
-      ...analysis.warnings.map(w => ({ ...w, priority: 3, categoryLabel: 'PERINGATAN' })),
-      ...analysis.refactors.map(r => ({ ...r, priority: 2, categoryLabel: 'PERBAIKAN STRUKTUR' })),
-      ...analysis.conventions.map(c => ({ ...c, priority: 1, categoryLabel: 'ATURAN PEP 8' })),
+      ...analysis.errors.map(e => ({ ...e, priority: 4, categoryLabel: 'Kesalahan' })),
+      ...analysis.warnings.map(w => ({ ...w, priority: 3, categoryLabel: 'Peringatan' })),
+      ...analysis.refactors.map(r => ({ ...r, priority: 2, categoryLabel: 'Perbaikan Struktur' })),
+      ...analysis.conventions.map(c => ({ ...c, priority: 1, categoryLabel: 'Aturan PEP 8' })),
     ].sort((a, b) => b.priority - a.priority)
 
     if (allIssues.length > 0) {
-      suggestions.push('📝 Temuan utama:')
+      suggestions.push('📝 Daftar perbaikan:')
       suggestions.push('')
       
-      // Tampilkan semua issues dengan penjelasan lengkap
-      allIssues.forEach((issue, idx) => {
+      // Tampilkan semua issues dengan format yang sederhana
+      allIssues.forEach((issue) => {
         const emoji = this.getCategoryEmoji(issue.category)
-        const lineInfo = issue.line > 0 ? `Baris ${issue.line}` : 'Umum'
+        const lineInfo = issue.line > 0 ? `Baris ${issue.line}` : 'Lokasi umum'
         
-        // Format: emoji [KATEGORI] Baris X: Penjelasan
-        suggestions.push(`${emoji} [${issue.categoryLabel}] ${lineInfo}:`)
-        suggestions.push(`   📖 ${issue.explanation}`)
+        suggestions.push(`${emoji} ${issue.categoryLabel} (${lineInfo})`)
+        suggestions.push(`   Masalah: ${issue.explanation}`)
         
         if (issue.fix_suggestion && issue.fix_suggestion !== 'Perbaiki sesuai pesan error') {
-          suggestions.push(`   💡 Saran perbaikan: ${issue.fix_suggestion}`)
+          suggestions.push(`   Perbaiki: ${issue.fix_suggestion}`)
         }
         suggestions.push('')
       })
