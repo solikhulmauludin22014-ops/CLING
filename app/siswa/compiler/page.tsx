@@ -735,18 +735,18 @@ print(f"Average: {result_avg}")
                 <div className="flex items-center gap-3">
                   <span className="text-xl">📊</span>
                   <div>
-                    <p className="text-xs text-green-100">Clean Code Score</p>
+                    <p className="text-xs text-green-100">{tr('Skor Clean Code', 'Clean Code Score')}</p>
                     <p className="text-lg font-bold text-white">{cleanCodeScore.toFixed(2)}/10</p>
                   </div>
                   {lastAnalysisTime && (
                     <div className="border-l border-white/30 pl-3 ml-1">
                       <p className="text-xs text-green-100">{tr('Terakhir', 'Last')}</p>
                       <p className="text-xs font-medium text-white">
-                        {new Date(lastAnalysisTime).toLocaleDateString('id-ID', {
+                        {new Date(lastAnalysisTime).toLocaleDateString(language === 'en' ? 'en-US' : 'id-ID', {
                           day: '2-digit',
                           month: 'short',
                         })}{' '}
-                        {new Date(lastAnalysisTime).toLocaleTimeString('id-ID', {
+                        {new Date(lastAnalysisTime).toLocaleTimeString(language === 'en' ? 'en-US' : 'id-ID', {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
@@ -951,7 +951,7 @@ print(f"Average: {result_avg}")
                     {loading ? (
                       <div className="flex items-center gap-3 text-yellow-400">
                         <div className="animate-spin">⚙️</div>
-                        <span>Menjalankan kode...</span>
+                        <span>{tr('Menjalankan kode...', 'Running code...')}</span>
                       </div>
                     ) : output ? (
                       <pre className="whitespace-pre-wrap text-green-400">{output}</pre>
@@ -966,7 +966,7 @@ print(f"Average: {result_avg}")
                     {analysisLoading ? (
                       <div className="flex flex-col items-center justify-center py-12">
                         <div className="text-6xl animate-bounce">🔍</div>
-                        <p className={`mt-4 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Menganalisis kode...</p>
+                        <p className={`mt-4 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Menganalisis kode...', 'Analyzing code...')}</p>
                       </div>
                     ) : showAnalysis && analysis ? (
                       <div className="space-y-4">
@@ -974,7 +974,7 @@ print(f"Average: {result_avg}")
                         <div className={`bg-gradient-to-r ${getScoreColor(analysis.final_score)} p-6 rounded-xl text-white`}>
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm opacity-80">Clean Code Score</p>
+                              <p className="text-sm opacity-80">{tr('Skor Clean Code', 'Clean Code Score')}</p>
                               <p className="text-4xl font-bold">{analysis.final_score.toFixed(2)}/10</p>
                               <p className="text-lg mt-1">{getScoreMessage(analysis.final_score)}</p>
                             </div>
@@ -985,15 +985,15 @@ print(f"Average: {result_avg}")
                         {/* Breakdown */}
                         <div className="grid grid-cols-3 gap-4">
                           <div className={`rounded-xl p-4 border ${theme === 'dark' ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-100 border-purple-200'}`}>
-                            <p className={`text-sm ${theme === 'dark' ? 'text-purple-400' : 'text-purple-700'}`}>Meaningful Names</p>
+                            <p className={`text-sm ${theme === 'dark' ? 'text-purple-400' : 'text-purple-700'}`}>{tr('Penamaan', 'Meaningful Names')}</p>
                             <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{Math.round(analysis.breakdown.meaningful_names.score)}%</p>
                           </div>
                           <div className={`rounded-xl p-4 border ${theme === 'dark' ? 'bg-green-500/20 border-green-500/30' : 'bg-green-100 border-green-200'}`}>
-                            <p className={`text-sm ${theme === 'dark' ? 'text-green-400' : 'text-green-700'}`}>No Duplication</p>
+                            <p className={`text-sm ${theme === 'dark' ? 'text-green-400' : 'text-green-700'}`}>{tr('Tidak Duplikasi', 'No Duplication')}</p>
                             <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{Math.round(analysis.breakdown.code_duplication.score)}%</p>
                           </div>
                           <div className={`rounded-xl p-4 border ${theme === 'dark' ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-100 border-purple-200'}`}>
-                            <p className={`text-sm ${theme === 'dark' ? 'text-purple-400' : 'text-purple-700'}`}>Code Quality</p>
+                            <p className={`text-sm ${theme === 'dark' ? 'text-purple-400' : 'text-purple-700'}`}>{tr('Kualitas Kode', 'Code Quality')}</p>
                             <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{Math.round(analysis.breakdown.code_quality.score)}%</p>
                           </div>
                         </div>
@@ -1002,14 +1002,14 @@ print(f"Average: {result_avg}")
                         {analysis.suggestions.length > 0 && (
                           <div className={`rounded-xl p-4 ${theme === 'dark' ? 'bg-slate-800/50' : 'bg-yellow-50 border border-yellow-200'}`}>
                             <h4 className={`font-semibold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-700'}`}>
-                              💡 Saran Perbaikan:
+                              💡 {tr('Saran Perbaikan', 'Suggestions')}:
                               <span className={`text-xs font-normal ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{tr('(scroll untuk melihat semua)', '(scroll to view all)')}</span>
                             </h4>
                             <div className="max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
                               <ul className={`space-y-2 text-sm ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
                                 {analysis.suggestions.map((s, i) => {
                                   // Deteksi jenis baris untuk styling berbeda
-                                  const isHeader = s.includes('TEMUAN') || s.includes('TIPS') || s.includes('PESAN') || s.includes('LUAR BIASA')
+                                  const isHeader = /^(📊|📋|📝|💬|📚|💡|🎉|✅|1️⃣|2️⃣|3️⃣)/.test(s)
                                   const isSeparator = s.startsWith('━') || s.startsWith('─') || s === ''
                                   const isSubItem = s.startsWith('   ')
                                   const isEmoji = s.match(/^[🔴1️⃣2️⃣3️⃣🔗📝📦💬📚💡✅🎉📊📋🔴🟡🟠🟢]/)
