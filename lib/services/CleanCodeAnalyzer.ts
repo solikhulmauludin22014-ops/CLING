@@ -31,11 +31,14 @@ interface DetailedAnalysis {
   formatted_report: string
 }
 
+type LanguageCode = 'id' | 'en'
+const DEFAULT_LANGUAGE: LanguageCode = 'id'
+
 export class CleanCodeAnalyzer {
   private readonly MAX_SCORE = 100
 
   // Penjelasan kode Pylint dalam Bahasa Indonesia untuk siswa SMK
-  private readonly CODE_EXPLANATIONS: Record<string, string> = {
+  private readonly CODE_EXPLANATIONS_ID: Record<string, string> = {
     // Convention (C) - PEP 8
     'C0103': 'Nama variabel/fungsi tidak sesuai standar Python (gunakan snake_case untuk variabel, UPPER_CASE untuk konstanta)',
     'C0111': 'Tidak ada docstring (komentar penjelasan) di fungsi/kelas',
@@ -254,8 +257,37 @@ export class CleanCodeAnalyzer {
     'R1732': 'Gunakan with statement untuk resource',
   }
 
+  private readonly CODE_EXPLANATIONS_EN: Record<string, string> = {
+    'C0103': 'Variable/function name does not follow Python naming standards (use snake_case, UPPER_CASE for constants).',
+    'C0114': 'Module is missing a docstring at the top of the file.',
+    'C0115': 'Class is missing a docstring.',
+    'C0116': 'Function is missing a docstring.',
+    'C0301': 'Line is too long (max 79 characters).',
+    'C0303': 'Trailing whitespace at the end of the line.',
+    'C0304': 'File does not end with a newline.',
+    'C0411': 'Import order is not standard (stdlib, third-party, local).',
+    'W0311': 'Indentation is not a multiple of 4 spaces.',
+    'W0312': 'Mixed tabs and spaces in indentation.',
+    'W0401': 'Wildcard import is not recommended.',
+    'W0611': 'Unused import.',
+    'W0612': 'Unused variable.',
+    'W0613': 'Unused function argument.',
+    'W0622': 'Variable name shadows a built-in.',
+    'W0122': 'Using exec() is unsafe.',
+    'W0123': 'Using eval() is unsafe.',
+    'E0001': 'Python syntax error.',
+    'E0102': 'Duplicate function/class name.',
+    'E0401': 'Import error (module not found).',
+    'E0601': 'Variable used before assignment.',
+    'E0602': 'Undefined variable (typo or missing definition).',
+    'R0801': 'Duplicate code detected.',
+    'R0912': 'Too many branches/if statements in a function.',
+    'R0913': 'Too many parameters in a function.',
+    'R0915': 'Too many statements in a function.',
+  }
+
   // Fix suggestions untuk kode Pylint
-  private readonly FIX_SUGGESTIONS: Record<string, string> = {
+  private readonly FIX_SUGGESTIONS_ID: Record<string, string> = {
     'C0103': 'Gunakan snake_case untuk variabel/fungsi dan UPPER_CASE untuk konstanta. Contoh: total_nilai, hitung_rata_rata(), NAMA_KONSTANTA.',
     'C0114': "Tambahkan docstring singkat di awal file. Contoh: '''Modul ini untuk ...'''.",
     'C0115': "Tambahkan docstring singkat setelah class. Contoh: '''Kelas untuk ...'''.",
@@ -281,6 +313,46 @@ export class CleanCodeAnalyzer {
     'R0915': 'Pecah fungsi ini agar lebih fokus dan mudah dibaca.',
   }
 
+  private readonly FIX_SUGGESTIONS_EN: Record<string, string> = {
+    'C0103': 'Use snake_case for variables/functions and UPPER_CASE for constants. Example: total_score, calculate_total(), MAX_LIMIT.',
+    'C0114': "Add a short module docstring at the top. Example: '''Module for ...'''.",
+    'C0115': "Add a short class docstring. Example: '''Class for ...'''.",
+    'C0116': "Add a short function docstring. Example: '''Function to ...'''.",
+    'C0301': 'Break long lines by wrapping in parentheses or moving parts to a new line.',
+    'C0303': 'Remove trailing whitespace at the end of the line.',
+    'C0304': 'Add a final newline at the end of the file.',
+    'C0411': 'Order imports: standard library, third-party, then local modules.',
+    'W0311': 'Use 4 spaces per indentation level.',
+    'W0312': 'Replace tabs with 4 spaces.',
+    'W0401': 'Avoid wildcard import. Import only what you use, e.g. from x import a, b.',
+    'W0611': 'Remove unused import.',
+    'W0612': 'Remove the unused variable or use it.',
+    'W0613': 'Prefix unused parameters with _, e.g. _unused_param.',
+    'W0622': 'Avoid shadowing built-ins like list, dict, str, id, type.',
+    'E0001': 'Check parentheses, colons, and indentation.',
+    'E0102': 'Rename the duplicate function/class.',
+    'E0401': 'Install the missing module, e.g. pip install module_name.',
+    'E0601': 'Define the variable before using it.',
+    'E0602': 'Fix typos or define the variable first.',
+    'R0913': 'Reduce parameters; group them into an object/dict if needed.',
+    'R0912': 'Split the large function into smaller ones.',
+    'R0915': 'Split this function into smaller focused functions.',
+  }
+
+  private getExplanation(code: string, fallback: string, language: LanguageCode): string {
+    if (language === 'en') {
+      return this.CODE_EXPLANATIONS_EN[code] || fallback
+    }
+    return this.CODE_EXPLANATIONS_ID[code] || fallback
+  }
+
+  private getFixSuggestion(code: string, language: LanguageCode): string {
+    if (language === 'en') {
+      return this.FIX_SUGGESTIONS_EN[code] || ''
+    }
+    return this.FIX_SUGGESTIONS_ID[code] || ''
+  }
+
   constructor() {
     // Menggunakan Python API yang di-deploy di Render.com
   }
@@ -289,37 +361,41 @@ export class CleanCodeAnalyzer {
    * Analyze Python code dengan format khusus untuk siswa SMK
    * Menggunakan Pylint + standar PEP 8
    */
-  async analyze(code: string): Promise<CleanCodeAnalysisResult> {
+  async analyze(code: string, language: LanguageCode = DEFAULT_LANGUAGE): Promise<CleanCodeAnalysisResult> {
     try {
       // Run analisis via Pylint lokal
-      const pylint = await this.runAnalysis(code)
+      const pylint = await this.runAnalysis(code, language)
       
       // Kategorikan pesan berdasarkan jenis
-      const detailedAnalysis = this.createDetailedAnalysis(pylint, code)
+      const detailedAnalysis = this.createDetailedAnalysis(pylint, code, language)
 
       // Build breakdown untuk compatibility dengan interface yang ada
       const meaningfulNames: IndicatorResult = {
         score: Math.max(0, this.MAX_SCORE - pylint.invalidNameCount * 20),
-        details: `Penamaan tidak standar: ${pylint.invalidNameCount} masalah`,
+        details: language === 'en'
+          ? `Non-standard naming: ${pylint.invalidNameCount} issue(s)`
+          : `Penamaan tidak standar: ${pylint.invalidNameCount} masalah`,
         issues: pylint.messages
           .filter(m => m.code === 'C0103')
-          .map(m => this.formatMessageForStudent(m)),
+          .map(m => this.formatMessageForStudent(m, language)),
       }
 
       const codeDuplication: IndicatorResult = {
         score: Math.max(0, this.MAX_SCORE - pylint.duplicateCodeCount * 25),
-        details: `Kode duplikat: ${pylint.duplicateCodeCount} ditemukan`,
+        details: language === 'en'
+          ? `Duplicate code: ${pylint.duplicateCodeCount} found`
+          : `Kode duplikat: ${pylint.duplicateCodeCount} ditemukan`,
         issues: pylint.messages
           .filter(m => m.code === 'R0801')
-          .map(m => this.formatMessageForStudent(m)),
+          .map(m => this.formatMessageForStudent(m, language)),
       }
 
       const codeQuality: IndicatorResult = {
         score: detailedAnalysis.score * 10,
         details: detailedAnalysis.formatted_report,
-        issues: this.generateFormattedIssues(detailedAnalysis),
+        issues: this.generateFormattedIssues(detailedAnalysis, language),
         pylint_rating: detailedAnalysis.score,
-        pylint_messages: pylint.messages.map(m => this.formatMessageForStudent(m)),
+        pylint_messages: pylint.messages.map(m => this.formatMessageForStudent(m, language)),
       }
 
       const breakdown = {
@@ -329,7 +405,7 @@ export class CleanCodeAnalyzer {
       }
 
       // Generate suggestions dengan format baru
-      const suggestions = this.generateEnhancedSuggestions(detailedAnalysis, code)
+      const suggestions = this.generateEnhancedSuggestions(detailedAnalysis, code, language)
 
       return {
         final_score: detailedAnalysis.score,
@@ -341,6 +417,9 @@ export class CleanCodeAnalyzer {
       } as CleanCodeAnalysisResult
 
     } catch (error: any) {
+      const fallbackMessage = language === 'en'
+        ? `❌ Analysis error: ${error.message}`
+        : `❌ Error saat analisis: ${error.message}`
       return {
         final_score: 0,
         grade: '0.00/10',
@@ -349,7 +428,7 @@ export class CleanCodeAnalyzer {
           code_duplication: { score: 0, details: '', issues: [] },
           code_quality: { score: 0, details: '', issues: [] },
         },
-        suggestions: [`❌ Error saat analisis: ${error.message}`],
+        suggestions: [fallbackMessage],
       }
     }
   }
@@ -359,7 +438,8 @@ export class CleanCodeAnalyzer {
    */
   private createDetailedAnalysis(
     pylint: Awaited<ReturnType<typeof this.runAnalysis>>,
-    code: string
+    code: string,
+    language: LanguageCode
   ): DetailedAnalysis {
     const errors: PylintMessage[] = []
     const warnings: PylintMessage[] = []
@@ -368,6 +448,8 @@ export class CleanCodeAnalyzer {
 
     // Kategorikan pesan
     for (const msg of pylint.messages) {
+      const explanation = this.getExplanation(msg.code, msg.message, language)
+      const fixSuggestion = this.getFixSuggestion(msg.code, language)
       const enhancedMsg: PylintMessage = {
         code: msg.code,
         line: msg.line,
@@ -375,8 +457,8 @@ export class CleanCodeAnalyzer {
         message: msg.message,
         category: msg.category as PylintMessage['category'],
         symbol: msg.code,
-        explanation: this.CODE_EXPLANATIONS[msg.code] || msg.message,
-        fix_suggestion: this.FIX_SUGGESTIONS[msg.code] || 'Perbaiki sesuai pesan error',
+        explanation,
+        fix_suggestion: fixSuggestion || undefined,
       }
 
       switch (msg.category) {
@@ -397,7 +479,7 @@ export class CleanCodeAnalyzer {
     }
 
     // Tambahkan pengecekan PEP 8 tambahan
-    this.addPEP8Checks(code, conventions, warnings)
+    this.addPEP8Checks(code, conventions, warnings, language)
 
     // Hitung skor menggunakan rumus yang diminta:
     // max(0, 0 if fatal else 10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10))
@@ -408,18 +490,18 @@ export class CleanCodeAnalyzer {
     const scoreRounded = Math.round(score10 * 100) / 100
 
     // Tentukan grade category
-    const gradeCategory = this.getGradeCategory(scoreRounded)
+    const gradeCategory = this.getGradeCategory(scoreRounded, language)
 
     // Generate kode perbaikan
     const correctedCode = this.generateCorrectedCode(code, [...errors, ...warnings, ...refactors, ...conventions])
 
     // Generate motivasi
-    const motivation = this.generateMotivation(scoreRounded, gradeCategory)
+    const motivation = this.generateMotivation(scoreRounded, language)
 
     // Format report lengkap
     const formattedReport = this.formatFullReport(
       errors, warnings, refactors, conventions,
-      scoreRounded, gradeCategory, correctedCode, motivation
+      scoreRounded, gradeCategory, correctedCode, motivation, language
     )
 
     return {
@@ -439,37 +521,47 @@ export class CleanCodeAnalyzer {
   /**
    * Tambahan pengecekan PEP 8 yang mungkin tidak tertangkap Pylint
    */
-  private addPEP8Checks(code: string, conventions: PylintMessage[], warnings: PylintMessage[]): void {
+  private addPEP8Checks(
+    code: string,
+    conventions: PylintMessage[],
+    warnings: PylintMessage[],
+    language: LanguageCode
+  ): void {
     const lines = code.split('\n')
+    const isEnglish = language === 'en'
 
     lines.forEach((line, idx) => {
       const lineNum = idx + 1
 
       // Cek line length > 79
       if (line.length > 79) {
+        const message = isEnglish
+          ? `Line too long (${line.length}/79 characters)`
+          : `Baris terlalu panjang (${line.length}/79 karakter)`
         conventions.push({
           code: 'C0301',
           line: lineNum,
           column: 80,
-          message: `Baris terlalu panjang (${line.length}/79 karakter)`,
+          message,
           category: 'convention',
           symbol: 'line-too-long',
-          explanation: this.CODE_EXPLANATIONS['C0301'],
-          fix_suggestion: this.FIX_SUGGESTIONS['C0301'],
+          explanation: this.getExplanation('C0301', message, language),
+          fix_suggestion: this.getFixSuggestion('C0301', language) || undefined,
         })
       }
 
       // Cek trailing whitespace
       if (/\s+$/.test(line)) {
+        const message = isEnglish ? 'Trailing whitespace detected' : 'Trailing whitespace terdeteksi'
         conventions.push({
           code: 'C0303',
           line: lineNum,
           column: line.length,
-          message: 'Trailing whitespace terdeteksi',
+          message,
           category: 'convention',
           symbol: 'trailing-whitespace',
-          explanation: this.CODE_EXPLANATIONS['C0303'],
-          fix_suggestion: this.FIX_SUGGESTIONS['C0303'],
+          explanation: this.getExplanation('C0303', message, language),
+          fix_suggestion: this.getFixSuggestion('C0303', language) || undefined,
         })
       }
 
@@ -478,45 +570,54 @@ export class CleanCodeAnalyzer {
       if (indentMatch && indentMatch[1].includes(' ')) {
         const spaces = indentMatch[1].replace(/\t/g, '    ').length
         if (spaces % 4 !== 0) {
+          const message = isEnglish
+            ? `Indentation is ${spaces} spaces (should be a multiple of 4)`
+            : `Indentasi ${spaces} spasi (seharusnya kelipatan 4)`
           conventions.push({
             code: 'W0311',
             line: lineNum,
             column: 0,
-            message: `Indentasi ${spaces} spasi (seharusnya kelipatan 4)`,
+            message,
             category: 'warning',
             symbol: 'bad-indentation',
-            explanation: this.CODE_EXPLANATIONS['W0311'],
-            fix_suggestion: this.FIX_SUGGESTIONS['W0311'],
+            explanation: this.getExplanation('W0311', message, language),
+            fix_suggestion: this.getFixSuggestion('W0311', language) || undefined,
           })
         }
       }
 
       // Cek tab dan spasi tercampur
       if (/^\t+ +/.test(line) || /^ +\t+/.test(line)) {
+        const message = isEnglish
+          ? 'Mixed tabs and spaces for indentation'
+          : 'Campuran tab dan spasi untuk indentasi'
         warnings.push({
           code: 'W0312',
           line: lineNum,
           column: 0,
-          message: 'Campuran tab dan spasi untuk indentasi',
+          message,
           category: 'warning',
           symbol: 'mixed-indentation',
-          explanation: this.CODE_EXPLANATIONS['W0312'],
-          fix_suggestion: this.FIX_SUGGESTIONS['W0312'],
+          explanation: this.getExplanation('W0312', message, language),
+          fix_suggestion: this.getFixSuggestion('W0312', language) || undefined,
         })
       }
     })
 
     // Cek tidak ada newline di akhir file
     if (!code.endsWith('\n')) {
+      const message = isEnglish
+        ? 'File does not end with a newline'
+        : 'File tidak diakhiri dengan baris kosong'
       conventions.push({
         code: 'C0304',
         line: lines.length,
         column: 0,
-        message: 'File tidak diakhiri dengan baris kosong',
+        message,
         category: 'convention',
         symbol: 'missing-final-newline',
-        explanation: this.CODE_EXPLANATIONS['C0304'],
-        fix_suggestion: this.FIX_SUGGESTIONS['C0304'],
+        explanation: this.getExplanation('C0304', message, language),
+        fix_suggestion: this.getFixSuggestion('C0304', language) || undefined,
       })
     }
   }
@@ -524,7 +625,14 @@ export class CleanCodeAnalyzer {
   /**
    * Tentukan kategori grade
    */
-  private getGradeCategory(score: number): string {
+  private getGradeCategory(score: number, language: LanguageCode): string {
+    if (language === 'en') {
+      if (score >= 8.1) return 'Excellent ⭐'
+      if (score >= 6.1) return 'Skilled 👍'
+      if (score >= 4.1) return 'Fair 💪'
+      if (score >= 2.1) return 'Needs Practice ⚠️'
+      return 'Beginner ❌'
+    }
     if (score >= 8.1) return 'Sangat Terampil ⭐'
     if (score >= 6.1) return 'Terampil 👍'
     if (score >= 4.1) return 'Cukup Terampil 💪'
@@ -535,7 +643,22 @@ export class CleanCodeAnalyzer {
   /**
    * Generate motivasi untuk siswa
    */
-  private generateMotivation(score: number, category: string): string {
+  private generateMotivation(score: number, language: LanguageCode): string {
+    if (language === 'en') {
+      if (score >= 8.1) {
+        return '🎉 Excellent! Your code is clean and professional. Keep this standard!'
+      }
+      if (score >= 6.1) {
+        return '👍 Great job! Your code is good with only minor improvements needed. Keep going!'
+      }
+      if (score >= 4.1) {
+        return '💪 Fair effort! Improve variable naming and follow PEP 8 for better results.'
+      }
+      if (score >= 2.1) {
+        return '📚 Keep practicing! Learn PEP 8 and apply proper naming conventions.'
+      }
+      return '🚀 Start with the basics! Focus on 4-space indentation and clear names. You can do it!'
+    }
     if (score >= 8.1) {
       return '🎉 Luar biasa! Kode kamu sudah sangat bersih dan profesional — Sangat Terampil! Pertahankan standar ini!'
     }
@@ -554,12 +677,16 @@ export class CleanCodeAnalyzer {
   /**
    * Format pesan untuk siswa SMK
    */
-  private formatMessageForStudent(msg: { code: string; line: number; message: string; category: string }): string {
+  private formatMessageForStudent(
+    msg: { code: string; line: number; message: string; category: string },
+    language: LanguageCode
+  ): string {
     const emoji = this.getCategoryEmoji(msg.category)
-    const explanation = this.CODE_EXPLANATIONS[msg.code] || msg.message
-    const fix = this.FIX_SUGGESTIONS[msg.code] || ''
+    const explanation = this.getExplanation(msg.code, msg.message, language)
+    const fix = this.getFixSuggestion(msg.code, language)
+    const lineLabel = language === 'en' ? 'Line' : 'Baris'
     
-    let result = `${emoji} Baris ${msg.line} | ${msg.code}: ${explanation}`
+    let result = `${emoji} ${lineLabel} ${msg.line} | ${msg.code}: ${explanation}`
     if (fix) {
       result += ` → ${fix}`
     }
@@ -588,38 +715,41 @@ export class CleanCodeAnalyzer {
   /**
    * Generate formatted issues untuk output
    */
-  private generateFormattedIssues(analysis: DetailedAnalysis): string[] {
+  private generateFormattedIssues(analysis: DetailedAnalysis, language: LanguageCode): string[] {
     const issues: string[] = []
+    const isEnglish = language === 'en'
+    const lineLabel = isEnglish ? 'Line' : 'Baris'
+    const fixLabel = isEnglish ? 'Fix' : 'Perbaikan'
 
     if (analysis.errors.length > 0) {
-      issues.push('═══ 🔴 KESALAHAN (Bug Potensial) ═══')
+      issues.push(isEnglish ? '═══ 🔴 ERROR (Potential Bugs) ═══' : '═══ 🔴 KESALAHAN (Bug Potensial) ═══')
       analysis.errors.forEach(e => {
-        issues.push(`  Baris ${e.line}: ${e.explanation}`)
-        if (e.fix_suggestion) issues.push(`    💡 Perbaikan: ${e.fix_suggestion}`)
+        issues.push(`  ${lineLabel} ${e.line}: ${e.explanation}`)
+        if (e.fix_suggestion) issues.push(`    💡 ${fixLabel}: ${e.fix_suggestion}`)
       })
     }
 
     if (analysis.warnings.length > 0) {
-      issues.push('═══ 🟡 PERINGATAN (Potensi Bug) ═══')
+      issues.push(isEnglish ? '═══ 🟡 WARNING (Potential Issues) ═══' : '═══ 🟡 PERINGATAN (Potensi Bug) ═══')
       analysis.warnings.forEach(w => {
-        issues.push(`  Baris ${w.line}: ${w.explanation}`)
-        if (w.fix_suggestion) issues.push(`    💡 Perbaikan: ${w.fix_suggestion}`)
+        issues.push(`  ${lineLabel} ${w.line}: ${w.explanation}`)
+        if (w.fix_suggestion) issues.push(`    💡 ${fixLabel}: ${w.fix_suggestion}`)
       })
     }
 
     if (analysis.refactors.length > 0) {
-      issues.push('═══ 🟠 PERBAIKAN STRUKTUR (Perlu Perapian) ═══')
+      issues.push(isEnglish ? '═══ 🟠 STRUCTURE (Needs Refactor) ═══' : '═══ 🟠 PERBAIKAN STRUKTUR (Perlu Perapian) ═══')
       analysis.refactors.forEach(r => {
-        issues.push(`  Baris ${r.line}: ${r.explanation}`)
-        if (r.fix_suggestion) issues.push(`    💡 Perbaikan: ${r.fix_suggestion}`)
+        issues.push(`  ${lineLabel} ${r.line}: ${r.explanation}`)
+        if (r.fix_suggestion) issues.push(`    💡 ${fixLabel}: ${r.fix_suggestion}`)
       })
     }
 
     if (analysis.conventions.length > 0) {
-      issues.push('═══ 🟢 ATURAN PEP 8 (Format Penulisan) ═══')
+      issues.push(isEnglish ? '═══ 🟢 PEP 8 (Formatting) ═══' : '═══ 🟢 ATURAN PEP 8 (Format Penulisan) ═══')
       analysis.conventions.forEach(c => {
-        issues.push(`  Baris ${c.line}: ${c.explanation}`)
-        if (c.fix_suggestion) issues.push(`    💡 Perbaikan: ${c.fix_suggestion}`)
+        issues.push(`  ${lineLabel} ${c.line}: ${c.explanation}`)
+        if (c.fix_suggestion) issues.push(`    💡 ${fixLabel}: ${c.fix_suggestion}`)
       })
     }
 
@@ -665,64 +795,79 @@ export class CleanCodeAnalyzer {
     score: number,
     gradeCategory: string,
     correctedCode: string,
-    motivation: string
+    motivation: string,
+    language: LanguageCode
   ): string {
     const totalIssues = errors.length + warnings.length + refactors.length + conventions.length
+    const isEnglish = language === 'en'
+    const lineLabel = isEnglish ? 'Line' : 'Baris'
+    const scoreLabel = isEnglish ? 'SCORE' : 'SKOR'
+    const totalLabel = isEnglish ? 'Total Findings' : 'Total Temuan'
+    const summaryTitle = isEnglish ? 'SUMMARY' : 'RINGKASAN TEMUAN'
+    const nextSubmitTitle = isEnglish ? 'TIPS FOR NEXT SUBMISSION' : 'SARAN UNTUK SUBMIT BERIKUTNYA'
 
     let report = `
 ╔══════════════════════════════════════════════════════════════╗
-║           📊 LAPORAN ANALISIS CLEAN CODE PYTHON              ║
-║                    C3-Py Compiler Online                      ║
+║           📊 ${isEnglish ? 'CLEAN CODE ANALYSIS REPORT' : 'LAPORAN ANALISIS CLEAN CODE PYTHON'}              ║
+║                    ${isEnglish ? 'C3-Py Online Compiler' : 'C3-Py Compiler Online'}                      ║
 ╚══════════════════════════════════════════════════════════════╝
 
-📈 SKOR: ${score.toFixed(2)}/10 (${gradeCategory})
-📋 Total Temuan: ${totalIssues} masalah
+📈 ${scoreLabel}: ${score.toFixed(2)}/10 (${gradeCategory})
+📋 ${totalLabel}: ${totalIssues} ${isEnglish ? 'issues' : 'masalah'}
 
 ┌──────────────────────────────────────────────────────────────┐
-│ RINGKASAN TEMUAN                                             │
+│ ${summaryTitle.padEnd(60)} │
 ├──────────────────────────────────────────────────────────────┤
-│ 🔴 Kesalahan (bug potensial)    : ${errors.length.toString().padStart(3)} masalah              │
-│ 🟡 Peringatan (potensi bug)     : ${warnings.length.toString().padStart(3)} masalah              │
-│ 🟠 Perbaikan struktur           : ${refactors.length.toString().padStart(3)} masalah              │
-│ 🟢 Aturan PEP 8                 : ${conventions.length.toString().padStart(3)} masalah              │
+│ 🔴 ${isEnglish ? 'Errors (potential bugs)' : 'Kesalahan (bug potensial)'}    : ${errors.length.toString().padStart(3)} ${isEnglish ? 'issues' : 'masalah'}              │
+│ 🟡 ${isEnglish ? 'Warnings (potential issues)' : 'Peringatan (potensi bug)'}     : ${warnings.length.toString().padStart(3)} ${isEnglish ? 'issues' : 'masalah'}              │
+│ 🟠 ${isEnglish ? 'Refactor (structure)' : 'Perbaikan struktur'}           : ${refactors.length.toString().padStart(3)} ${isEnglish ? 'issues' : 'masalah'}              │
+│ 🟢 ${isEnglish ? 'PEP 8 (formatting)' : 'Aturan PEP 8'}                 : ${conventions.length.toString().padStart(3)} ${isEnglish ? 'issues' : 'masalah'}              │
 └──────────────────────────────────────────────────────────────┘
 `
 
     if (errors.length > 0) {
-      report += '\n🔴 KESALAHAN - Bug yang berpotensi gagal:\n'
+      report += isEnglish
+        ? '\n🔴 ERROR - Potential bugs:\n'
+        : '\n🔴 KESALAHAN - Bug yang berpotensi gagal:\n'
       errors.slice(0, 5).forEach(e => {
-        report += `   Baris ${e.line}: ${e.explanation}\n`
+        report += `   ${lineLabel} ${e.line}: ${e.explanation}\n`
         if (e.fix_suggestion) report += `   └─ 💡 ${e.fix_suggestion}\n`
       })
     }
 
     if (warnings.length > 0) {
-      report += '\n🟡 PERINGATAN - Potensi bug & variabel tidak terpakai:\n'
+      report += isEnglish
+        ? '\n🟡 WARNING - Potential issues & unused variables:\n'
+        : '\n🟡 PERINGATAN - Potensi bug & variabel tidak terpakai:\n'
       warnings.slice(0, 5).forEach(w => {
-        report += `   Baris ${w.line}: ${w.explanation}\n`
+        report += `   ${lineLabel} ${w.line}: ${w.explanation}\n`
         if (w.fix_suggestion) report += `   └─ 💡 ${w.fix_suggestion}\n`
       })
     }
 
     if (refactors.length > 0) {
-      report += '\n🟠 PERBAIKAN STRUKTUR - Kompleksitas tinggi:\n'
+      report += isEnglish
+        ? '\n🟠 REFACTOR - High complexity:\n'
+        : '\n🟠 PERBAIKAN STRUKTUR - Kompleksitas tinggi:\n'
       refactors.slice(0, 5).forEach(r => {
-        report += `   Baris ${r.line}: ${r.explanation}\n`
+        report += `   ${lineLabel} ${r.line}: ${r.explanation}\n`
         if (r.fix_suggestion) report += `   └─ 💡 ${r.fix_suggestion}\n`
       })
     }
 
     if (conventions.length > 0) {
-      report += '\n🟢 ATURAN PEP 8 - Pelanggaran format:\n'
+      report += isEnglish
+        ? '\n🟢 PEP 8 - Formatting issues:\n'
+        : '\n🟢 ATURAN PEP 8 - Pelanggaran format:\n'
       conventions.slice(0, 5).forEach(c => {
-        report += `   Baris ${c.line}: ${c.explanation}\n`
+        report += `   ${lineLabel} ${c.line}: ${c.explanation}\n`
         if (c.fix_suggestion) report += `   └─ 💡 ${c.fix_suggestion}\n`
       })
     }
 
     report += `
 ┌──────────────────────────────────────────────────────────────┐
-│ 💡 SARAN UNTUK SUBMIT BERIKUTNYA                             │
+│ 💡 ${nextSubmitTitle.padEnd(60)} │
 ├──────────────────────────────────────────────────────────────┤
 │ ${motivation.padEnd(60)} │
 └──────────────────────────────────────────────────────────────┘
@@ -734,45 +879,67 @@ export class CleanCodeAnalyzer {
   /**
    * Generate saran yang lebih baik dengan penjelasan Bahasa Indonesia yang jelas
    */
-  private generateEnhancedSuggestions(analysis: DetailedAnalysis, code: string): string[] {
+  private generateEnhancedSuggestions(
+    analysis: DetailedAnalysis,
+    code: string,
+    language: LanguageCode
+  ): string[] {
     const suggestions: string[] = []
+    const isEnglish = language === 'en'
 
     // Header dengan skor dan kategori
     const gradeEmoji = analysis.score >= 8.1 ? '⭐' : analysis.score >= 6.1 ? '👍' : analysis.score >= 4.1 ? '💪' : analysis.score >= 2.1 ? '📚' : '❌'
-    suggestions.push(`📊 Skor Kualitas Kode: ${analysis.score.toFixed(2)}/10 (${analysis.grade_category}) ${gradeEmoji}`)
+    suggestions.push(isEnglish
+      ? `📊 Code Quality Score: ${analysis.score.toFixed(2)}/10 (${analysis.grade_category}) ${gradeEmoji}`
+      : `📊 Skor Kualitas Kode: ${analysis.score.toFixed(2)}/10 (${analysis.grade_category}) ${gradeEmoji}`
+    )
     suggestions.push('')
 
     // Statistik temuan dengan format jelas
-    suggestions.push(`📋 Ringkasan temuan: 🔴 ${analysis.errors.length} Kesalahan | 🟡 ${analysis.warnings.length} Peringatan | 🟠 ${analysis.refactors.length} Perbaikan Struktur | 🟢 ${analysis.conventions.length} Aturan PEP 8`)
+    suggestions.push(isEnglish
+      ? `📋 Summary: 🔴 ${analysis.errors.length} Errors | 🟡 ${analysis.warnings.length} Warnings | 🟠 ${analysis.refactors.length} Refactors | 🟢 ${analysis.conventions.length} PEP 8`
+      : `📋 Ringkasan temuan: 🔴 ${analysis.errors.length} Kesalahan | 🟡 ${analysis.warnings.length} Peringatan | 🟠 ${analysis.refactors.length} Perbaikan Struktur | 🟢 ${analysis.conventions.length} Aturan PEP 8`
+    )
     suggestions.push('')
 
     // Gabungkan semua issues dan sort by priority
     const allIssues = [
-      ...analysis.errors.map(e => ({ ...e, priority: 4, categoryLabel: 'Kesalahan' })),
-      ...analysis.warnings.map(w => ({ ...w, priority: 3, categoryLabel: 'Peringatan' })),
-      ...analysis.refactors.map(r => ({ ...r, priority: 2, categoryLabel: 'Perbaikan Struktur' })),
-      ...analysis.conventions.map(c => ({ ...c, priority: 1, categoryLabel: 'Aturan PEP 8' })),
+      ...analysis.errors.map(e => ({ ...e, priority: 4, categoryLabel: isEnglish ? 'Error' : 'Kesalahan' })),
+      ...analysis.warnings.map(w => ({ ...w, priority: 3, categoryLabel: isEnglish ? 'Warning' : 'Peringatan' })),
+      ...analysis.refactors.map(r => ({ ...r, priority: 2, categoryLabel: isEnglish ? 'Refactor' : 'Perbaikan Struktur' })),
+      ...analysis.conventions.map(c => ({ ...c, priority: 1, categoryLabel: isEnglish ? 'PEP 8' : 'Aturan PEP 8' })),
     ].sort((a, b) => b.priority - a.priority)
 
     if (allIssues.length > 0) {
-      suggestions.push('📝 Daftar perbaikan:')
+      suggestions.push(isEnglish ? '📝 Fix list:' : '📝 Daftar perbaikan:')
       suggestions.push('')
       
       // Tampilkan semua issues dengan format yang sederhana
       allIssues.forEach((issue) => {
         const emoji = this.getCategoryEmoji(issue.category)
-        const lineInfo = issue.line > 0 ? `Baris ${issue.line}` : 'Lokasi umum'
+        const lineInfo = issue.line > 0
+          ? `${isEnglish ? 'Line' : 'Baris'} ${issue.line}`
+          : (isEnglish ? 'General location' : 'Lokasi umum')
         
         suggestions.push(`${emoji} ${issue.categoryLabel} (${lineInfo})`)
-        suggestions.push(`   Masalah: ${issue.explanation}`)
+        suggestions.push(isEnglish
+          ? `   Issue: ${issue.explanation}`
+          : `   Masalah: ${issue.explanation}`
+        )
         
-        if (issue.fix_suggestion && issue.fix_suggestion !== 'Perbaiki sesuai pesan error') {
-          suggestions.push(`   Perbaiki: ${issue.fix_suggestion}`)
+        if (issue.fix_suggestion) {
+          suggestions.push(isEnglish
+            ? `   Fix: ${issue.fix_suggestion}`
+            : `   Perbaiki: ${issue.fix_suggestion}`
+          )
         }
         suggestions.push('')
       })
     } else {
-      suggestions.push('✅ Tidak ada masalah ditemukan! Kode sudah sangat rapi.')
+      suggestions.push(isEnglish
+        ? '✅ No issues found! Your code looks clean.'
+        : '✅ Tidak ada masalah ditemukan! Kode sudah sangat rapi.'
+      )
       suggestions.push('')
     }
 
@@ -781,37 +948,76 @@ export class CleanCodeAnalyzer {
     suggestions.push('')
     
     // Motivasi dengan format yang lebih menarik
-    suggestions.push('💬 Pesan untuk kamu:')
+    suggestions.push(isEnglish ? '💬 Message for you:' : '💬 Pesan untuk kamu:')
     suggestions.push(analysis.motivation)
     suggestions.push('')
 
     // Tips tambahan berdasarkan skor
     if (analysis.score < 7) {
-      suggestions.push('📚 Tips agar nilai naik:')
+      suggestions.push(isEnglish ? '📚 Tips to improve your score:' : '📚 Tips agar nilai naik:')
       suggestions.push('')
-      suggestions.push('1️⃣ Penamaan:')
-      suggestions.push('   • Gunakan snake_case: total_nilai, jumlah_siswa')
-      suggestions.push('   • Hindari nama terlalu singkat: x → jumlah, i → indeks')
+      suggestions.push(isEnglish ? '1️⃣ Naming:' : '1️⃣ Penamaan:')
+      suggestions.push(isEnglish
+        ? '   • Use snake_case: total_score, student_count'
+        : '   • Gunakan snake_case: total_nilai, jumlah_siswa'
+      )
+      suggestions.push(isEnglish
+        ? '   • Avoid very short names: x → total, i → index'
+        : '   • Hindari nama terlalu singkat: x → jumlah, i → indeks'
+      )
       suggestions.push('')
-      suggestions.push('2️⃣ Kerapian kode:')
-      suggestions.push('   • Gunakan 4 spasi untuk indentasi')
-      suggestions.push('   • Maksimal 79 karakter per baris')
-      suggestions.push('   • Hapus spasi kosong di akhir baris')
+      suggestions.push(isEnglish ? '2️⃣ Formatting:' : '2️⃣ Kerapian kode:')
+      suggestions.push(isEnglish
+        ? '   • Use 4 spaces for indentation'
+        : '   • Gunakan 4 spasi untuk indentasi'
+      )
+      suggestions.push(isEnglish
+        ? '   • Keep lines under 79 characters'
+        : '   • Maksimal 79 karakter per baris'
+      )
+      suggestions.push(isEnglish
+        ? '   • Remove trailing whitespace'
+        : '   • Hapus spasi kosong di akhir baris'
+      )
       suggestions.push('')
-      suggestions.push('3️⃣ Dokumentasi:')
-      suggestions.push('   • Tambahkan docstring (komentar penjelasan) pada fungsi penting')
-      suggestions.push('   • Contoh: """Menghitung total belanja."""')
+      suggestions.push(isEnglish ? '3️⃣ Documentation:' : '3️⃣ Dokumentasi:')
+      suggestions.push(isEnglish
+        ? '   • Add docstrings to important functions'
+        : '   • Tambahkan docstring (komentar penjelasan) pada fungsi penting'
+      )
+      suggestions.push(isEnglish
+        ? '   • Example: """Calculate total cost."""'
+        : '   • Contoh: """Menghitung total belanja."""'
+      )
       suggestions.push('')
-      suggestions.push('🔗 Baca panduan PEP 8: https://pep8.org/')
+      suggestions.push(isEnglish
+        ? '🔗 Read the PEP 8 guide: https://pep8.org/'
+        : '🔗 Baca panduan PEP 8: https://pep8.org/'
+      )
     } else if (analysis.score < 9) {
-      suggestions.push('💡 Tips agar lebih rapi:')
-      suggestions.push('   • Tambahkan docstring (komentar penjelasan) pada fungsi penting')
-      suggestions.push('   • Gunakan nama variabel yang jelas dan konsisten')
-      suggestions.push('   • Cek ulang format dan indentasi')
+      suggestions.push(isEnglish ? '💡 Tips to make it even cleaner:' : '💡 Tips agar lebih rapi:')
+      suggestions.push(isEnglish
+        ? '   • Add docstrings to important functions'
+        : '   • Tambahkan docstring (komentar penjelasan) pada fungsi penting'
+      )
+      suggestions.push(isEnglish
+        ? '   • Use clear and consistent variable names'
+        : '   • Gunakan nama variabel yang jelas dan konsisten'
+      )
+      suggestions.push(isEnglish
+        ? '   • Recheck formatting and indentation'
+        : '   • Cek ulang format dan indentasi'
+      )
     } else {
-      suggestions.push('🎉 Luar biasa!')
-      suggestions.push('   Kode kamu sudah memenuhi standar clean code.')
-      suggestions.push('   Pertahankan kualitas ini!')
+      suggestions.push(isEnglish ? '🎉 Excellent!' : '🎉 Luar biasa!')
+      suggestions.push(isEnglish
+        ? '   Your code already meets clean code standards.'
+        : '   Kode kamu sudah memenuhi standar clean code.'
+      )
+      suggestions.push(isEnglish
+        ? '   Keep it up!'
+        : '   Pertahankan kualitas ini!'
+      )
     }
 
     return suggestions
@@ -822,7 +1028,7 @@ export class CleanCodeAnalyzer {
    * Run analisis kode Python via Render API (Pylint di server)
    * Hasil rinci dari Pylint tanpa ketergantungan Python lokal di Vercel
    */
-  private async runAnalysis(code: string): Promise<{
+  private async runAnalysis(code: string, language: LanguageCode): Promise<{
     fatal: boolean
     error: number
     warning: number
@@ -855,14 +1061,14 @@ export class CleanCodeAnalyzer {
 
       if (!response.ok) {
         console.error('Analyze API error:', response.status)
-        return this.runFallbackAnalysis(code)
+        return this.runFallbackAnalysis(code, language)
       }
 
       const data = await response.json()
 
       if (!data.success || !Array.isArray(data.messages)) {
         console.warn('Analyze API returned empty, using fallback')
-        return this.runFallbackAnalysis(code)
+        return this.runFallbackAnalysis(code, language)
       }
 
       for (const item of data.messages) {
@@ -899,7 +1105,7 @@ export class CleanCodeAnalyzer {
       }
     } catch (err: any) {
       console.error('Render API error, using fallback:', err.message)
-      return this.runFallbackAnalysis(code)
+      return this.runFallbackAnalysis(code, language)
     }
 
     const invalidNameCount = messages.filter(m => m.code === 'C0103').length
@@ -923,7 +1129,7 @@ export class CleanCodeAnalyzer {
    * Fallback analisis berbasis TypeScript jika Pylint lokal gagal
    * Melakukan pengecekan PEP 8 dasar tanpa Python
    */
-  private runFallbackAnalysis(code: string): {
+  private runFallbackAnalysis(code: string, language: LanguageCode): {
     fatal: boolean
     error: number
     warning: number
@@ -938,6 +1144,7 @@ export class CleanCodeAnalyzer {
     let convention = 0
     let warning = 0
     let refactor = 0
+    const isEnglish = language === 'en'
 
     const lines = code.split('\n')
 
@@ -946,13 +1153,17 @@ export class CleanCodeAnalyzer {
 
       // Line too long
       if (line.length > 79) {
-        messages.push({ code: 'C0301', line: lineNum, message: `Baris terlalu panjang (${line.length}/79)`, category: 'convention' })
+        const message = isEnglish
+          ? `Line too long (${line.length}/79)`
+          : `Baris terlalu panjang (${line.length}/79)`
+        messages.push({ code: 'C0301', line: lineNum, message, category: 'convention' })
         convention++
       }
 
       // Trailing whitespace
       if (/\s+$/.test(line) && line.trim().length > 0) {
-        messages.push({ code: 'C0303', line: lineNum, message: 'Spasi di akhir baris', category: 'convention' })
+        const message = isEnglish ? 'Trailing whitespace' : 'Spasi di akhir baris'
+        messages.push({ code: 'C0303', line: lineNum, message, category: 'convention' })
         convention++
       }
 
@@ -961,14 +1172,18 @@ export class CleanCodeAnalyzer {
       if (indentMatch && indentMatch[1].includes(' ')) {
         const spaces = indentMatch[1].replace(/\t/g, '    ').length
         if (spaces % 4 !== 0) {
-          messages.push({ code: 'W0311', line: lineNum, message: `Indentasi ${spaces} spasi (seharusnya kelipatan 4)`, category: 'warning' })
+          const message = isEnglish
+            ? `Indentation is ${spaces} spaces (should be a multiple of 4)`
+            : `Indentasi ${spaces} spasi (seharusnya kelipatan 4)`
+          messages.push({ code: 'W0311', line: lineNum, message, category: 'warning' })
           warning++
         }
       }
 
       // Mixed indentation
       if (/^\t+ +/.test(line) || /^ +\t+/.test(line)) {
-        messages.push({ code: 'W0312', line: lineNum, message: 'Campuran tab dan spasi', category: 'warning' })
+        const message = isEnglish ? 'Mixed tabs and spaces' : 'Campuran tab dan spasi'
+        messages.push({ code: 'W0312', line: lineNum, message, category: 'warning' })
         warning++
       }
 
@@ -977,7 +1192,10 @@ export class CleanCodeAnalyzer {
       if (funcMatch) {
         const name = funcMatch[1]
         if (!/^[a-z_][a-z0-9_]*$/.test(name) && !name.startsWith('__')) {
-          messages.push({ code: 'C0103', line: lineNum, message: `Nama fungsi '${name}' tidak sesuai snake_case`, category: 'convention' })
+          const message = isEnglish
+            ? `Function name '${name}' should use snake_case`
+            : `Nama fungsi '${name}' tidak sesuai snake_case`
+          messages.push({ code: 'C0103', line: lineNum, message, category: 'convention' })
           convention++
         }
       }
@@ -987,32 +1205,39 @@ export class CleanCodeAnalyzer {
       if (classMatch) {
         const name = classMatch[1]
         if (!/^[A-Z][a-zA-Z0-9]*$/.test(name)) {
-          messages.push({ code: 'C0103', line: lineNum, message: `Nama class '${name}' harus PascalCase`, category: 'convention' })
+          const message = isEnglish
+            ? `Class name '${name}' should use PascalCase`
+            : `Nama class '${name}' harus PascalCase`
+          messages.push({ code: 'C0103', line: lineNum, message, category: 'convention' })
           convention++
         }
       }
 
       // Check eval/exec
       if (/\beval\s*\(/.test(line)) {
-        messages.push({ code: 'W0123', line: lineNum, message: 'Penggunaan eval() berbahaya', category: 'warning' })
+        const message = isEnglish ? 'Using eval() is unsafe' : 'Penggunaan eval() berbahaya'
+        messages.push({ code: 'W0123', line: lineNum, message, category: 'warning' })
         warning++
       }
       if (/\bexec\s*\(/.test(line)) {
-        messages.push({ code: 'W0122', line: lineNum, message: 'Penggunaan exec() berbahaya', category: 'warning' })
+        const message = isEnglish ? 'Using exec() is unsafe' : 'Penggunaan exec() berbahaya'
+        messages.push({ code: 'W0122', line: lineNum, message, category: 'warning' })
         warning++
       }
     })
 
     // Missing final newline
     if (!code.endsWith('\n')) {
-      messages.push({ code: 'C0304', line: lines.length, message: 'File tidak diakhiri dengan baris kosong', category: 'convention' })
+      const message = isEnglish ? 'File does not end with a newline' : 'File tidak diakhiri dengan baris kosong'
+      messages.push({ code: 'C0304', line: lines.length, message, category: 'convention' })
       convention++
     }
 
     // Check for missing module docstring (basic)
     const firstNonEmpty = lines.findIndex(l => l.trim().length > 0 && !l.trim().startsWith('#'))
     if (firstNonEmpty >= 0 && !lines[firstNonEmpty].trim().startsWith('"""') && !lines[firstNonEmpty].trim().startsWith("'''")) {
-      messages.push({ code: 'C0114', line: 1, message: 'Module tidak punya docstring', category: 'convention' })
+      const message = isEnglish ? 'Module is missing a docstring' : 'Module tidak punya docstring'
+      messages.push({ code: 'C0114', line: 1, message, category: 'convention' })
       convention++
     }
 

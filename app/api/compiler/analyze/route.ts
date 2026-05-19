@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
       error: authError,
     } = await supabase.auth.getUser()
 
-    const { code } = await request.json()
+    const { code, language } = await request.json()
+    const analysisLanguage = language === 'en' ? 'en' : 'id'
 
     if (!code || typeof code !== 'string') {
       return NextResponse.json({ error: 'Invalid code' }, { status: 400 })
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     // Analisis kode dan hitung poin yang didapat
     // Skor 0-10, konversi ke persentase (0-100%)
-    const analysis = await cleanCodeAnalyzer.analyze(code)
+    const analysis = await cleanCodeAnalyzer.analyze(code, analysisLanguage)
     const scorePercentage = Math.round(analysis.final_score * 10) // Konversi ke 0-100%
     const pointsEarned = scorePercentage // Poin = persentase
 

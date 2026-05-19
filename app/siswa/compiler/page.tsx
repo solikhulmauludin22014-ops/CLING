@@ -277,7 +277,7 @@ print(f"Average: {result_avg}")
       const response = await fetch('/api/compiler/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, language }),
       })
 
       const data = await response.json()
