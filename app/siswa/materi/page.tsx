@@ -137,14 +137,14 @@ export default function SiswaMateriPage() {
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-center">
               <div className="text-6xl mb-4">🚪</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Logout?', 'Logout?')}</h3>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Keluar?', 'Logout?')}</h3>
               <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin keluar?', 'Are you sure you want to logout?')}</p>
               <div className="flex gap-4 justify-center">
                 <button onClick={() => setShowLogoutModal(false)} className={`px-6 py-3 rounded-xl font-semibold transition-all ${theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500 text-white' : 'bg-gray-200 hover:bg-gray-300 text-slate-800'}`}>
                   {tr('❌ Tidak', '❌ No')}
                 </button>
                 <button onClick={handleLogout} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-red-500/30">
-                  {tr('✅ Ya, Logout', '✅ Yes, Logout')}
+                  {tr('✅ Ya, Keluar', '✅ Yes, Logout')}
                 </button>
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function SiswaMateriPage() {
               onClick={() => setShowLogoutModal(true)}
               className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300 text-left"
             >
-              🚪 {tr('Logout', 'Logout')}
+              🚪 {tr('Keluar', 'Logout')}
             </button>
           </div>
         </div>

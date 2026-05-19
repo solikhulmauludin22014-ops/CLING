@@ -593,7 +593,7 @@ export default function GuruDashboard() {
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-center">
               <div className="text-6xl mb-4">🚪</div>
-              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Logout?', 'Logout?')}</h3>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Keluar?', 'Logout?')}</h3>
               <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin keluar dari aplikasi?', 'Are you sure you want to logout from the app?')}</p>
               <div className="flex gap-4 justify-center">
                 <button
@@ -606,7 +606,7 @@ export default function GuruDashboard() {
                   onClick={handleLogout}
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
-                  {tr('✅ Ya, Logout', '✅ Yes, Logout')}
+                  {tr('✅ Ya, Keluar', '✅ Yes, Logout')}
                 </button>
               </div>
             </div>
@@ -795,7 +795,7 @@ export default function GuruDashboard() {
                 onClick={confirmLogout}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300"
               >
-                🚪 Logout
+                🚪 {tr('Keluar', 'Logout')}
               </button>
             </div>
           </div>

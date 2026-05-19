@@ -55,10 +55,11 @@ const translations = {
     deleteModalDelete: '🗑️ Hapus Akun',
     deleteModalDeleting: '🗑️ Menghapus...',
     deleteConfirmReminder: 'Ketik "HAPUS AKUN" untuk mengkonfirmasi penghapusan.',
-    logoutTitle: 'Logout?',
+    logoutTitle: 'Keluar?',
     logoutDesc: 'Apakah Anda yakin ingin keluar?',
     logoutCancel: '❌ Tidak',
-    logoutConfirm: '✅ Ya, Logout',
+    logoutConfirm: '✅ Ya, Keluar',
+    logoutButton: 'Keluar',
     fileDeleteError: 'Gagal menghapus akun',
   },
   en: {
@@ -112,6 +113,7 @@ const translations = {
     logoutDesc: 'Are you sure you want to logout?',
     logoutCancel: '❌ No',
     logoutConfirm: '✅ Yes, Logout',
+    logoutButton: 'Logout',
     fileDeleteError: 'Failed to delete account',
   }
 }
@@ -508,7 +510,7 @@ export default function SiswaProfilePage() {
               onClick={() => setShowLogoutModal(true)}
               className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300 text-left"
             >
-              🚪 Logout
+              🚪 {t('logoutButton')}
             </button>
           </div>
         </div>

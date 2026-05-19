@@ -592,7 +592,7 @@ export class CleanCodeAnalyzer {
     const issues: string[] = []
 
     if (analysis.errors.length > 0) {
-      issues.push('═══ 🔴 ERROR (Bug Potensial) ═══')
+      issues.push('═══ 🔴 KESALAHAN (Bug Potensial) ═══')
       analysis.errors.forEach(e => {
         issues.push(`  Baris ${e.line}: ${e.explanation}`)
         if (e.fix_suggestion) issues.push(`    💡 Perbaikan: ${e.fix_suggestion}`)
@@ -600,7 +600,7 @@ export class CleanCodeAnalyzer {
     }
 
     if (analysis.warnings.length > 0) {
-      issues.push('═══ 🟡 WARNING (Potensi Bug) ═══')
+      issues.push('═══ 🟡 PERINGATAN (Potensi Bug) ═══')
       analysis.warnings.forEach(w => {
         issues.push(`  Baris ${w.line}: ${w.explanation}`)
         if (w.fix_suggestion) issues.push(`    💡 Perbaikan: ${w.fix_suggestion}`)
@@ -608,7 +608,7 @@ export class CleanCodeAnalyzer {
     }
 
     if (analysis.refactors.length > 0) {
-      issues.push('═══ 🟠 REFACTOR (Perlu Perbaikan Struktur) ═══')
+      issues.push('═══ 🟠 PERBAIKAN STRUKTUR (Perlu Perapian) ═══')
       analysis.refactors.forEach(r => {
         issues.push(`  Baris ${r.line}: ${r.explanation}`)
         if (r.fix_suggestion) issues.push(`    💡 Perbaikan: ${r.fix_suggestion}`)
@@ -616,7 +616,7 @@ export class CleanCodeAnalyzer {
     }
 
     if (analysis.conventions.length > 0) {
-      issues.push('═══ 🟢 CONVENTION (Pelanggaran PEP 8) ═══')
+      issues.push('═══ 🟢 ATURAN PEP 8 (Format Penulisan) ═══')
       analysis.conventions.forEach(c => {
         issues.push(`  Baris ${c.line}: ${c.explanation}`)
         if (c.fix_suggestion) issues.push(`    💡 Perbaikan: ${c.fix_suggestion}`)
@@ -681,15 +681,15 @@ export class CleanCodeAnalyzer {
 ┌──────────────────────────────────────────────────────────────┐
 │ RINGKASAN TEMUAN                                             │
 ├──────────────────────────────────────────────────────────────┤
-│ 🔴 Error (bug potensial)        : ${errors.length.toString().padStart(3)} masalah              │
-│ 🟡 Warning (potensi bug)        : ${warnings.length.toString().padStart(3)} masalah              │
-│ 🟠 Refactor (perlu struktur)    : ${refactors.length.toString().padStart(3)} masalah              │
-│ 🟢 Convention (PEP 8)           : ${conventions.length.toString().padStart(3)} masalah              │
+│ 🔴 Kesalahan (bug potensial)    : ${errors.length.toString().padStart(3)} masalah              │
+│ 🟡 Peringatan (potensi bug)     : ${warnings.length.toString().padStart(3)} masalah              │
+│ 🟠 Perbaikan struktur           : ${refactors.length.toString().padStart(3)} masalah              │
+│ 🟢 Aturan PEP 8                 : ${conventions.length.toString().padStart(3)} masalah              │
 └──────────────────────────────────────────────────────────────┘
 `
 
     if (errors.length > 0) {
-      report += '\n🔴 ERROR - Bug yang berpotensi gagal:\n'
+      report += '\n🔴 KESALAHAN - Bug yang berpotensi gagal:\n'
       errors.slice(0, 5).forEach(e => {
         report += `   Baris ${e.line}: ${e.explanation}\n`
         if (e.fix_suggestion) report += `   └─ 💡 ${e.fix_suggestion}\n`
@@ -697,7 +697,7 @@ export class CleanCodeAnalyzer {
     }
 
     if (warnings.length > 0) {
-      report += '\n🟡 WARNING - Potensi bug & unused variable:\n'
+      report += '\n🟡 PERINGATAN - Potensi bug & variabel tidak terpakai:\n'
       warnings.slice(0, 5).forEach(w => {
         report += `   Baris ${w.line}: ${w.explanation}\n`
         if (w.fix_suggestion) report += `   └─ 💡 ${w.fix_suggestion}\n`
@@ -705,7 +705,7 @@ export class CleanCodeAnalyzer {
     }
 
     if (refactors.length > 0) {
-      report += '\n🟠 REFACTOR - Kompleksitas tinggi:\n'
+      report += '\n🟠 PERBAIKAN STRUKTUR - Kompleksitas tinggi:\n'
       refactors.slice(0, 5).forEach(r => {
         report += `   Baris ${r.line}: ${r.explanation}\n`
         if (r.fix_suggestion) report += `   └─ 💡 ${r.fix_suggestion}\n`
@@ -713,7 +713,7 @@ export class CleanCodeAnalyzer {
     }
 
     if (conventions.length > 0) {
-      report += '\n🟢 CONVENTION - Pelanggaran PEP 8:\n'
+      report += '\n🟢 ATURAN PEP 8 - Pelanggaran format:\n'
       conventions.slice(0, 5).forEach(c => {
         report += `   Baris ${c.line}: ${c.explanation}\n`
         if (c.fix_suggestion) report += `   └─ 💡 ${c.fix_suggestion}\n`
@@ -739,23 +739,23 @@ export class CleanCodeAnalyzer {
 
     // Header dengan skor dan kategori
     const gradeEmoji = analysis.score >= 8.1 ? '⭐' : analysis.score >= 6.1 ? '👍' : analysis.score >= 4.1 ? '💪' : analysis.score >= 2.1 ? '📚' : '❌'
-    suggestions.push(`📊 Skor Clean Code: ${analysis.score.toFixed(2)}/10 (${analysis.grade_category}) ${gradeEmoji}`)
+    suggestions.push(`📊 Skor Kualitas Kode: ${analysis.score.toFixed(2)}/10 (${analysis.grade_category}) ${gradeEmoji}`)
     suggestions.push('')
 
     // Statistik temuan dengan format jelas
-    suggestions.push(`📋 Temuan: 🔴 ${analysis.errors.length} Error | 🟡 ${analysis.warnings.length} Warning | 🟠 ${analysis.refactors.length} Refactor | 🟢 ${analysis.conventions.length} Convention`)
+    suggestions.push(`📋 Ringkasan temuan: 🔴 ${analysis.errors.length} Kesalahan | 🟡 ${analysis.warnings.length} Peringatan | 🟠 ${analysis.refactors.length} Perbaikan Struktur | 🟢 ${analysis.conventions.length} Aturan PEP 8`)
     suggestions.push('')
 
     // Gabungkan semua issues dan sort by priority
     const allIssues = [
-      ...analysis.errors.map(e => ({ ...e, priority: 4, categoryLabel: 'ERROR' })),
-      ...analysis.warnings.map(w => ({ ...w, priority: 3, categoryLabel: 'WARNING' })),
-      ...analysis.refactors.map(r => ({ ...r, priority: 2, categoryLabel: 'REFACTOR' })),
-      ...analysis.conventions.map(c => ({ ...c, priority: 1, categoryLabel: 'CONVENTION' })),
+      ...analysis.errors.map(e => ({ ...e, priority: 4, categoryLabel: 'KESALAHAN' })),
+      ...analysis.warnings.map(w => ({ ...w, priority: 3, categoryLabel: 'PERINGATAN' })),
+      ...analysis.refactors.map(r => ({ ...r, priority: 2, categoryLabel: 'PERBAIKAN STRUKTUR' })),
+      ...analysis.conventions.map(c => ({ ...c, priority: 1, categoryLabel: 'ATURAN PEP 8' })),
     ].sort((a, b) => b.priority - a.priority)
 
     if (allIssues.length > 0) {
-      suggestions.push('📝 TEMUAN UTAMA:')
+      suggestions.push('📝 Temuan utama:')
       suggestions.push('')
       
       // Tampilkan semua issues dengan penjelasan lengkap
@@ -768,12 +768,12 @@ export class CleanCodeAnalyzer {
         suggestions.push(`   📖 ${issue.explanation}`)
         
         if (issue.fix_suggestion && issue.fix_suggestion !== 'Perbaiki sesuai pesan error') {
-          suggestions.push(`   💡 Cara perbaiki: ${issue.fix_suggestion}`)
+          suggestions.push(`   💡 Saran perbaikan: ${issue.fix_suggestion}`)
         }
         suggestions.push('')
       })
     } else {
-      suggestions.push('✅ Tidak ada masalah ditemukan! Kode sudah sangat bersih.')
+      suggestions.push('✅ Tidak ada masalah ditemukan! Kode sudah sangat rapi.')
       suggestions.push('')
     }
 
@@ -782,35 +782,35 @@ export class CleanCodeAnalyzer {
     suggestions.push('')
     
     // Motivasi dengan format yang lebih menarik
-    suggestions.push('💬 PESAN UNTUK KAMU:')
+    suggestions.push('💬 Pesan untuk kamu:')
     suggestions.push(analysis.motivation)
     suggestions.push('')
 
     // Tips tambahan berdasarkan skor
     if (analysis.score < 7) {
-      suggestions.push('📚 TIPS UNTUK NILAI LEBIH TINGGI:')
+      suggestions.push('📚 Tips agar nilai naik:')
       suggestions.push('')
-      suggestions.push('1️⃣ Penamaan Variabel:')
-      suggestions.push('   • Gunakan snake_case: contoh_variabel, hitung_total')
-      suggestions.push('   • Hindari nama 1 huruf: x → jumlah, i → index')
+      suggestions.push('1️⃣ Penamaan:')
+      suggestions.push('   • Gunakan snake_case: total_nilai, jumlah_siswa')
+      suggestions.push('   • Hindari nama terlalu singkat: x → jumlah, i → indeks')
       suggestions.push('')
-      suggestions.push('2️⃣ Format Kode:')
+      suggestions.push('2️⃣ Kerapian kode:')
       suggestions.push('   • Gunakan 4 spasi untuk indentasi')
       suggestions.push('   • Maksimal 79 karakter per baris')
       suggestions.push('   • Hapus spasi kosong di akhir baris')
       suggestions.push('')
       suggestions.push('3️⃣ Dokumentasi:')
-      suggestions.push('   • Tambahkan docstring di setiap fungsi')
-      suggestions.push('   • Contoh: """Fungsi untuk menghitung total."""')
+      suggestions.push('   • Tambahkan docstring (komentar penjelasan) pada fungsi penting')
+      suggestions.push('   • Contoh: """Menghitung total belanja."""')
       suggestions.push('')
-      suggestions.push('🔗 Pelajari lebih lanjut: https://pep8.org/')
+      suggestions.push('🔗 Baca panduan PEP 8: https://pep8.org/')
     } else if (analysis.score < 9) {
-      suggestions.push('💡 TIPS UNTUK SEMPURNA:')
-      suggestions.push('   • Tambahkan docstring di setiap fungsi')
-      suggestions.push('   • Pastikan semua variabel memiliki nama deskriptif')
-      suggestions.push('   • Periksa kembali format dan indentasi')
+      suggestions.push('💡 Tips agar lebih rapi:')
+      suggestions.push('   • Tambahkan docstring (komentar penjelasan) pada fungsi penting')
+      suggestions.push('   • Gunakan nama variabel yang jelas dan konsisten')
+      suggestions.push('   • Cek ulang format dan indentasi')
     } else {
-      suggestions.push('🎉 LUAR BIASA!')
+      suggestions.push('🎉 Luar biasa!')
       suggestions.push('   Kode kamu sudah memenuhi standar clean code.')
       suggestions.push('   Pertahankan kualitas ini!')
     }
@@ -953,7 +953,7 @@ export class CleanCodeAnalyzer {
 
       // Trailing whitespace
       if (/\s+$/.test(line) && line.trim().length > 0) {
-        messages.push({ code: 'C0303', line: lineNum, message: 'Trailing whitespace', category: 'convention' })
+        messages.push({ code: 'C0303', line: lineNum, message: 'Spasi di akhir baris', category: 'convention' })
         convention++
       }
 

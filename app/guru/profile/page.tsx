@@ -46,10 +46,11 @@ const translations = {
     warningTitle: 'Peringatan',
     warningDesc: 'Menghapus akun akan menghapus semua data Anda secara permanen termasuk profil dan data akun. Tindakan ini tidak dapat dibatalkan.',
     btnDeleteAccount: 'Hapus Akun Saya',
-    logoutTitle: 'Logout?',
+    logoutTitle: 'Keluar?',
     logoutDesc: 'Apakah Anda yakin ingin keluar?',
     logoutCancel: '❌ Tidak',
-    logoutConfirm: '✅ Ya, Logout',
+    logoutConfirm: '✅ Ya, Keluar',
+    logoutButton: 'Keluar',
     fileDeleteError: 'Gagal menghapus akun',
   },
   en: {
@@ -94,6 +95,7 @@ const translations = {
     logoutDesc: 'Are you sure you want to logout?',
     logoutCancel: '❌ No',
     logoutConfirm: '✅ Yes, Logout',
+    logoutButton: 'Logout',
     fileDeleteError: 'Failed to delete account',
   }
 }
@@ -399,7 +401,7 @@ export default function GuruProfilePage() {
               <Link href="/guru/dashboard" className={`px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-purple-50 hover:bg-purple-100 text-purple-700'}`}>
                 📊 {t('navDashboard')}
               </Link>
-              <button onClick={() => setShowLogoutModal(true)} className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all" title="Logout">
+              <button onClick={() => setShowLogoutModal(true)} className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all" title={t('logoutButton')}>
                 🚪
               </button>
             </div>
