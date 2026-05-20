@@ -21,9 +21,8 @@ export async function middleware(request: NextRequest) {
         },
       },
     }
-            const isGuruRoute = pathname.startsWith('/guru')
-            const isSiswaRoute = pathname.startsWith('/siswa')
-            const isExamRoute = pathname.startsWith('/exams')
+  )
+
   const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
 
@@ -32,7 +31,7 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-            const isProtectedRoute = isGuruRoute || isSiswaRoute || isExamRoute
+  const isGuruRoute = pathname.startsWith('/guru')
   const isSiswaRoute = pathname.startsWith('/siswa')
   const isExamRoute = pathname.startsWith('/exams')
   const isLoginRoute = pathname === '/login'
@@ -41,7 +40,6 @@ export async function middleware(request: NextRequest) {
   const isResetPasswordRoute = pathname === '/reset-password'
   const isAuthCallbackRoute = pathname === '/auth/callback'
   const isAuthConfirmRoute = pathname === '/auth/confirm'
-
   const isProtectedRoute = isGuruRoute || isSiswaRoute || isExamRoute
 
   if (isAuthCallbackRoute || isAuthConfirmRoute) {
