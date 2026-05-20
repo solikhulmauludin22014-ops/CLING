@@ -4,10 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request, context: { params: any }) {
+  const { params } = context as { params: { id: string } }
   try {
     const supabase = await createClient()
     const {
