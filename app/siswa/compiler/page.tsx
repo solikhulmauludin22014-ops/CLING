@@ -809,6 +809,13 @@ print(f"Average: {result_avg}")
               </a>
 
               <a
+                href="/siswa/ujian"
+                className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 border border-blue-500/30' : 'bg-blue-100 hover:bg-blue-200 text-blue-700'}`}
+              >
+                📝 {tr('Ujian', 'Exams')}
+              </a>
+
+              <a
                 href="/siswa/leaderboard"
                 className={`px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 ${theme === 'dark' ? 'bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/30' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'}`}
               >

@@ -14,6 +14,7 @@ const translations = {
     navMaterials: 'Materi',
     navCompiler: 'Compiler',
     navLeaderboard: 'Leaderboard',
+    navExam: 'Ujian',
     back: 'Kembali',
     labelFullName: 'Nama Lengkap',
     placeholderFullName: 'Nama lengkap Anda',
@@ -68,6 +69,7 @@ const translations = {
     navMaterials: 'Materials',
     navCompiler: 'Compiler',
     navLeaderboard: 'Leaderboard',
+    navExam: 'Exams',
     back: 'Back',
     labelFullName: 'Full Name',
     placeholderFullName: 'Your full name',
@@ -482,6 +484,13 @@ export default function SiswaProfilePage() {
               className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 border border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`}
             >
               📚 {t('navMaterials')}
+            </Link>
+
+            <Link
+              href="/siswa/ujian"
+              className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${theme === 'dark' ? 'bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 border border-blue-500/30' : 'bg-blue-100 hover:bg-blue-200 text-blue-700'}`}
+            >
+              📝 {t('navExam')}
             </Link>
 
             <Link
