@@ -61,11 +61,22 @@ export default function GuruDashboard() {
   })
   
   // Tab state
-  const [activeTab, setActiveTab] = useState<'students' | 'materials'>('students')
+  const [activeTab, setActiveTab] = useState<'students' | 'materials' | 'exams'>('students')
   
   // Material states
   const [materials, setMaterials] = useState<Material[]>([])
   const [materialsLoading, setMaterialsLoading] = useState(false)
+  // Exams (teacher) states
+  const [exams, setExams] = useState<Array<any>>([])
+  const [examsLoading, setExamsLoading] = useState(false)
+  const [showCreateExamModal, setShowCreateExamModal] = useState(false)
+  const [newExam, setNewExam] = useState({
+    title: '',
+    exam_type: 'pretest',
+    duration_minutes: 60,
+    is_active: false,
+    questions: [] as Array<{ order_number: number; instruction_text: string; dirty_code_template: string }>,
+  })
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadForm, setUploadForm] = useState({
@@ -134,6 +145,7 @@ export default function GuruDashboard() {
         // Load student data
         loadStudentData()
         loadMaterials()
+        loadExams()
       } catch (error) {
         console.error('Error loading data:', error)
         setLoading(false)
@@ -179,6 +191,64 @@ export default function GuruDashboard() {
       console.error('Failed to load materials:', error)
     } finally {
       setMaterialsLoading(false)
+    }
+  }
+
+  const loadExams = async () => {
+    setExamsLoading(true)
+    try {
+      const res = await fetch('/api/guru/exams')
+      const data = await res.json()
+      if (data.success) setExams(data.exams || [])
+    } catch (err) {
+      console.error('Failed to load exams:', err)
+    } finally {
+      setExamsLoading(false)
+    }
+  }
+
+  const handleAddQuestion = () => {
+    setNewExam((prev) => ({
+      ...prev,
+      questions: [
+        ...prev.questions,
+        { order_number: prev.questions.length + 1, instruction_text: '', dirty_code_template: '' },
+      ],
+    }))
+  }
+
+  const handleRemoveQuestion = (index: number) => {
+    setNewExam((prev) => {
+      const q = [...prev.questions]
+      q.splice(index, 1)
+      return { ...prev, questions: q.map((qq, i) => ({ ...qq, order_number: i + 1 })) }
+    })
+  }
+
+  const handleCreateExam = async () => {
+    if (!newExam.title.trim()) {
+      alert(tr('Judul ujian harus diisi', 'Exam title is required'))
+      return
+    }
+
+    try {
+      const res = await fetch('/api/guru/exams', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newExam),
+      })
+      const data = await res.json()
+      if (data.success) {
+        alert(tr('Ujian berhasil dibuat', 'Exam created'))
+        setShowCreateExamModal(false)
+        setNewExam({ title: '', exam_type: 'pretest', duration_minutes: 60, is_active: false, questions: [] })
+        loadExams()
+      } else {
+        alert(data.error || tr('Gagal membuat ujian', 'Failed to create exam'))
+      }
+    } catch (err) {
+      console.error('Create exam error:', err)
+      alert(tr('Terjadi kesalahan saat membuat ujian', 'Error creating exam'))
     }
   }
 
@@ -986,6 +1056,16 @@ export default function GuruDashboard() {
           >
             📚 Materi Pembelajaran
           </button>
+          <button
+            onClick={() => setActiveTab('exams')}
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+              activeTab === 'exams'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                : theme === 'dark' ? 'text-slate-400 hover:text-white hover:bg-slate-700' : 'text-slate-600 hover:text-purple-700 hover:bg-purple-100'
+            }`}
+          >
+            📝 {tr('Ujian', 'Exams')}
+          </button>
         </div>
       </div>
 
@@ -1444,6 +1524,127 @@ export default function GuruDashboard() {
           </div>
         </div>
           </>
+        )}
+
+        {/* Exams Tab Content */}
+        {activeTab === 'exams' && (
+          <div className="space-y-6">
+            <div className={`rounded-2xl p-6 border shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
+              <div className="flex items-center justify-between">
+                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>📝 {tr('Ujian', 'Exams')}</h2>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={loadExams}
+                    className="text-purple-600 hover:text-purple-700"
+                  >
+                    🔄 Refresh
+                  </button>
+                  <button
+                    onClick={() => setShowCreateExamModal(true)}
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl"
+                  >
+                    ➕ {tr('Buat Ujian', 'Create Exam')}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                {examsLoading ? (
+                  <div className="py-8 text-center">{tr('Memuat ujian...', 'Loading exams...')}</div>
+                ) : exams.length === 0 ? (
+                  <div className="py-8 text-center">{tr('Belum ada ujian', 'No exams yet')}</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {exams.map((exam: any) => (
+                      <div key={exam.id} className={`p-4 rounded-xl border ${theme === 'dark' ? 'bg-slate-700/50 border-slate-600' : 'bg-white border-purple-100'}`}>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{exam.title}</h3>
+                            <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{exam.exam_type} • {exam.duration_minutes} menit</p>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-sm ${theme === 'dark' ? 'text-slate-300' : 'text-slate-500'}`}>{new Date(exam.created_at).toLocaleDateString()}</p>
+                            <p className={`text-xs mt-2 ${exam.is_active ? 'text-green-500' : 'text-slate-400'}`}>{exam.is_active ? tr('Aktif','Active') : tr('Tidak aktif','Inactive')}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Create Exam Modal */}
+            {showCreateExamModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/60" onClick={() => setShowCreateExamModal(false)}></div>
+                <div className={`relative w-11/12 max-w-2xl rounded-2xl p-6 border shadow-2xl ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
+                  <h3 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Buat Ujian Baru','Create New Exam')}</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm block mb-1">{tr('Judul Ujian','Exam Title')}</label>
+                      <input value={newExam.title} onChange={(e) => setNewExam({ ...newExam, title: e.target.value })} className="w-full px-3 py-2 rounded-xl border" />
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <label className="text-sm block mb-1">{tr('Tipe','Type')}</label>
+                        <select value={newExam.exam_type} onChange={(e) => setNewExam({ ...newExam, exam_type: e.target.value as any })} className="w-full px-3 py-2 rounded-xl border">
+                          <option value="pretest">Pretest</option>
+                          <option value="posttest">Posttest</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm block mb-1">{tr('Durasi (menit)','Duration (minutes)')}</label>
+                        <input type="number" value={newExam.duration_minutes} onChange={(e) => setNewExam({ ...newExam, duration_minutes: Number(e.target.value) })} className="w-32 px-3 py-2 rounded-xl border" />
+                      </div>
+                      <div className="flex items-end">
+                        <label className="flex items-center gap-2">
+                          <input type="checkbox" checked={newExam.is_active} onChange={(e) => setNewExam({ ...newExam, is_active: e.target.checked })} /> {tr('Aktif','Active')}
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-sm font-semibold">{tr('Soal Ujian','Exam Questions')}</label>
+                        <button onClick={handleAddQuestion} className="text-sm text-green-600">+ {tr('Tambah Soal','Add Question')}</button>
+                      </div>
+                      {newExam.questions.length === 0 && <p className="text-sm text-slate-500">{tr('Belum ada soal','No questions added')}</p>}
+                      <div className="space-y-3 max-h-60 overflow-auto">
+                        {newExam.questions.map((q, idx) => (
+                          <div key={idx} className="p-3 border rounded-xl">
+                            <div className="flex justify-between items-center mb-2">
+                              <strong>{tr('Soal','Question')} #{q.order_number}</strong>
+                              <button onClick={() => handleRemoveQuestion(idx)} className="text-red-500">{tr('Hapus','Remove')}</button>
+                            </div>
+                            <div className="mb-2">
+                              <label className="text-sm block mb-1">{tr('Instruksi','Instruction')}</label>
+                              <input value={q.instruction_text} onChange={(e) => {
+                                const v = e.target.value
+                                setNewExam(prev => ({ ...prev, questions: prev.questions.map((qq,i) => i===idx ? { ...qq, instruction_text: v } : qq) }))
+                              }} className="w-full px-3 py-2 rounded-xl border" />
+                            </div>
+                            <div>
+                              <label className="text-sm block mb-1">{tr('Template Kode','Code Template')}</label>
+                              <textarea value={q.dirty_code_template} onChange={(e) => {
+                                const v = e.target.value
+                                setNewExam(prev => ({ ...prev, questions: prev.questions.map((qq,i) => i===idx ? { ...qq, dirty_code_template: v } : qq) }))
+                              }} className="w-full px-3 py-2 rounded-xl border resize-none" rows={4} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 mt-4">
+                      <button onClick={() => setShowCreateExamModal(false)} className="px-4 py-2 rounded-xl border">{tr('Batal','Cancel')}</button>
+                      <button onClick={handleCreateExam} className="px-4 py-2 rounded-xl bg-purple-600 text-white">{tr('Buat Ujian','Create Exam')}</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Materials Tab Content */}
