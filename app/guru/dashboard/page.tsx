@@ -81,6 +81,9 @@ export default function GuruDashboard() {
   const [showDeleteStudentModal, setShowDeleteStudentModal] = useState(false)
   const [studentToDelete, setStudentToDelete] = useState<StudentData | null>(null)
   const [deleteStudentLoading, setDeleteStudentLoading] = useState(false)
+  const [showResetProgressModal, setShowResetProgressModal] = useState(false)
+  const [studentToReset, setStudentToReset] = useState<StudentData | null>(null)
+  const [resetProgressLoading, setResetProgressLoading] = useState(false)
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false)
   const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false)
@@ -315,6 +318,11 @@ export default function GuruDashboard() {
     setShowDeleteStudentModal(true)
   }
 
+  const confirmResetProgress = (student: StudentData) => {
+    setStudentToReset(student)
+    setShowResetProgressModal(true)
+  }
+
   const handleDeleteStudent = async () => {
     if (!studentToDelete) return
 
@@ -342,6 +350,39 @@ export default function GuruDashboard() {
       setDeleteStudentLoading(false)
       setShowDeleteStudentModal(false)
       setStudentToDelete(null)
+    }
+  }
+
+  const handleResetProgress = async () => {
+    if (!studentToReset) return
+
+    setResetProgressLoading(true)
+    try {
+      const response = await fetch('/api/guru/reset-student-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: studentToReset.id }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        loadStudentData()
+        alert(
+          language === 'id'
+            ? `Progress siswa "${studentToReset.name}" berhasil direset.`
+            : `Student progress "${studentToReset.name}" reset successfully.`
+        )
+      } else {
+        alert(data.error || tr('Gagal mereset progress siswa', 'Failed to reset student progress'))
+      }
+    } catch (error) {
+      console.error('Reset progress error:', error)
+      alert(tr('Terjadi kesalahan saat mereset progress', 'An error occurred while resetting progress'))
+    } finally {
+      setResetProgressLoading(false)
+      setShowResetProgressModal(false)
+      setStudentToReset(null)
     }
   }
 
@@ -679,6 +720,54 @@ export default function GuruDashboard() {
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
                   {deleteStudentLoading ? tr('⏳ Menghapus...', '⏳ Deleting...') : tr('🗑️ Ya, Hapus Akun', '🗑️ Yes, Delete Account')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showResetProgressModal && studentToReset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => !resetProgressLoading && setShowResetProgressModal(false)}
+          ></div>
+          <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-yellow-100'}`}>
+            <div className="text-center">
+              <div className="text-6xl mb-4">🔄</div>
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
+                {tr('Reset Progress Siswa?', 'Reset Student Progress?')}
+              </h3>
+              <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+                {tr('Apakah Anda yakin ingin mereset progress siswa:', 'Are you sure you want to reset progress for:')}
+              </p>
+              <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-slate-700' : 'bg-yellow-50'}`}>
+                <p className="text-yellow-500 font-bold text-lg">{studentToReset.name}</p>
+                <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                  NIS: {studentToReset.nis} | Kelas: {studentToReset.kelas}
+                </p>
+              </div>
+              <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-600'}`}>
+                {tr(
+                  '⚠️ Semua submission, skor, dan leaderboard siswa ini akan direset menjadi 0. Akun tetap ada.',
+                  '⚠️ All submissions, scores, and leaderboard data will be reset to 0. The account remains.'
+                )}
+              </p>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => setShowResetProgressModal(false)}
+                  disabled={resetProgressLoading}
+                  className="px-6 py-3 bg-slate-500 hover:bg-slate-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300"
+                >
+                  {tr('❌ Batal', '❌ Cancel')}
+                </button>
+                <button
+                  onClick={handleResetProgress}
+                  disabled={resetProgressLoading}
+                  className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-yellow-500/30"
+                >
+                  {resetProgressLoading ? tr('⏳ Mereset...', '⏳ Resetting...') : tr('🔄 Ya, Reset', '🔄 Yes, Reset')}
                 </button>
               </div>
             </div>
@@ -1218,13 +1307,22 @@ export default function GuruDashboard() {
                         })()}
                       </td>
                       <td className={`py-3 px-2 text-center sticky right-0 ${theme === 'dark' ? 'bg-slate-800' : 'bg-white'}`} style={{ boxShadow: '-4px 0 6px -2px rgba(0,0,0,0.08)' }}>
-                        <button
-                          onClick={() => confirmDeleteStudent(student)}
-                          className="px-2.5 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105"
-                          title={`Hapus akun ${student.name}`}
-                        >
-                          🗑️ Hapus
-                        </button>
+                        <div className="flex flex-col items-center gap-2">
+                          <button
+                            onClick={() => confirmResetProgress(student)}
+                            className="px-2.5 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105"
+                            title={tr(`Reset progress ${student.name}`, `Reset progress ${student.name}`)}
+                          >
+                            🔄 {tr('Reset', 'Reset')}
+                          </button>
+                          <button
+                            onClick={() => confirmDeleteStudent(student)}
+                            className="px-2.5 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105"
+                            title={`Hapus akun ${student.name}`}
+                          >
+                            🗑️ {tr('Hapus', 'Delete')}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
