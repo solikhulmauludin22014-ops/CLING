@@ -2,9 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,17 +14,16 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
+          supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
         },
       },
     }
-  )
-
+            const isGuruRoute = pathname.startsWith('/guru')
+            const isSiswaRoute = pathname.startsWith('/siswa')
+            const isExamRoute = pathname.startsWith('/exams')
   const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
 
@@ -35,23 +32,22 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Route yang dilindungi
-  const isGuruRoute = pathname.startsWith('/guru')
+            const isProtectedRoute = isGuruRoute || isSiswaRoute || isExamRoute
   const isSiswaRoute = pathname.startsWith('/siswa')
+  const isExamRoute = pathname.startsWith('/exams')
   const isLoginRoute = pathname === '/login'
   const isRegisterRoute = pathname === '/register'
   const isForgotPasswordRoute = pathname === '/lupa-password'
   const isResetPasswordRoute = pathname === '/reset-password'
   const isAuthCallbackRoute = pathname === '/auth/callback'
   const isAuthConfirmRoute = pathname === '/auth/confirm'
-  const isProtectedRoute = isGuruRoute || isSiswaRoute
 
-  // Lewati route auth (callback dan confirm)
+  const isProtectedRoute = isGuruRoute || isSiswaRoute || isExamRoute
+
   if (isAuthCallbackRoute || isAuthConfirmRoute) {
     return supabaseResponse
   }
 
-  // Handle code parameter pada root URL (fallback ketika redirect URL tidak di-whitelist di Supabase)
   const code = request.nextUrl.searchParams.get('code')
   if (code && !isAuthCallbackRoute) {
     const callbackUrl = new URL('/auth/callback', request.url)
@@ -60,7 +56,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(callbackUrl)
   }
 
-  // Handle token_hash parameter (dari email template kustom)
   const tokenHash = request.nextUrl.searchParams.get('token_hash')
   const type = request.nextUrl.searchParams.get('type')
   if (tokenHash && type) {
@@ -71,56 +66,68 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(confirmUrl)
   }
 
-  // Jangan redirect user yang sedang reset password
   if (isResetPasswordRoute && user) {
     return supabaseResponse
   }
 
-  // Belum login - redirect ke login (hanya untuk route yang dilindungi)
   if (isProtectedRoute && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Ambil role user dari profile atau user_metadata
   const getUserRole = async (userId: string) => {
-    // Pertama coba ambil dari tabel profiles
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', userId)
       .single()
-    
+
     if (profile?.role) {
       return profile.role
     }
-    
-    // Fallback ke user_metadata (diset saat registrasi)
+
     const { data: { user: fullUser } } = await supabase.auth.getUser()
     return fullUser?.user_metadata?.role || 'siswa'
   }
 
-  // User yang sudah login di halaman login, register, atau lupa password - redirect ke dashboard yang sesuai
   if ((isLoginRoute || isRegisterRoute || isForgotPasswordRoute) && user) {
     const userRole = await getUserRole(user.id)
-
     if (userRole === 'guru') {
       return NextResponse.redirect(new URL('/guru/dashboard', request.url))
     }
     return NextResponse.redirect(new URL('/siswa/compiler', request.url))
   }
 
-  // Kontrol akses berbasis role untuk route yang dilindungi
   if (user && isProtectedRoute) {
     const userRole = await getUserRole(user.id)
 
-    // Guru mencoba akses route siswa
-    if (isSiswaRoute && userRole === 'guru') {
+    if ((isSiswaRoute || isExamRoute) && userRole === 'guru') {
       return NextResponse.redirect(new URL('/guru/dashboard', request.url))
     }
 
-    // Siswa mencoba akses route guru
     if (isGuruRoute && userRole === 'siswa') {
       return NextResponse.redirect(new URL('/siswa/compiler', request.url))
+    }
+  }
+
+  // Lock navigation saat ujian aktif (khusus siswa)
+  if (user) {
+    const userRole = await getUserRole(user.id)
+
+    if (userRole === 'siswa') {
+      const { data: activeExam } = await supabase
+        .from('exam_submissions')
+        .select('exam_id')
+        .eq('user_id', user.id)
+        .eq('is_submitted', false)
+        .maybeSingle()
+
+      if (activeExam?.exam_id) {
+        const examPath = `/exams/${activeExam.exam_id}`
+        const isExamPath = pathname.startsWith(examPath)
+        if (!isExamPath) {
+          return NextResponse.redirect(new URL(examPath, request.url))
+        }
+      }
     }
   }
 
