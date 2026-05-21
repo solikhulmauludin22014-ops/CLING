@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/lib/context/ThemeContext'
 import { useLanguage } from '@/lib/context/LanguageContext'
@@ -61,10 +62,12 @@ const translations = {
   },
 }
 
-export default function ExamPage({ params }: { params: { id: string } }) {
+export default function ExamPage({ params }: { params?: { id?: string } }) {
   const { theme } = useTheme()
   const { language } = useLanguage()
   const t = (key: keyof typeof translations['id']) => translations[language][key]
+  const routeParams = useParams<{ id?: string }>()
+  const examId = params?.id || routeParams?.id || ''
 
   const [exam, setExam] = useState<ExamData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -85,7 +88,12 @@ export default function ExamPage({ params }: { params: { id: string } }) {
       setLoading(true)
 
       try {
-        const res = await fetch(`/api/exams/${params.id}`)
+        if (!examId) {
+          setExam(null)
+          return
+        }
+
+        const res = await fetch(`/api/exams/${examId}`)
         const data = await res.json().catch(() => null)
         const examData = data?.exam as ExamData | undefined
 
@@ -108,13 +116,13 @@ export default function ExamPage({ params }: { params: { id: string } }) {
         const { data: examRow } = await supabase
           .from('exams')
           .select('id, title, exam_type, duration_minutes, is_active')
-          .eq('id', params.id)
+          .eq('id', examId)
           .single()
 
         const { data: questions } = await supabase
           .from('exam_questions')
           .select('id, order_number, instruction_text, dirty_code_template')
-          .eq('exam_id', params.id)
+          .eq('exam_id', examId)
           .order('order_number', { ascending: true })
 
         const sortedQuestions = (questions || []).sort((a, b) => a.order_number - b.order_number)
@@ -133,7 +141,7 @@ export default function ExamPage({ params }: { params: { id: string } }) {
     }
 
     loadExam()
-  }, [params.id])
+  }, [examId])
 
   const handleRun = async () => {
     if (!code.trim()) return
