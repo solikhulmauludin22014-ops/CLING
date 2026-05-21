@@ -214,7 +214,16 @@ export default function ExamPage({ params }: { params: { id: string } }) {
   }
 
   if (!exam) {
-    return <div className="p-6">{t('notFound')}</div>
+    return (
+      <div className="p-6">
+        <div className={`rounded-2xl border p-6 ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-purple-100 text-slate-800'}`}>
+          <h2 className="text-xl font-bold mb-2">{t('notFound')}</h2>
+          <p className={theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}>
+            Ujian belum bisa dimuat. Jika ini ujian lama, pastikan sudah ada minimal 1 soal di tabel exam_questions dan exam tersebut masih aktif di Supabase.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   if (!currentQuestion) {

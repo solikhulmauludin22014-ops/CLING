@@ -8,13 +8,6 @@ export async function GET(request: Request, context: { params: any }) {
   const { params } = context as { params: { id: string } }
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
     const examId = params?.id
     if (!examId) {
