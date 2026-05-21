@@ -231,7 +231,17 @@ export default function ExamPage({ params }: { params?: { id?: string } }) {
   }
 
   if (loading) {
-    return <div className="p-6">{t('loadingExam')}</div>
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className={`w-full max-w-2xl rounded-2xl border p-8 text-center ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-purple-100 text-slate-800'}`}>
+          <div className="text-xl font-semibold mb-2">{t('loadingExam')}</div>
+          <div className="mt-4">
+            <div className="inline-block w-16 h-16 border-4 border-t-transparent rounded-full animate-spin" />
+          </div>
+          <p className="mt-4 text-sm opacity-80">Memuat data ujian. Tunggu sebentar...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!exam) {

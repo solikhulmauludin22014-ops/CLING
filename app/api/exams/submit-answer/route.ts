@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
     const payload = (await request.json()) as SubmitAnswerPayload
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     if (submissionError) {
       console.error('Submission lookup error:', submissionError)
-      return NextResponse.json({ error: 'Failed to save answer' }, { status: 500 })
+      return NextResponse.json({ success: false, error: 'Failed to save answer', detail: submissionError.message || submissionError }, { status: 500 })
     }
 
     if (existingSubmission?.is_submitted) {
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
       if (createError || !createdSubmission) {
         console.error('Submission create error:', createError)
-        return NextResponse.json({ error: 'Failed to start exam' }, { status: 500 })
+        return NextResponse.json({ success: false, error: 'Failed to start exam', detail: createError?.message || createError }, { status: 500 })
       }
 
       submissionId = createdSubmission.id
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     if (answerError) {
       console.error('Answer upsert error:', answerError)
-      return NextResponse.json({ error: 'Failed to save answer' }, { status: 500 })
+      return NextResponse.json({ success: false, error: 'Failed to save answer', detail: answerError.message || answerError }, { status: 500 })
     }
 
     return NextResponse.json({
@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Submit answer error:', error)
-    return NextResponse.json({ error: 'Failed to save answer' }, { status: 500 })
+    const msg = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ success: false, error: 'Failed to save answer', detail: msg }, { status: 500 })
   }
 }
