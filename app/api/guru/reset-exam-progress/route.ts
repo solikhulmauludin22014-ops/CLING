@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { supabaseAdmin, isAdminConfigured } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (!user || authError) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
     const { data: profile } = await supabase
@@ -24,17 +24,20 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!profile || profile.role !== 'guru') {
-      return NextResponse.json({ error: 'Forbidden: Hanya guru yang dapat mereset ujian siswa' }, { status: 403 })
+      return NextResponse.json({ success: false, error: 'Forbidden: Hanya guru yang dapat mereset ujian siswa' }, { status: 403 })
     }
 
     const { studentId, examId } = await request.json()
 
     if (!studentId || !examId) {
-      return NextResponse.json({ error: 'Student ID dan Exam ID diperlukan' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'Student ID dan Exam ID diperlukan' }, { status: 400 })
     }
 
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Admin client not configured' }, { status: 500 })
+      return NextResponse.json(
+        { success: false, error: 'Admin client not configured', isAdminConfigured: Boolean(isAdminConfigured) },
+        { status: 500 }
+      )
     }
 
     const { data: studentProfile } = await supabaseAdmin
@@ -44,11 +47,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!studentProfile) {
-      return NextResponse.json({ error: 'Siswa tidak ditemukan' }, { status: 404 })
+      return NextResponse.json({ success: false, error: 'Siswa tidak ditemukan' }, { status: 404 })
     }
 
     if (studentProfile.role !== 'siswa') {
-      return NextResponse.json({ error: 'Hanya akun siswa yang dapat direset' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'Hanya akun siswa yang dapat direset' }, { status: 400 })
     }
 
     const { data: examRow } = await supabaseAdmin
@@ -58,7 +61,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!examRow) {
-      return NextResponse.json({ error: 'Ujian tidak ditemukan' }, { status: 404 })
+      return NextResponse.json({ success: false, error: 'Ujian tidak ditemukan' }, { status: 404 })
     }
 
     const { error: deleteSubmissionError } = await supabaseAdmin
@@ -69,7 +72,8 @@ export async function POST(request: NextRequest) {
 
     if (deleteSubmissionError) {
       console.error('Reset exam progress: delete submission error', deleteSubmissionError)
-      return NextResponse.json({ error: 'Gagal mereset ujian siswa' }, { status: 500 })
+      const errMsg = (deleteSubmissionError as any)?.message || JSON.stringify(deleteSubmissionError)
+      return NextResponse.json({ success: false, error: 'Gagal mereset ujian siswa', detail: errMsg }, { status: 500 })
     }
 
     const studentName = studentProfile.full_name || studentProfile.name || 'Siswa'
@@ -81,6 +85,6 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('Reset exam progress error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Gagal mereset ujian siswa'
-    return NextResponse.json({ error: errorMessage }, { status: 500 })
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 })
   }
 }
