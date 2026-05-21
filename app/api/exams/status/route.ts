@@ -34,6 +34,17 @@ export async function GET() {
     .eq('is_submitted', false)
     .maybeSingle()
 
+  let activeExamId: string | null = null
+  if (activeSubmission?.exam_id) {
+    const { data: activeExam } = await dataClient
+      .from('exams')
+      .select('id')
+      .eq('id', activeSubmission.exam_id)
+      .maybeSingle()
+
+    activeExamId = activeExam?.id ?? null
+  }
+
   const { data: pretestSubmission, error: pretestSubmissionError } = await dataClient
     .from('exam_submissions')
     .select('is_submitted')
@@ -75,7 +86,7 @@ export async function GET() {
   const posttestUnlocked = Boolean(posttest?.is_active) && pretestDone && allMaterialsDone
 
   return NextResponse.json({
-    activeExamId: activeSubmission?.exam_id ?? null,
+    activeExamId,
     pretest: {
       id: pretest?.id ?? null,
       is_active: pretest?.is_active ?? false,

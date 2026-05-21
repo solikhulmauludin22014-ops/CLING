@@ -70,9 +70,10 @@ export default function GuruDashboard() {
   const [exams, setExams] = useState<Array<any>>([])
   const [examsLoading, setExamsLoading] = useState(false)
   const [showCreateExamModal, setShowCreateExamModal] = useState(false)
+  const [editingExamId, setEditingExamId] = useState<string | null>(null)
   const [newExam, setNewExam] = useState({
     title: '',
-    exam_type: 'pretest',
+    exam_type: 'pretest' as 'pretest' | 'posttest',
     duration_minutes: 60,
     is_active: false,
     questions: [] as Array<{ order_number: number; instruction_text: string; dirty_code_template: string }>,
@@ -207,6 +208,39 @@ export default function GuruDashboard() {
     }
   }
 
+  const openCreateExamModal = () => {
+    setEditingExamId(null)
+    setNewExam({
+      title: '',
+      exam_type: 'pretest',
+      duration_minutes: 60,
+      is_active: false,
+      questions: [],
+    })
+    setShowCreateExamModal(true)
+  }
+
+  const openEditExamModal = (exam: any) => {
+    setEditingExamId(exam.id)
+    setNewExam({
+      title: exam.title || '',
+      exam_type: exam.exam_type || 'pretest',
+      duration_minutes: exam.duration_minutes || 60,
+      is_active: Boolean(exam.is_active),
+      questions: exam.questions?.length
+        ? exam.questions
+            .slice()
+            .sort((a: any, b: any) => a.order_number - b.order_number)
+            .map((question: any) => ({
+              order_number: question.order_number,
+              instruction_text: question.instruction_text || '',
+              dirty_code_template: question.dirty_code_template || '',
+            }))
+        : [{ order_number: 1, instruction_text: '', dirty_code_template: '' }],
+    })
+    setShowCreateExamModal(true)
+  }
+
   const handleAddQuestion = () => {
     setNewExam((prev) => ({
       ...prev,
@@ -232,23 +266,44 @@ export default function GuruDashboard() {
     }
 
     try {
-      const res = await fetch('/api/guru/exams', {
-        method: 'POST',
+      const endpoint = editingExamId ? `/api/guru/exams/${editingExamId}` : '/api/guru/exams'
+      const res = await fetch(endpoint, {
+        method: editingExamId ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newExam),
       })
       const data = await res.json()
       if (data.success) {
-        alert(tr('Ujian berhasil dibuat', 'Exam created'))
+        alert(editingExamId ? tr('Ujian berhasil diperbarui', 'Exam updated') : tr('Ujian berhasil dibuat', 'Exam created'))
         setShowCreateExamModal(false)
+        setEditingExamId(null)
         setNewExam({ title: '', exam_type: 'pretest', duration_minutes: 60, is_active: false, questions: [] })
         loadExams()
       } else {
-        alert(data.error || tr('Gagal membuat ujian', 'Failed to create exam'))
+        alert(data.error || (editingExamId ? tr('Gagal memperbarui ujian', 'Failed to update exam') : tr('Gagal membuat ujian', 'Failed to create exam')))
       }
     } catch (err) {
       console.error('Create exam error:', err)
-      alert(tr('Terjadi kesalahan saat membuat ujian', 'Error creating exam'))
+      alert(editingExamId ? tr('Terjadi kesalahan saat memperbarui ujian', 'Error updating exam') : tr('Terjadi kesalahan saat membuat ujian', 'Error creating exam'))
+    }
+  }
+
+  const handleDeleteExam = async (examId: string) => {
+    const confirmed = window.confirm(tr('Hapus ujian ini beserta semua soalnya?', 'Delete this exam and all questions?'))
+    if (!confirmed) return
+
+    try {
+      const res = await fetch(`/api/guru/exams/${examId}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (data.success) {
+        loadExams()
+        alert(tr('Ujian berhasil dihapus', 'Exam deleted'))
+      } else {
+        alert(data.error || tr('Gagal menghapus ujian', 'Failed to delete exam'))
+      }
+    } catch (err) {
+      console.error('Delete exam error:', err)
+      alert(tr('Terjadi kesalahan saat menghapus ujian', 'Error deleting exam'))
     }
   }
 
@@ -1540,7 +1595,7 @@ export default function GuruDashboard() {
                     🔄 Refresh
                   </button>
                   <button
-                    onClick={() => setShowCreateExamModal(true)}
+                    onClick={openCreateExamModal}
                     className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl"
                   >
                     ➕ {tr('Buat Ujian', 'Create Exam')}
@@ -1567,6 +1622,14 @@ export default function GuruDashboard() {
                             <p className={`text-xs mt-2 ${exam.is_active ? 'text-green-500' : 'text-slate-400'}`}>{exam.is_active ? tr('Aktif','Active') : tr('Tidak aktif','Inactive')}</p>
                           </div>
                         </div>
+                        <div className="flex gap-2 mt-4">
+                          <button onClick={() => openEditExamModal(exam)} className="flex-1 px-3 py-2 rounded-xl bg-purple-600 text-white text-sm font-semibold">
+                            {tr('Edit', 'Edit')}
+                          </button>
+                          <button onClick={() => handleDeleteExam(exam.id)} className="flex-1 px-3 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold">
+                            {tr('Hapus', 'Delete')}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1577,9 +1640,12 @@ export default function GuruDashboard() {
             {/* Create Exam Modal */}
             {showCreateExamModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center">
-                <div className="absolute inset-0 bg-black/60" onClick={() => setShowCreateExamModal(false)}></div>
+                <div className="absolute inset-0 bg-black/60" onClick={() => {
+                  setShowCreateExamModal(false)
+                  setEditingExamId(null)
+                }}></div>
                 <div className={`relative w-11/12 max-w-2xl rounded-2xl p-6 border shadow-2xl ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
-                  <h3 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Buat Ujian Baru','Create New Exam')}</h3>
+                  <h3 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{editingExamId ? tr('Edit Ujian','Edit Exam') : tr('Buat Ujian Baru','Create New Exam')}</h3>
                   <div className="space-y-3">
                     <div>
                       <label className="text-sm block mb-1">{tr('Judul Ujian','Exam Title')}</label>
@@ -1637,8 +1703,11 @@ export default function GuruDashboard() {
                     </div>
 
                     <div className="flex justify-end gap-3 mt-4">
-                      <button onClick={() => setShowCreateExamModal(false)} className="px-4 py-2 rounded-xl border">{tr('Batal','Cancel')}</button>
-                      <button onClick={handleCreateExam} className="px-4 py-2 rounded-xl bg-purple-600 text-white">{tr('Buat Ujian','Create Exam')}</button>
+                        <button onClick={() => {
+                          setShowCreateExamModal(false)
+                          setEditingExamId(null)
+                        }} className="px-4 py-2 rounded-xl border">{tr('Batal','Cancel')}</button>
+                      <button onClick={handleCreateExam} className="px-4 py-2 rounded-xl bg-purple-600 text-white">{editingExamId ? tr('Simpan Perubahan','Save Changes') : tr('Buat Ujian','Create Exam')}</button>
                     </div>
                   </div>
                 </div>

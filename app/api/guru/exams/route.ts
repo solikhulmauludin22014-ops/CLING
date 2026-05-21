@@ -18,7 +18,28 @@ export async function GET() {
       return NextResponse.json({ success: false, error: 'Failed to fetch exams' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, exams: exams || [] })
+    const examIds = (exams || []).map((exam) => exam.id)
+    const { data: questions } = examIds.length > 0
+      ? await dataClient
+          .from('exam_questions')
+          .select('id, exam_id, order_number, instruction_text, dirty_code_template')
+          .in('exam_id', examIds)
+          .order('order_number', { ascending: true })
+      : { data: [] }
+
+    const questionMap = new Map<string, Array<any>>()
+    ;(questions || []).forEach((question) => {
+      const list = questionMap.get(question.exam_id) || []
+      list.push(question)
+      questionMap.set(question.exam_id, list)
+    })
+
+    const examsWithQuestions = (exams || []).map((exam) => ({
+      ...exam,
+      questions: questionMap.get(exam.id) || [],
+    }))
+
+    return NextResponse.json({ success: true, exams: examsWithQuestions })
   } catch (err) {
     console.error('GET /api/guru/exams error:', err)
     return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 })

@@ -38,20 +38,6 @@ export async function GET(request: Request, context: { params: any }) {
       return NextResponse.json({ error: 'Exam not found' }, { status: 404 })
     }
 
-    if (!exam.is_active) {
-      const { data: activeSubmission } = await dataClient
-        .from('exam_submissions')
-        .select('id')
-        .eq('exam_id', examId)
-        .eq('user_id', user.id)
-        .eq('is_submitted', false)
-        .maybeSingle()
-
-      if (!activeSubmission) {
-        return NextResponse.json({ error: 'Exam not active' }, { status: 403 })
-      }
-    }
-
     const { data: questions, error: questionError } = await dataClient
       .from('exam_questions')
       .select('id, order_number, instruction_text, dirty_code_template')
