@@ -85,50 +85,44 @@ export default function ExamPage({ params }: { params: { id: string } }) {
       setLoading(true)
 
       try {
+        const res = await fetch(`/api/exams/${params.id}`)
+        const data = await res.json().catch(() => null)
+        const examData = data?.exam as ExamData | undefined
+
+        if (examData?.questions?.length) {
+          examData.questions = examData.questions.sort((a, b) => a.order_number - b.order_number)
+          setExam(examData)
+          setCode(examData.questions[0]?.dirty_code_template || '')
+          return
+        }
+
         const supabase = createClient()
         const { data: { session } } = await supabase.auth.getSession()
 
         if (!session?.user) {
-          setExam(null)
-          setLoading(false)
+          setExam(examData || null)
+          setCode(examData?.questions?.[0]?.dirty_code_template || '')
           return
         }
 
-        const { data: examRow, error: examError } = await supabase
+        const { data: examRow } = await supabase
           .from('exams')
           .select('id, title, exam_type, duration_minutes, is_active')
           .eq('id', params.id)
           .single()
 
-        if (examError || !examRow) {
-          setExam(null)
-          setLoading(false)
-          return
-        }
-
-        const { data: questions, error: questionError } = await supabase
+        const { data: questions } = await supabase
           .from('exam_questions')
           .select('id, order_number, instruction_text, dirty_code_template')
           .eq('exam_id', params.id)
           .order('order_number', { ascending: true })
 
-        if (questionError) {
-          setExam(null)
-          setLoading(false)
-          return
-        }
-
         const sortedQuestions = (questions || []).sort((a, b) => a.order_number - b.order_number)
 
-        setExam({ ...examRow, questions: sortedQuestions })
-        setCode(sortedQuestions[0]?.dirty_code_template || '')
-      } catch {
-        const res = await fetch(`/api/exams/${params.id}`)
-        const data = await res.json()
-        const examData = data.exam as ExamData | undefined
-
-        if (examData?.questions) {
-          examData.questions = examData.questions.sort((a, b) => a.order_number - b.order_number)
+        if (examRow) {
+          setExam({ ...examRow, questions: sortedQuestions })
+          setCode(sortedQuestions[0]?.dirty_code_template || '')
+          return
         }
 
         setExam(examData || null)
