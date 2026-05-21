@@ -1756,7 +1756,6 @@ export default function GuruDashboard() {
                           <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>NIS</th>
                           <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Skor Akhir</th>
                           <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Waktu Submit</th>
-                          <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1767,17 +1766,28 @@ export default function GuruDashboard() {
                             <td className="px-4 py-3 text-center">{row.kelas || '-'}</td>
                             <td className="px-4 py-3 text-center font-mono text-xs">{row.nis || '-'}</td>
                             <td className="px-4 py-3 text-center">
-                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                                row.final_score >= 8
-                                  ? 'bg-green-500/20 text-green-300'
-                                  : row.final_score >= 6
-                                  ? 'bg-purple-500/20 text-purple-300'
-                                  : row.final_score >= 4
-                                  ? 'bg-yellow-500/20 text-yellow-300'
-                                  : 'bg-red-500/20 text-red-300'
-                              }`}>
-                                {row.final_score.toFixed(2)}/10
-                              </span>
+                              <div className="flex flex-col items-center gap-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                  row.final_score >= 8
+                                    ? 'bg-green-500/20 text-green-300'
+                                    : row.final_score >= 6
+                                    ? 'bg-purple-500/20 text-purple-300'
+                                    : row.final_score >= 4
+                                    ? 'bg-yellow-500/20 text-yellow-300'
+                                    : 'bg-red-500/20 text-red-300'
+                                }`}>
+                                  {row.final_score.toFixed(2)}/10
+                                </span>
+                                <button
+                                  onClick={() => handleResetExamScore(row)}
+                                  disabled={resetExamLoading === `${row.exam_id}:${row.student_name}`}
+                                  className="px-3 py-1.5 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                                >
+                                  {resetExamLoading === `${row.exam_id}:${row.student_name}`
+                                    ? tr('Mereset...', 'Resetting...')
+                                    : tr('Reset Ujian', 'Reset Exam')}
+                                </button>
+                              </div>
                             </td>
                             <td className="px-4 py-3 text-center text-xs">
                               {row.submitted_at
@@ -1789,17 +1799,6 @@ export default function GuruDashboard() {
                                     minute: '2-digit',
                                   })
                                 : '-'}
-                            </td>
-                            <td className="px-4 py-3 text-center">
-                              <button
-                                onClick={() => handleResetExamScore(row)}
-                                disabled={resetExamLoading === `${row.exam_id}:${row.student_name}`}
-                                className="px-3 py-1.5 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
-                              >
-                                {resetExamLoading === `${row.exam_id}:${row.student_name}`
-                                  ? tr('Mereset...', 'Resetting...')
-                                  : tr('Reset Ujian', 'Reset Exam')}
-                              </button>
                             </td>
                           </tr>
                         ))}
