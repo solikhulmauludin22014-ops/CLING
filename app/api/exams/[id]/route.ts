@@ -5,10 +5,10 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request, context: { params: any }) {
-  const { params } = context as { params: { id: string } }
   try {
     const supabase = await createClient()
 
+    const params = (await Promise.resolve(context.params)) as { id?: string } | undefined
     const examId = params?.id
     if (!examId) {
       return NextResponse.json({ error: 'Exam ID required' }, { status: 400 })

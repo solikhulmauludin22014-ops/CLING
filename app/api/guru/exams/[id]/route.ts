@@ -40,7 +40,7 @@ type UpdateExamPayload = {
 }
 
 async function resolveExamId(request: NextRequest, context: { params: any }, payload?: { id?: string }) {
-  const params = context.params as { id?: string } | undefined
+  const params = (await Promise.resolve(context.params)) as { id?: string } | undefined
   const fromParams = params?.id
   if (fromParams) return fromParams
 
