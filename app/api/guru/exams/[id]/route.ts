@@ -116,7 +116,8 @@ export async function DELETE(request: NextRequest, context: { params: any }) {
     const auth = await assertGuru()
     if ('error' in auth) return auth.error
 
-    const examId = await resolveExamId(request, context)
+    const body = await request.json().catch(() => ({} as { id?: string }))
+    const examId = await resolveExamId(request, context, body)
     if (!examId) {
       return NextResponse.json({ success: false, error: 'Exam ID required' }, { status: 400 })
     }

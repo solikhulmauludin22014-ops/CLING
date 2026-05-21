@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/lib/context/ThemeContext'
 import { useLanguage } from '@/lib/context/LanguageContext'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -82,17 +83,59 @@ export default function ExamPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const loadExam = async () => {
       setLoading(true)
-      const res = await fetch(`/api/exams/${params.id}`)
-      const data = await res.json()
-      const examData = data.exam as ExamData | undefined
 
-      if (examData?.questions) {
-        examData.questions = examData.questions.sort((a, b) => a.order_number - b.order_number)
+      try {
+        const supabase = createClient()
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (!session?.user) {
+          setExam(null)
+          setLoading(false)
+          return
+        }
+
+        const { data: examRow, error: examError } = await supabase
+          .from('exams')
+          .select('id, title, exam_type, duration_minutes, is_active')
+          .eq('id', params.id)
+          .single()
+
+        if (examError || !examRow) {
+          setExam(null)
+          setLoading(false)
+          return
+        }
+
+        const { data: questions, error: questionError } = await supabase
+          .from('exam_questions')
+          .select('id, order_number, instruction_text, dirty_code_template')
+          .eq('exam_id', params.id)
+          .order('order_number', { ascending: true })
+
+        if (questionError) {
+          setExam(null)
+          setLoading(false)
+          return
+        }
+
+        const sortedQuestions = (questions || []).sort((a, b) => a.order_number - b.order_number)
+
+        setExam({ ...examRow, questions: sortedQuestions })
+        setCode(sortedQuestions[0]?.dirty_code_template || '')
+      } catch {
+        const res = await fetch(`/api/exams/${params.id}`)
+        const data = await res.json()
+        const examData = data.exam as ExamData | undefined
+
+        if (examData?.questions) {
+          examData.questions = examData.questions.sort((a, b) => a.order_number - b.order_number)
+        }
+
+        setExam(examData || null)
+        setCode(examData?.questions?.[0]?.dirty_code_template || '')
+      } finally {
+        setLoading(false)
       }
-
-      setExam(examData || null)
-      setCode(examData?.questions?.[0]?.dirty_code_template || '')
-      setLoading(false)
     }
 
     loadExam()
