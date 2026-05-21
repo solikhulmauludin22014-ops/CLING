@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS exam_answers (
   submission_id UUID NOT NULL REFERENCES exam_submissions(id) ON DELETE CASCADE,
   question_id UUID NOT NULL REFERENCES exam_questions(id) ON DELETE CASCADE,
   answer_code TEXT NOT NULL,
+  answer_score DECIMAL(5,2) DEFAULT 0,
+  analysis_result JSONB,
   run_status VARCHAR(20) DEFAULT 'not_run',
   submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

@@ -68,27 +68,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, final_score: 0 })
     }
 
-    const { count: questionCount, error: questionError } = await dataClient
+    const { data: questions, error: questionError } = await dataClient
       .from('exam_questions')
-      .select('id', { count: 'exact', head: true })
+      .select('id')
       .eq('exam_id', examId)
 
     if (questionError) {
       console.error('Question count error:', questionError)
     }
 
-    const { count: answerCount, error: answerError } = await dataClient
+    const { data: answers, error: answerError } = await dataClient
       .from('exam_answers')
-      .select('id', { count: 'exact', head: true })
+      .select('answer_score')
       .eq('submission_id', submission.id)
 
     if (answerError) {
       console.error('Answer count error:', answerError)
     }
 
-    const totalQuestions = questionCount || 0
-    const totalAnswers = answerCount || 0
-    const rawScore = totalQuestions > 0 ? (totalAnswers / totalQuestions) * 10 : 0
+    const totalQuestions = questions?.length || 0
+    const totalScore = (answers || []).reduce((sum, answer) => sum + Number(answer.answer_score || 0), 0)
+    const rawScore = totalQuestions > 0 ? totalScore / totalQuestions : 0
     const finalScore = Math.round(rawScore * 100) / 100
 
     const { error: updateError } = await dataClient

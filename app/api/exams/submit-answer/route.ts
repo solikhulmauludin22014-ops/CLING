@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { cleanCodeAnalyzer } from '@/lib/services/CleanCodeAnalyzer'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +31,8 @@ export async function POST(request: NextRequest) {
     }
 
     const dataClient = supabaseAdmin ?? supabase
+    const analysis = await cleanCodeAnalyzer.analyze(answerCode, 'id')
+    const answerScore = analysis.final_score
 
     const { data: existingSubmission, error: submissionError } = await dataClient
       .from('exam_submissions')
@@ -78,6 +81,8 @@ export async function POST(request: NextRequest) {
           submission_id: submissionId,
           question_id: questionId,
           answer_code: answerCode,
+          answer_score: answerScore,
+          analysis_result: analysis,
           run_status: runStatus || 'not_run',
           submitted_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -90,7 +95,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save answer' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      question_score: answerScore,
+      analysis,
+    })
   } catch (error) {
     console.error('Submit answer error:', error)
     return NextResponse.json({ error: 'Failed to save answer' }, { status: 500 })

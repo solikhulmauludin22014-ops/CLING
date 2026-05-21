@@ -74,6 +74,7 @@ export default function ExamPage({ params }: { params: { id: string } }) {
   const [saveLoading, setSaveLoading] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
   const [answeredIds, setAnsweredIds] = useState<Set<string>>(new Set())
+  const [questionScores, setQuestionScores] = useState<Record<string, number>>({})
 
   const questions = useMemo(() => exam?.questions || [], [exam])
   const currentQuestion = questions[currentIndex]
@@ -120,7 +121,7 @@ export default function ExamPage({ params }: { params: { id: string } }) {
     if (!currentQuestion || !exam) return false
     setSaveLoading(true)
     try {
-      await fetch('/api/exams/submit-answer', {
+      const res = await fetch('/api/exams/submit-answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -130,6 +131,10 @@ export default function ExamPage({ params }: { params: { id: string } }) {
           runStatus: output ? 'success' : 'not_run',
         }),
       })
+      const data = await res.json()
+      if (typeof data.question_score === 'number') {
+        setQuestionScores((prev) => ({ ...prev, [currentQuestion.id]: data.question_score }))
+      }
       setAnsweredIds((prev) => new Set(prev).add(currentQuestion.id))
       return true
     } finally {
@@ -237,6 +242,14 @@ export default function ExamPage({ params }: { params: { id: string } }) {
               ))}
             </div>
           </div>
+
+          {questionScores[currentQuestion.id] !== undefined && (
+            <div className={`mt-5 rounded-xl p-4 border ${theme === 'dark' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+              <p className="text-sm font-semibold">Skor soal ini</p>
+              <p className="text-2xl font-bold">{questionScores[currentQuestion.id].toFixed(2)}/10</p>
+              <p className="text-xs mt-1 opacity-80">Diambil dari formula Pylint pada kode jawaban saat disimpan.</p>
+            </div>
+          )}
         </div>
 
         <div className={`rounded-2xl border p-6 shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
