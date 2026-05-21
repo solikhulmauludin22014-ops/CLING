@@ -70,21 +70,18 @@ export async function POST(request: NextRequest) {
       .from('exam_submissions')
       .delete()
       .match({ user_id: studentId, exam_id: examId })
+      .select('id')
 
     if (deleteSubmissionError) {
       console.error('Reset exam progress: delete submission error', deleteSubmissionError)
       const errMsg = (deleteSubmissionError as any)?.message || JSON.stringify(deleteSubmissionError)
-      return NextResponse.json({ success: false, error: 'Gagal mereset ujian siswa', detail: errMsg }, { status: 500 })
+      return NextResponse.json(
+        { success: false, error: 'Gagal mereset ujian siswa', detail: errMsg, isAdminConfigured: Boolean(isAdminConfigured) },
+        { status: 500 }
+      )
     }
 
-    // If nothing was deleted, respond with a helpful message
     const deletedCount = Array.isArray(deletedSubmissions) ? deletedSubmissions.length : (deletedSubmissions ? 1 : 0)
-
-    if (deleteSubmissionError) {
-      console.error('Reset exam progress: delete submission error', deleteSubmissionError)
-      const errMsg = (deleteSubmissionError as any)?.message || JSON.stringify(deleteSubmissionError)
-      return NextResponse.json({ success: false, error: 'Gagal mereset ujian siswa', detail: errMsg, isAdminConfigured: Boolean(isAdminConfigured) }, { status: 500 })
-    }
 
     if (deletedCount === 0) {
       console.warn('Reset exam progress: no submissions deleted', { studentId, examId })
