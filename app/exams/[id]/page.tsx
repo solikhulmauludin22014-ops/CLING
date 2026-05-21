@@ -179,11 +179,20 @@ export default function ExamPage({ params }: { params?: { id?: string } }) {
         }),
       })
       const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save answer')
+      }
+
       if (typeof data.question_score === 'number') {
         setQuestionScores((prev) => ({ ...prev, [currentQuestion.id]: data.question_score }))
       }
       setAnsweredIds((prev) => new Set(prev).add(currentQuestion.id))
       return true
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save answer'
+      alert(message)
+      return false
     } finally {
       setSaveLoading(false)
     }
@@ -200,7 +209,8 @@ export default function ExamPage({ params }: { params?: { id?: string } }) {
 
   const handleSubmit = async () => {
     if (!exam) return
-    await saveAnswer()
+    const saved = await saveAnswer()
+    if (!saved) return
     setSubmitLoading(true)
     try {
       const res = await fetch('/api/exams/submit-all', {

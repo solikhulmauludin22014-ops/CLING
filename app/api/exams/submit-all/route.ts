@@ -87,8 +87,14 @@ export async function POST(request: NextRequest) {
     }
 
     const totalQuestions = questions?.length || 0
+    const answeredQuestions = answers?.length || 0
+
+    if (answeredQuestions === 0) {
+      return NextResponse.json({ error: 'Belum ada jawaban yang tersimpan' }, { status: 400 })
+    }
+
     const totalScore = (answers || []).reduce((sum, answer) => sum + Number(answer.answer_score || 0), 0)
-    const rawScore = totalQuestions > 0 ? totalScore / totalQuestions : 0
+    const rawScore = totalScore / answeredQuestions
     const finalScore = Math.round(rawScore * 100) / 100
 
     const { error: updateError } = await dataClient
