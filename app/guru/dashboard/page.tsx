@@ -69,6 +69,8 @@ export default function GuruDashboard() {
   // Exams (teacher) states
   const [exams, setExams] = useState<Array<any>>([])
   const [examsLoading, setExamsLoading] = useState(false)
+  const [examScoreRows, setExamScoreRows] = useState<Array<any>>([])
+  const [examScoresLoading, setExamScoresLoading] = useState(false)
   const [showCreateExamModal, setShowCreateExamModal] = useState(false)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
   const [newExam, setNewExam] = useState({
@@ -147,6 +149,7 @@ export default function GuruDashboard() {
         loadStudentData()
         loadMaterials()
         loadExams()
+        loadExamScores()
       } catch (error) {
         console.error('Error loading data:', error)
         setLoading(false)
@@ -205,6 +208,32 @@ export default function GuruDashboard() {
       console.error('Failed to load exams:', err)
     } finally {
       setExamsLoading(false)
+    }
+  }
+
+  const loadExamScores = async () => {
+    setExamScoresLoading(true)
+    try {
+      const res = await fetch('/api/guru/exams/scores')
+      const data = await res.json()
+      if (data.success) {
+        const rows = (data.exams || []).flatMap((exam: any) =>
+          (exam.submissions || []).map((submission: any) => ({
+            exam_id: exam.id,
+            exam_title: exam.title,
+            student_name: submission.student_name,
+            nis: submission.nis,
+            kelas: submission.kelas,
+            final_score: Number(submission.final_score || 0),
+            submitted_at: submission.submitted_at,
+          }))
+        )
+        setExamScoreRows(rows)
+      }
+    } catch (err) {
+      console.error('Failed to load exam scores:', err)
+    } finally {
+      setExamScoresLoading(false)
     }
   }
 
@@ -296,6 +325,7 @@ export default function GuruDashboard() {
           questions: [{ order_number: 1, instruction_text: '', dirty_code_template: '' }],
         })
         loadExams()
+        loadExamScores()
       } else {
         alert(data.error || (editingExamId ? tr('Gagal memperbarui ujian', 'Failed to update exam') : tr('Gagal membuat ujian', 'Failed to create exam')))
       }
@@ -314,6 +344,7 @@ export default function GuruDashboard() {
       const data = await res.json()
       if (data.success) {
         loadExams()
+        loadExamScores()
         alert(tr('Ujian berhasil dihapus', 'Exam deleted'))
       } else {
         alert(data.error || tr('Gagal menghapus ujian', 'Failed to delete exam'))
@@ -1606,7 +1637,10 @@ export default function GuruDashboard() {
                 <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>📝 {tr('Ujian', 'Exams')}</h2>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={loadExams}
+                    onClick={() => {
+                      loadExams()
+                      loadExamScores()
+                    }}
                     className="text-purple-600 hover:text-purple-700"
                   >
                     🔄 Refresh
@@ -1653,6 +1687,79 @@ export default function GuruDashboard() {
                 )}
               </div>
             </div>
+
+              <div className={`mt-6 rounded-2xl border p-5 ${theme === 'dark' ? 'bg-slate-900/40 border-slate-700' : 'bg-purple-50/70 border-purple-100'}`}>
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                  <div>
+                    <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
+                      📊 Rekap Skor Ujian Siswa
+                    </h3>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                      Nilai akhir diambil dari rata-rata skor tiap soal yang dihitung dengan analisis Pylint.
+                    </p>
+                  </div>
+                  <div className={`text-sm ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
+                    Total submission: <span className="font-semibold">{examScoreRows.length}</span>
+                  </div>
+                </div>
+
+                {examScoresLoading ? (
+                  <div className="py-8 text-center">Memuat rekap skor ujian...</div>
+                ) : examScoreRows.length === 0 ? (
+                  <div className="py-8 text-center text-sm text-slate-500">
+                    Belum ada submission ujian yang tersimpan.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-xl border border-purple-100">
+                    <table className="w-full text-sm">
+                      <thead className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>
+                        <tr>
+                          <th className={`text-left px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Ujian</th>
+                          <th className={`text-left px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Siswa</th>
+                          <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Kelas</th>
+                          <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>NIS</th>
+                          <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Skor Akhir</th>
+                          <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Waktu Submit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {examScoreRows.map((row, index) => (
+                          <tr key={`${row.exam_id}-${row.student_name}-${index}`} className={`border-t ${theme === 'dark' ? 'border-slate-700' : 'border-purple-100'}`}>
+                            <td className={`px-4 py-3 font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{row.exam_title}</td>
+                            <td className={`px-4 py-3 ${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'}`}>{row.student_name}</td>
+                            <td className="px-4 py-3 text-center">{row.kelas || '-'}</td>
+                            <td className="px-4 py-3 text-center font-mono text-xs">{row.nis || '-'}</td>
+                            <td className="px-4 py-3 text-center">
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                row.final_score >= 8
+                                  ? 'bg-green-500/20 text-green-300'
+                                  : row.final_score >= 6
+                                  ? 'bg-purple-500/20 text-purple-300'
+                                  : row.final_score >= 4
+                                  ? 'bg-yellow-500/20 text-yellow-300'
+                                  : 'bg-red-500/20 text-red-300'
+                              }`}>
+                                {row.final_score.toFixed(2)}/10
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-center text-xs">
+                              {row.submitted_at
+                                ? new Date(row.submitted_at).toLocaleString('id-ID', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })
+                                : '-'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
 
             {/* Create Exam Modal */}
             {showCreateExamModal && (

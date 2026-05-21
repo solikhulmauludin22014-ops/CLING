@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useTheme } from '@/lib/context/ThemeContext'
 import { useLanguage } from '@/lib/context/LanguageContext'
@@ -63,6 +64,7 @@ const translations = {
 }
 
 export default function ExamPage({ params }: { params?: { id?: string } }) {
+  const router = useRouter()
   const { theme } = useTheme()
   const { language } = useLanguage()
   const t = (key: keyof typeof translations['id']) => translations[language][key]
@@ -209,6 +211,7 @@ export default function ExamPage({ params }: { params?: { id?: string } }) {
       const data = await res.json()
       if (data.success) {
         alert(`Score: ${data.final_score?.toFixed(2) || '0.00'}/10`)
+        router.replace('/siswa/ujian')
       } else {
         alert(data.error || 'Failed')
       }
