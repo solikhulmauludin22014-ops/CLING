@@ -64,16 +64,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Ujian tidak ditemukan' }, { status: 404 })
     }
 
-    const { error: deleteSubmissionError } = await supabaseAdmin
+    const { data: deletedSubmissions, error: deleteSubmissionError } = await supabaseAdmin
       .from('exam_submissions')
       .delete()
-      .eq('student_id', studentId)
+      .eq('user_id', studentId)
       .eq('exam_id', examId)
 
     if (deleteSubmissionError) {
       console.error('Reset exam progress: delete submission error', deleteSubmissionError)
       const errMsg = (deleteSubmissionError as any)?.message || JSON.stringify(deleteSubmissionError)
       return NextResponse.json({ success: false, error: 'Gagal mereset ujian siswa', detail: errMsg }, { status: 500 })
+    }
+
+    // If nothing was deleted, respond with a helpful message
+    if (!deletedSubmissions || (Array.isArray(deletedSubmissions) && deletedSubmissions.length === 0)) {
+      return NextResponse.json({ success: false, error: 'Tidak ada submission yang ditemukan untuk direset' }, { status: 404 })
     }
 
     const studentName = studentProfile.full_name || studentProfile.name || 'Siswa'
