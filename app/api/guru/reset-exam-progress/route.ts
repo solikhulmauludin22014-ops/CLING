@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!supabaseAdmin) {
+      console.error('Reset exam progress: supabaseAdmin not configured; isAdminConfigured=', isAdminConfigured)
       return NextResponse.json(
         { success: false, error: 'Admin client not configured', isAdminConfigured: Boolean(isAdminConfigured) },
         { status: 500 }
@@ -64,11 +65,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Ujian tidak ditemukan' }, { status: 404 })
     }
 
+    console.log('Reset exam progress: deleting submissions for', { studentId, examId })
     const { data: deletedSubmissions, error: deleteSubmissionError } = await supabaseAdmin
       .from('exam_submissions')
       .delete()
-      .eq('user_id', studentId)
-      .eq('exam_id', examId)
+      .match({ user_id: studentId, exam_id: examId })
 
     if (deleteSubmissionError) {
       console.error('Reset exam progress: delete submission error', deleteSubmissionError)
@@ -77,8 +78,17 @@ export async function POST(request: NextRequest) {
     }
 
     // If nothing was deleted, respond with a helpful message
-    if (!deletedSubmissions || (Array.isArray(deletedSubmissions) && deletedSubmissions.length === 0)) {
-      return NextResponse.json({ success: false, error: 'Tidak ada submission yang ditemukan untuk direset' }, { status: 404 })
+    const deletedCount = Array.isArray(deletedSubmissions) ? deletedSubmissions.length : (deletedSubmissions ? 1 : 0)
+
+    if (deleteSubmissionError) {
+      console.error('Reset exam progress: delete submission error', deleteSubmissionError)
+      const errMsg = (deleteSubmissionError as any)?.message || JSON.stringify(deleteSubmissionError)
+      return NextResponse.json({ success: false, error: 'Gagal mereset ujian siswa', detail: errMsg, isAdminConfigured: Boolean(isAdminConfigured) }, { status: 500 })
+    }
+
+    if (deletedCount === 0) {
+      console.warn('Reset exam progress: no submissions deleted', { studentId, examId })
+      return NextResponse.json({ success: false, error: 'Tidak ada submission yang ditemukan untuk direset', deletedCount, isAdminConfigured: Boolean(isAdminConfigured) }, { status: 404 })
     }
 
     const studentName = studentProfile.full_name || studentProfile.name || 'Siswa'
@@ -86,6 +96,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Ujian "${examRow.title}" untuk siswa "${studentName}" berhasil direset`,
+      deletedCount,
     })
   } catch (error: unknown) {
     console.error('Reset exam progress error:', error)
