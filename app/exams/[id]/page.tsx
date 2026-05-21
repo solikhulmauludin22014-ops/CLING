@@ -181,7 +181,10 @@ export default function ExamPage({ params }: { params?: { id?: string } }) {
       const data = await res.json()
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to save answer')
+        console.error('Save answer failed response:', res.status, data)
+        const detail = data?.detail ? `\nDetail: ${data.detail}` : ''
+        alert((data?.error || 'Failed to save answer') + detail)
+        return false
       }
 
       if (typeof data.question_score === 'number') {
@@ -190,6 +193,7 @@ export default function ExamPage({ params }: { params?: { id?: string } }) {
       setAnsweredIds((prev) => new Set(prev).add(currentQuestion.id))
       return true
     } catch (error) {
+      console.error('Save answer exception:', error)
       const message = error instanceof Error ? error.message : 'Failed to save answer'
       alert(message)
       return false
