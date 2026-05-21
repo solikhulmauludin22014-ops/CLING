@@ -12,11 +12,13 @@ type ExamStatus = {
   pretest: {
     id: string | null
     is_active: boolean
+    available?: boolean
     done: boolean
   }
   posttest: {
     id: string | null
     is_active: boolean
+    available?: boolean
     done: boolean
     unlocked: boolean
     materials: {
@@ -161,14 +163,15 @@ export default function SiswaUjianPage() {
     </span>
   )
 
-  const pretestAvailable = Boolean(status?.pretest?.id) && Boolean(status?.pretest?.is_active)
+  const pretestAvailable = Boolean(status?.pretest?.available ?? status?.pretest?.id)
   const pretestDone = Boolean(status?.pretest?.done)
-  const posttestAvailable = Boolean(status?.posttest?.id) && Boolean(status?.posttest?.is_active)
+  const posttestAvailable = Boolean(status?.posttest?.available ?? status?.posttest?.id)
   const posttestDone = Boolean(status?.posttest?.done)
-  const posttestUnlocked = Boolean(status?.posttest?.unlocked)
 
   const materialsDone = status?.posttest?.materials?.done ?? 0
   const materialsTotal = status?.posttest?.materials?.total ?? 0
+
+  const posttestUnlocked = Boolean(status?.posttest?.unlocked || (status?.posttest?.available && pretestDone && (materialsTotal === 0 || materialsDone >= materialsTotal)))
 
   const posttestNeedsPretest = !pretestDone
   const posttestNeedsMaterials = materialsTotal > 0 && materialsDone < materialsTotal

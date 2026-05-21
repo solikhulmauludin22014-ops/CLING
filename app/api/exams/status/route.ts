@@ -83,18 +83,20 @@ export async function GET() {
   const allMaterialsDone = totalMaterials === 0 || completedMaterials >= totalMaterials
   const pretestDone = pretestSubmission?.is_submitted ?? false
   const posttestDone = posttestSubmission?.is_submitted ?? false
-  const posttestUnlocked = Boolean(posttest?.is_active) && pretestDone && allMaterialsDone
+  const posttestUnlocked = Boolean(posttest?.id) && pretestDone && allMaterialsDone
 
   return NextResponse.json({
     activeExamId,
     pretest: {
       id: pretest?.id ?? null,
       is_active: pretest?.is_active ?? false,
+      available: Boolean(pretest?.id),
       done: pretestDone,
     },
     posttest: {
       id: posttest?.id ?? null,
       is_active: posttest?.is_active ?? false,
+      available: Boolean(posttest?.id),
       done: posttestDone,
       unlocked: posttestUnlocked,
       materials: {

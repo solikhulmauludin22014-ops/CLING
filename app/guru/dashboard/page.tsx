@@ -214,7 +214,7 @@ export default function GuruDashboard() {
       title: '',
       exam_type: 'pretest',
       duration_minutes: 60,
-      is_active: false,
+      is_active: true,
       questions: [{ order_number: 1, instruction_text: '', dirty_code_template: '' }],
     })
     setShowCreateExamModal(true)
@@ -292,7 +292,7 @@ export default function GuruDashboard() {
           title: '',
           exam_type: 'pretest',
           duration_minutes: 60,
-          is_active: false,
+          is_active: true,
           questions: [{ order_number: 1, instruction_text: '', dirty_code_template: '' }],
         })
         loadExams()
