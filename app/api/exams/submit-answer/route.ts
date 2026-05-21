@@ -74,21 +74,48 @@ export async function POST(request: NextRequest) {
       submissionId = createdSubmission.id
     }
 
-    const { error: answerError } = await dataClient
-      .from('exam_answers')
-      .upsert(
-        {
-          submission_id: submissionId,
-          question_id: questionId,
-          answer_code: answerCode,
-          answer_score: answerScore,
-          analysis_result: analysis,
-          run_status: runStatus || 'not_run',
-          submitted_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'submission_id,question_id' }
-      )
+    let answerError = null
+    try {
+      const result = await dataClient
+        .from('exam_answers')
+        .upsert(
+          {
+            submission_id: submissionId,
+            question_id: questionId,
+            answer_code: answerCode,
+            answer_score: answerScore,
+            analysis_result: analysis,
+            run_status: runStatus || 'not_run',
+            submitted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'submission_id,question_id' }
+        )
+
+      answerError = result.error
+      // If error indicates missing column (schema mismatch), try fallback without analysis_result
+      if (answerError && /analysis_result/.test(answerError.message || '')) {
+        console.warn('analysis_result column missing, retrying upsert without analysis_result')
+        const fallback = await dataClient
+          .from('exam_answers')
+          .upsert(
+            {
+              submission_id: submissionId,
+              question_id: questionId,
+              answer_code: answerCode,
+              answer_score: answerScore,
+              run_status: runStatus || 'not_run',
+              submitted_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'submission_id,question_id' }
+          )
+        answerError = fallback.error
+      }
+    } catch (e) {
+      console.error('Answer upsert exception:', e)
+      return NextResponse.json({ success: false, error: 'Failed to save answer', detail: e instanceof Error ? e.message : String(e) }, { status: 500 })
+    }
 
     if (answerError) {
       console.error('Answer upsert error:', answerError)
