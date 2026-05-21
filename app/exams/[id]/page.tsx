@@ -183,6 +183,15 @@ export default function ExamPage({ params }: { params?: { id?: string } }) {
       if (!res.ok || !data.success) {
         console.error('Save answer failed response:', res.status, data)
         const detail = data?.detail ? `\nDetail: ${data.detail}` : ''
+
+        // If the API returned Unauthorized, don't allow implicit global redirects.
+        // Send the student back to the student dashboard so they can continue.
+        if (res.status === 401 || data?.error === 'Unauthorized') {
+          alert((data?.error || 'Unauthorized') + detail)
+          router.replace('/siswa/ujian')
+          return false
+        }
+
         alert((data?.error || 'Failed to save answer') + detail)
         return false
       }
