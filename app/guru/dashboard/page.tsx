@@ -71,6 +71,7 @@ export default function GuruDashboard() {
   const [examsLoading, setExamsLoading] = useState(false)
   const [examScoreRows, setExamScoreRows] = useState<Array<any>>([])
   const [examScoresLoading, setExamScoresLoading] = useState(false)
+  const [resetExamLoading, setResetExamLoading] = useState<string | null>(null)
   const [showCreateExamModal, setShowCreateExamModal] = useState(false)
   const [editingExamId, setEditingExamId] = useState<string | null>(null)
   const [newExam, setNewExam] = useState({
@@ -221,6 +222,7 @@ export default function GuruDashboard() {
           (exam.submissions || []).map((submission: any) => ({
             exam_id: exam.id,
             exam_title: exam.title,
+            student_id: submission.user_id,
             student_name: submission.student_name,
             nis: submission.nis,
             kelas: submission.kelas,
@@ -234,6 +236,40 @@ export default function GuruDashboard() {
       console.error('Failed to load exam scores:', err)
     } finally {
       setExamScoresLoading(false)
+    }
+  }
+
+  const handleResetExamScore = async (row: any) => {
+    const confirmed = window.confirm(
+      tr(
+        `Reset ujian ${row.exam_title} untuk ${row.student_name}? Siswa akan bisa mengerjakan ulang pretest.`,
+        `Reset ${row.exam_title} for ${row.student_name}? The student will be able to retake the pretest.`
+      )
+    )
+
+    if (!confirmed) return
+
+    const resetKey = `${row.exam_id}:${row.student_name}`
+    setResetExamLoading(resetKey)
+    try {
+      const res = await fetch('/api/guru/reset-exam-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: row.student_id, examId: row.exam_id }),
+      })
+
+      const data = await res.json()
+      if (data.success) {
+        await loadExamScores()
+        alert(data.message || tr('Ujian siswa berhasil direset', 'Student exam reset successfully'))
+      } else {
+        alert(data.error || tr('Gagal mereset ujian siswa', 'Failed to reset student exam'))
+      }
+    } catch (error) {
+      console.error('Reset exam score error:', error)
+      alert(tr('Terjadi kesalahan saat mereset ujian siswa', 'An error occurred while resetting student exam'))
+    } finally {
+      setResetExamLoading(null)
     }
   }
 
@@ -1720,6 +1756,7 @@ export default function GuruDashboard() {
                           <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>NIS</th>
                           <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Skor Akhir</th>
                           <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Waktu Submit</th>
+                          <th className={`text-center px-4 py-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1752,6 +1789,17 @@ export default function GuruDashboard() {
                                     minute: '2-digit',
                                   })
                                 : '-'}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => handleResetExamScore(row)}
+                                disabled={resetExamLoading === `${row.exam_id}:${row.student_name}`}
+                                className="px-3 py-1.5 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {resetExamLoading === `${row.exam_id}:${row.student_name}`
+                                  ? tr('Mereset...', 'Resetting...')
+                                  : tr('Reset Ujian', 'Reset Exam')}
+                              </button>
                             </td>
                           </tr>
                         ))}
