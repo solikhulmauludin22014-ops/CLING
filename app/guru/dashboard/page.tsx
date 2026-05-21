@@ -263,7 +263,8 @@ export default function GuruDashboard() {
         await loadExamScores()
         alert(data.message || tr('Ujian siswa berhasil direset', 'Student exam reset successfully'))
       } else {
-        alert(data.error || tr('Gagal mereset ujian siswa', 'Failed to reset student exam'))
+        const detail = data?.detail ? `\nDetail: ${data.detail}` : ''
+        alert((data.error || tr('Gagal mereset ujian siswa', 'Failed to reset student exam')) + detail)
       }
     } catch (error) {
       console.error('Reset exam score error:', error)
