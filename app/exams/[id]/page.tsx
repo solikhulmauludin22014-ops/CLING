@@ -145,6 +145,23 @@ export default function ExamPage({ params }: { params?: { id?: string } }) {
     loadExam()
   }, [examId])
 
+  // Intercept browser back navigation that would land on the login page
+  // and instead route students to the student dashboard to avoid confusion.
+  useEffect(() => {
+    const onPop = () => {
+      try {
+        if (window.location.pathname === '/login') {
+          router.replace('/siswa/ujian')
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [router])
+
   const handleRun = async () => {
     if (!code.trim()) return
     setRunLoading(true)
