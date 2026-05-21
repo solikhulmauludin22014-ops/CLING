@@ -39,18 +39,28 @@ type UpdateExamPayload = {
   questions?: ExamQuestionInput[]
 }
 
+async function resolveExamId(request: NextRequest, context: { params: any }, payload?: { id?: string }) {
+  const params = context.params as { id?: string } | undefined
+  const fromParams = params?.id
+  if (fromParams) return fromParams
+
+  const fromQuery = new URL(request.url).searchParams.get('id')
+  if (fromQuery) return fromQuery
+
+  return payload?.id || null
+}
+
 export async function PATCH(request: NextRequest, context: { params: any }) {
   try {
     const auth = await assertGuru()
     if ('error' in auth) return auth.error
 
-    const { params } = context as { params: { id: string } }
-    const examId = params?.id
+    const payload = (await request.json()) as UpdateExamPayload & { id?: string }
+    const examId = await resolveExamId(request, context, payload)
     if (!examId) {
       return NextResponse.json({ success: false, error: 'Exam ID required' }, { status: 400 })
     }
 
-    const payload = (await request.json()) as UpdateExamPayload
     const dataClient = supabaseAdmin ?? auth.supabase
 
     const { error: updateError } = await dataClient
@@ -106,8 +116,7 @@ export async function DELETE(request: NextRequest, context: { params: any }) {
     const auth = await assertGuru()
     if ('error' in auth) return auth.error
 
-    const { params } = context as { params: { id: string } }
-    const examId = params?.id
+    const examId = await resolveExamId(request, context)
     if (!examId) {
       return NextResponse.json({ success: false, error: 'Exam ID required' }, { status: 400 })
     }

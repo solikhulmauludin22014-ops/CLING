@@ -176,8 +176,21 @@ export default function ExamPage({ params }: { params: { id: string } }) {
     return <div className="p-6">{t('loadingExam')}</div>
   }
 
-  if (!exam || !currentQuestion) {
+  if (!exam) {
     return <div className="p-6">{t('notFound')}</div>
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="p-6">
+        <div className={`rounded-2xl border p-6 ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-purple-100 text-slate-800'}`}>
+          <h2 className="text-xl font-bold mb-2">{exam.title}</h2>
+          <p className={theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}>
+            Soal ujian belum tersedia. Guru perlu menambahkan minimal satu soal agar siswa bisa mengerjakan ujian.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   const canGoTo = (idx: number) => {

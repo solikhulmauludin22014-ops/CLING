@@ -215,7 +215,7 @@ export default function GuruDashboard() {
       exam_type: 'pretest',
       duration_minutes: 60,
       is_active: false,
-      questions: [],
+      questions: [{ order_number: 1, instruction_text: '', dirty_code_template: '' }],
     })
     setShowCreateExamModal(true)
   }
@@ -265,6 +265,17 @@ export default function GuruDashboard() {
       return
     }
 
+    if (!newExam.questions.length) {
+      alert(tr('Minimal harus ada 1 soal.', 'At least 1 question is required.'))
+      return
+    }
+
+    const invalidQuestion = newExam.questions.find((question) => !question.instruction_text.trim())
+    if (invalidQuestion) {
+      alert(tr('Setiap soal harus punya instruksi.', 'Each question must have an instruction.'))
+      return
+    }
+
     try {
       const endpoint = editingExamId ? `/api/guru/exams/${editingExamId}` : '/api/guru/exams'
       const res = await fetch(endpoint, {
@@ -277,7 +288,13 @@ export default function GuruDashboard() {
         alert(editingExamId ? tr('Ujian berhasil diperbarui', 'Exam updated') : tr('Ujian berhasil dibuat', 'Exam created'))
         setShowCreateExamModal(false)
         setEditingExamId(null)
-        setNewExam({ title: '', exam_type: 'pretest', duration_minutes: 60, is_active: false, questions: [] })
+        setNewExam({
+          title: '',
+          exam_type: 'pretest',
+          duration_minutes: 60,
+          is_active: false,
+          questions: [{ order_number: 1, instruction_text: '', dirty_code_template: '' }],
+        })
         loadExams()
       } else {
         alert(data.error || (editingExamId ? tr('Gagal memperbarui ujian', 'Failed to update exam') : tr('Gagal membuat ujian', 'Failed to create exam')))
@@ -293,7 +310,7 @@ export default function GuruDashboard() {
     if (!confirmed) return
 
     try {
-      const res = await fetch(`/api/guru/exams/${examId}`, { method: 'DELETE' })
+      const res = await fetch(`/api/guru/exams/${examId}?id=${encodeURIComponent(examId)}`, { method: 'DELETE' })
       const data = await res.json()
       if (data.success) {
         loadExams()
