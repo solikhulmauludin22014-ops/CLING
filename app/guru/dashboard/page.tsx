@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import * as XLSX from 'xlsx'
 import { useTheme } from '@/lib/context/ThemeContext'
@@ -46,6 +46,18 @@ interface Material {
   updated_at: string
 }
 
+interface ExamScoreRow {
+  exam_id: string
+  exam_title: string
+  exam_type: 'pretest' | 'posttest'
+  student_id: string
+  student_name: string
+  nis: string
+  kelas: string
+  final_score: number
+  submitted_at: string | null
+}
+
 export default function GuruDashboard() {
   const { theme } = useTheme()
   const { language } = useLanguage()
@@ -69,7 +81,7 @@ export default function GuruDashboard() {
   // Exams (teacher) states
   const [exams, setExams] = useState<Array<any>>([])
   const [examsLoading, setExamsLoading] = useState(false)
-  const [examScoreRows, setExamScoreRows] = useState<Array<any>>([])
+  const [examScoreRows, setExamScoreRows] = useState<ExamScoreRow[]>([])
   const [examScoresLoading, setExamScoresLoading] = useState(false)
   const [resetExamLoading, setResetExamLoading] = useState<string | null>(null)
   const [showCreateExamModal, setShowCreateExamModal] = useState(false)
@@ -104,6 +116,11 @@ export default function GuruDashboard() {
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false)
   const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false)
+  const [examSearchTerm, setExamSearchTerm] = useState('')
+  const [selectedExamType, setSelectedExamType] = useState<'all' | 'pretest' | 'posttest'>('all')
+  const [selectedExamKelas, setSelectedExamKelas] = useState<string>('all')
+  const [selectedExamNIS, setSelectedExamNIS] = useState<string>('all')
+  const [examSortOrder, setExamSortOrder] = useState<'default' | 'score-high' | 'score-low'>('default')
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedKelas, setSelectedKelas] = useState<string>('all')
@@ -116,6 +133,9 @@ export default function GuruDashboard() {
   
   // Get unique NIS from students (exclude empty values)
   const nisOptions = [...new Set(students.map(s => s.nis).filter(n => n && n.trim() !== '' && n !== '-'))].sort()
+
+  const examKelasOptions = [...new Set(examScoreRows.map((row) => row.kelas).filter((kelas) => kelas && kelas.trim() !== '' && kelas !== '-'))].sort()
+  const examNisOptions = [...new Set(examScoreRows.map((row) => row.nis).filter((nis) => nis && nis.trim() !== '' && nis !== '-'))].sort()
 
   // Load data on mount - middleware handles auth
   useEffect(() => {
@@ -222,6 +242,7 @@ export default function GuruDashboard() {
           (exam.submissions || []).map((submission: any) => ({
             exam_id: exam.id,
             exam_title: exam.title,
+            exam_type: exam.exam_type,
             student_id: submission.user_id,
             student_name: submission.student_name,
             nis: submission.nis,
@@ -746,6 +767,35 @@ export default function GuruDashboard() {
       }
     })
 
+  const filteredExamScoreRows = useMemo(() => {
+    const rows = examScoreRows.filter((row) => {
+      const matchesSearch =
+        row.student_name.toLowerCase().includes(examSearchTerm.toLowerCase()) ||
+        row.exam_title.toLowerCase().includes(examSearchTerm.toLowerCase()) ||
+        row.nis.toLowerCase().includes(examSearchTerm.toLowerCase()) ||
+        row.kelas.toLowerCase().includes(examSearchTerm.toLowerCase())
+
+      const matchesType = selectedExamType === 'all' || row.exam_type === selectedExamType
+      const matchesKelas = selectedExamKelas === 'all' || row.kelas === selectedExamKelas
+      const matchesNis = selectedExamNIS === 'all' || row.nis === selectedExamNIS
+
+      return matchesSearch && matchesType && matchesKelas && matchesNis
+    })
+
+    rows.sort((a, b) => {
+      switch (examSortOrder) {
+        case 'score-high':
+          return b.final_score - a.final_score
+        case 'score-low':
+          return a.final_score - b.final_score
+        default:
+          return 0
+      }
+    })
+
+    return rows
+  }, [examScoreRows, examSearchTerm, selectedExamType, selectedExamKelas, selectedExamNIS, examSortOrder])
+
   const selectedStudents = students.filter((student) => selectedStudentIds.includes(student.id))
   const allVisibleSelected =
     filteredStudents.length > 0 &&
@@ -858,6 +908,62 @@ export default function GuruDashboard() {
     const filename = `Laporan_Clean_Code_Siswa_${fileDate}.xlsx`
 
     // Download file
+    XLSX.writeFile(workbook, filename)
+  }
+
+  const downloadExamScoresExcel = () => {
+    const exportRows = filteredExamScoreRows.map((row, index) => ({
+      No: index + 1,
+      'Jenis Ujian': row.exam_type,
+      Ujian: row.exam_title,
+      Siswa: row.student_name,
+      Kelas: row.kelas || '-',
+      NIS: row.nis || '-',
+      'Skor Akhir': Number(row.final_score.toFixed(2)),
+      'Waktu Submit': row.submitted_at
+        ? new Date(row.submitted_at).toLocaleString('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : '-',
+    }))
+
+    const summaryScore =
+      filteredExamScoreRows.length > 0
+        ? filteredExamScoreRows.reduce((sum, row) => sum + row.final_score, 0) / filteredExamScoreRows.length
+        : 0
+
+    exportRows.push({
+      No: '',
+      'Jenis Ujian': '',
+      Ujian: 'RINGKASAN',
+      Siswa: `${filteredExamScoreRows.length} submission`,
+      Kelas: '-',
+      NIS: '-',
+      'Skor Akhir': Number(summaryScore.toFixed(2)),
+      'Waktu Submit': new Date().toLocaleDateString('id-ID'),
+    } as any)
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows)
+    worksheet['!cols'] = [
+      { wch: 5 },
+      { wch: 12 },
+      { wch: 24 },
+      { wch: 25 },
+      { wch: 12 },
+      { wch: 15 },
+      { wch: 12 },
+      { wch: 20 },
+    ]
+
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Rekap Ujian')
+
+    const fileDate = new Date().toLocaleDateString('id-ID').replace(/\//g, '-')
+    const filename = `Rekap_Hasil_Ujian_Siswa_${fileDate}.xlsx`
     XLSX.writeFile(workbook, filename)
   }
 
@@ -1740,11 +1846,91 @@ export default function GuruDashboard() {
                   </div>
                 </div>
 
+                <div className="flex flex-col gap-3 mb-4 xl:flex-row xl:items-center xl:justify-between">
+                  <div className="flex flex-wrap gap-3">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={examSearchTerm}
+                        onChange={(e) => setExamSearchTerm(e.target.value)}
+                        placeholder={tr('Cari nama, ujian, NIS, kelas...', 'Search name, exam, NIS, class...')}
+                        className={`w-72 max-w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400' : 'bg-white border-purple-200 text-slate-800 placeholder-slate-400'}`}
+                      />
+                    </div>
+
+                    <select
+                      value={selectedExamType}
+                      onChange={(e) => setSelectedExamType(e.target.value as 'all' | 'pretest' | 'posttest')}
+                      className={`px-4 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
+                    >
+                      <option value="all">{tr('Semua Jenis', 'All Types')}</option>
+                      <option value="pretest">Pretest</option>
+                      <option value="posttest">Posttest</option>
+                    </select>
+
+                    <select
+                      value={selectedExamKelas}
+                      onChange={(e) => setSelectedExamKelas(e.target.value)}
+                      className={`px-4 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
+                    >
+                      <option value="all">{tr('Semua Kelas', 'All Classes')}</option>
+                      {examKelasOptions.map((kelas) => (
+                        <option key={kelas} value={kelas}>{kelas}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={selectedExamNIS}
+                      onChange={(e) => setSelectedExamNIS(e.target.value)}
+                      className={`px-4 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
+                    >
+                      <option value="all">{tr('Semua NIS', 'All NIS')}</option>
+                      {examNisOptions.map((nis) => (
+                        <option key={nis} value={nis}>{nis}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={examSortOrder}
+                      onChange={(e) => setExamSortOrder(e.target.value as 'default' | 'score-high' | 'score-low')}
+                      className={`px-4 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
+                    >
+                      <option value="default">{tr('Urutan default', 'Default order')}</option>
+                      <option value="score-high">{tr('Skor tertinggi ke terendah', 'Highest score to lowest')}</option>
+                      <option value="score-low">{tr('Skor terendah ke tertinggi', 'Lowest score to highest')}</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={downloadExamScoresExcel}
+                      disabled={filteredExamScoreRows.length === 0}
+                      className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl transition-all duration-300 shadow-lg flex items-center gap-2"
+                    >
+                      📥 Download Excel
+                    </button>
+                    <button
+                      onClick={() => {
+                        setExamSearchTerm('')
+                        setSelectedExamType('all')
+                        setSelectedExamKelas('all')
+                        setSelectedExamNIS('all')
+                        setExamSortOrder('default')
+                      }}
+                      className={`px-4 py-2 rounded-xl transition-all duration-300 border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700' : 'bg-white border-purple-200 text-slate-700 hover:bg-purple-50'}`}
+                    >
+                      {tr('Reset Filter', 'Reset Filters')}
+                    </button>
+                  </div>
+                </div>
+
                 {examScoresLoading ? (
                   <div className="py-8 text-center">Memuat rekap skor ujian...</div>
-                ) : examScoreRows.length === 0 ? (
+                ) : filteredExamScoreRows.length === 0 ? (
                   <div className="py-8 text-center text-sm text-slate-500">
-                    Belum ada submission ujian yang tersimpan.
+                    {examScoreRows.length === 0
+                      ? 'Belum ada submission ujian yang tersimpan.'
+                      : 'Tidak ada data yang cocok dengan filter saat ini.'}
                   </div>
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-purple-100">
@@ -1760,7 +1946,7 @@ export default function GuruDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {examScoreRows.map((row, index) => (
+                        {filteredExamScoreRows.map((row, index) => (
                           <tr key={`${row.exam_id}-${row.student_name}-${index}`} className={`border-t ${theme === 'dark' ? 'border-slate-700' : 'border-purple-100'}`}>
                             <td className={`px-4 py-3 font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{row.exam_title}</td>
                             <td className={`px-4 py-3 ${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'}`}>{row.student_name}</td>
@@ -1807,6 +1993,10 @@ export default function GuruDashboard() {
                     </table>
                   </div>
                 )}
+
+                <div className={`mt-3 text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Menampilkan {filteredExamScoreRows.length} dari {examScoreRows.length} submission
+                </div>
               </div>
 
             {/* Create Exam Modal */}
