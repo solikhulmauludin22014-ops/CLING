@@ -27,6 +27,8 @@ export default function SiswaMateriPage() {
   const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
+  const [completedMaterials, setCompletedMaterials] = useState<Set<string>>(new Set())
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [userName, setUserName] = useState('Siswa')
@@ -63,6 +65,23 @@ export default function SiswaMateriPage() {
 
       if (data.success) {
         setMaterials(data.materials)
+      }
+
+      // Load material progress for current user
+      try {
+        if (session?.user) {
+          const { data: progressData, error: progressError } = await supabase
+            .from('material_progress')
+            .select('material_id')
+            .eq('user_id', session.user.id)
+
+          if (!progressError && Array.isArray(progressData)) {
+            const doneSet = new Set(progressData.map((p: any) => p.material_id))
+            setCompletedMaterials(doneSet)
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load material progress:', err)
       }
     } catch (error) {
       console.error('Error loading materials:', error)
@@ -373,14 +392,45 @@ export default function SiswaMateriPage() {
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <a
-                      href={material.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-xl font-semibold text-center transition-all shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2"
+                    <button
+                      onClick={async (e) => {
+                          // mark material progress then open in new tab
+                          try {
+                            e.preventDefault()
+                            const supabase = createClient()
+                            const { data: { session } } = await supabase.auth.getSession()
+                            if (!session?.user) {
+                              window.location.replace('/login')
+                              return
+                            }
+
+                            // Upsert progress to avoid duplicate key errors
+                            const { error: upsertError } = await supabase
+                              .from('material_progress')
+                              .upsert({ user_id: session.user.id, material_id: material.id }, { onConflict: ['user_id', 'material_id'] })
+
+                            if (upsertError) throw upsertError
+
+                            // update local state
+                            setCompletedMaterials(prev => new Set(prev).add(material.id))
+                            // show toast
+                            setToastMessage('Progress tersimpan')
+                            setTimeout(() => setToastMessage(null), 2500)
+                          } catch (err) {
+                            // ignore errors; still open material
+                            console.error('Mark material progress error:', err)
+                            setToastMessage('Gagal menyimpan progress')
+                            setTimeout(() => setToastMessage(null), 2500)
+                          } finally {
+                            // open material in new tab
+                            window.open(material.file_url, '_blank', 'noopener')
+                          }
+                        }}
+                      className={`flex-1 ${completedMaterials.has(material.id) ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-purple-600 hover:bg-purple-700'} text-white py-3 px-4 rounded-xl font-semibold text-center transition-all shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2`}
                     >
-                      👁️ {tr('Lihat Materi', 'View Material')}
-                    </a>
+                      {completedMaterials.has(material.id) ? '✅ Dikerjakan' : `👁️ ${tr('Lihat Materi', 'View Material')}`}
+                    </button>
+                    
                     <a
                       href={material.file_url}
                       download={material.file_name}
@@ -405,6 +455,14 @@ export default function SiswaMateriPage() {
           </div>
         )}
       </main>
+        {/* Toast */}
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50">
+            <div className={`px-4 py-2 rounded-lg shadow-lg text-white ${theme === 'dark' ? 'bg-slate-700' : 'bg-emerald-600'}`}>
+              {toastMessage}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
