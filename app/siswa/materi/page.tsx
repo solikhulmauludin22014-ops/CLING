@@ -407,7 +407,7 @@ export default function SiswaMateriPage() {
                             // Upsert progress to avoid duplicate key errors
                             const { error: upsertError } = await supabase
                               .from('material_progress')
-                              .upsert({ user_id: session.user.id, material_id: material.id }, { onConflict: ['user_id', 'material_id'] })
+                              .upsert({ user_id: session.user.id, material_id: material.id }, { onConflict: 'user_id,material_id' })
 
                             if (upsertError) throw upsertError
 
