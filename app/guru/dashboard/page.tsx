@@ -2293,16 +2293,14 @@ export default function GuruDashboard() {
                         >
                           📥 Unduh
                         </a>
-                        {material.teacher_id === userId && (
-                          <button
-                            onClick={() => confirmDeleteMaterial(material)}
-                            className="py-2 px-3 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-sm font-medium transition-colors border border-red-200 flex items-center gap-1"
-                            aria-label={`Hapus materi ${material.title}`}
-                            title={`Hapus materi ${material.title}`}
-                          >
-                            🗑️ <span>Hapus</span>
-                          </button>
-                        )}
+                        <button
+                          onClick={() => confirmDeleteMaterial(material)}
+                          className="py-2 px-3 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-sm font-medium transition-colors border border-red-200 flex items-center gap-1"
+                          aria-label={`Hapus materi ${material.title}`}
+                          title={`Hapus materi ${material.title}`}
+                        >
+                          🗑️ <span>Hapus</span>
+                        </button>
                       </div>
                     </div>
                   ))}

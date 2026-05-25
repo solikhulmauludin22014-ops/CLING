@@ -233,11 +233,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Material not found' }, { status: 404 })
     }
 
-    // Cek apakah user adalah pemilik materi
-    if (material.teacher_id !== user.id) {
-      return NextResponse.json({ error: 'You can only delete your own materials' }, { status: 403 })
-    }
-
     // Ekstrak path storage dari URL
     const urlParts = material.file_url.split('/materials/')
     if (urlParts.length > 1) {
