@@ -107,6 +107,10 @@ export default function GuruDashboard() {
   const [materialToDelete, setMaterialToDelete] = useState<Material | null>(null)
   const [showDeleteStudentModal, setShowDeleteStudentModal] = useState(false)
   const [studentToDelete, setStudentToDelete] = useState<StudentData | null>(null)
+  const [showTempPasswordModal, setShowTempPasswordModal] = useState(false)
+  const [tempPasswordValue, setTempPasswordValue] = useState<string | null>(null)
+  const [tempPasswordLoading, setTempPasswordLoading] = useState<string | null>(null)
+  const [tempPasswordError, setTempPasswordError] = useState<string | null>(null)
   const [deleteStudentLoading, setDeleteStudentLoading] = useState(false)
   const [showResetProgressModal, setShowResetProgressModal] = useState(false)
   const [studentToReset, setStudentToReset] = useState<StudentData | null>(null)
@@ -645,6 +649,41 @@ export default function GuruDashboard() {
       setResetAllLoading(false)
       setShowResetAllModal(false)
     }
+  }
+
+  // Set temporary password for a student (admin action by guru)
+  const handleSetTempPassword = async (student: StudentData) => {
+    if (!student) return
+    setTempPasswordError(null)
+    setTempPasswordLoading(student.id)
+    try {
+      const res = await fetch('/api/guru/set-temp-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: student.id }),
+      })
+
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setTempPasswordValue(data.temp_password || null)
+        setShowTempPasswordModal(true)
+      } else {
+        setTempPasswordError(data.error || 'Failed to set temporary password')
+        alert(data.error || 'Gagal membuat password sementara')
+      }
+    } catch (err) {
+      console.error('Set temp password error:', err)
+      setTempPasswordError('Terjadi kesalahan saat membuat password sementara')
+      alert('Terjadi kesalahan saat membuat password sementara')
+    } finally {
+      setTempPasswordLoading(null)
+    }
+  }
+
+  const closeTempPasswordModal = () => {
+    setShowTempPasswordModal(false)
+    setTempPasswordValue(null)
+    setTempPasswordError(null)
   }
 
   const toggleStudentSelection = (studentId: string) => {
@@ -1721,6 +1760,14 @@ export default function GuruDashboard() {
                             🔄 {tr('Reset', 'Reset')}
                           </button>
                           <button
+                            onClick={() => handleSetTempPassword(student)}
+                            className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105"
+                            title={tr('Buat password sementara', 'Create temporary password')}
+                            disabled={tempPasswordLoading === student.id}
+                          >
+                            {tempPasswordLoading === student.id ? '⏳...' : '🔑 ' + tr('Password Sementara', 'Temp Password')}
+                          </button>
+                          <button
                             onClick={() => confirmDeleteStudent(student)}
                             className="px-2.5 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105"
                             title={`Hapus akun ${student.name}`}
@@ -2075,6 +2122,40 @@ export default function GuruDashboard() {
                 </div>
               </div>
             )}
+
+        {/* Temp Password Modal */}
+        {showTempPasswordModal && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/60" onClick={closeTempPasswordModal}></div>
+            <div className={`relative w-11/12 max-w-lg rounded-2xl p-6 border shadow-2xl ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
+              <h3 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Password Sementara', 'Temporary Password')}</h3>
+              <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Berikut password sementara siswa. Salin dan berikan ke siswa lalu minta mereka mengganti segera.', 'This is the student temporary password. Copy and give to the student and ask them to change it immediately.')}</p>
+
+              <div className="mb-4">
+                <div className="flex items-center gap-2">
+                  <input readOnly value={tempPasswordValue || ''} className="flex-1 px-3 py-2 rounded-xl border font-mono text-sm" />
+                  <button
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(tempPasswordValue || '')
+                        alert(tr('Tersalin ke clipboard', 'Copied to clipboard'))
+                      } catch (e) {
+                        alert(tr('Gagal menyalin', 'Copy failed'))
+                      }
+                    }}
+                    className="px-3 py-2 bg-purple-600 text-white rounded-xl"
+                  >
+                    {tr('Salin', 'Copy')}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button onClick={closeTempPasswordModal} className="px-4 py-2 rounded-xl border">{tr('Tutup','Close')}</button>
+              </div>
+            </div>
+          </div>
+        )}
           </div>
         )}
 
