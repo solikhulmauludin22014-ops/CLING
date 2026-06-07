@@ -83,8 +83,8 @@ export async function GET() {
   const allMaterialsDone = totalMaterials === 0 || completedMaterials >= totalMaterials
   const pretestDone = pretestSubmission?.is_submitted ?? false
   const posttestDone = posttestSubmission?.is_submitted ?? false
-  // Remove requirement of pretest completion so posttest can be available without pretest
-  const posttestUnlocked = Boolean(posttest?.id) && allMaterialsDone
+  // Make posttest available as long as a posttest exists (remove pretest/materials requirements)
+  const posttestUnlocked = Boolean(posttest?.id)
 
   return NextResponse.json({
     activeExamId,

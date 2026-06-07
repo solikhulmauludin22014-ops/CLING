@@ -171,12 +171,12 @@ export default function SiswaUjianPage() {
   const materialsDone = status?.posttest?.materials?.done ?? 0
   const materialsTotal = status?.posttest?.materials?.total ?? 0
 
-  // Posttest unlocked when available and materials requirement is satisfied
-  const posttestUnlocked = Boolean(status?.posttest?.unlocked || (status?.posttest?.available && (materialsTotal === 0 || materialsDone >= materialsTotal)))
+  // Posttest unlocked when available (remove pretest/materials requirement)
+  const posttestUnlocked = Boolean(status?.posttest?.unlocked || status?.posttest?.available)
 
-  // No longer require pretest to be done for posttest
+  // No requirements shown
   const posttestNeedsPretest = false
-  const posttestNeedsMaterials = materialsTotal > 0 && materialsDone < materialsTotal
+  const posttestNeedsMaterials = false
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-slate-900' : 'bg-gray-50'}`}>
