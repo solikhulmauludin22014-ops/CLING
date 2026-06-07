@@ -394,20 +394,7 @@ export default function SiswaUjianPage() {
                 </div>
 
                 <div className={`rounded-xl p-4 mb-5 ${theme === 'dark' ? 'bg-slate-700/60' : 'bg-purple-50'}`}>
-                  <p className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-purple-200' : 'text-purple-700'}`}>{t('requirements')}</p>
-                  {posttestNeedsPretest && (
-                    <p className={`text-sm ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{t('requirementPretest')}</p>
-                  )}
-                  {posttestNeedsMaterials && (
-                    <p className={`text-sm ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                      {t('requirementMaterials')}
-                    </p>
-                  )}
-                  {materialsTotal > 0 && (
-                    <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                      {t('materialsProgress')}: {materialsDone}/{materialsTotal}
-                    </p>
-                  )}
+                  {/* Requirements intentionally left blank */}
                 </div>
 
                 {posttestAvailable && posttestUnlocked && !posttestDone && status?.posttest?.id ? (
