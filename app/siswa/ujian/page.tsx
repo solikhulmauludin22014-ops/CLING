@@ -171,9 +171,11 @@ export default function SiswaUjianPage() {
   const materialsDone = status?.posttest?.materials?.done ?? 0
   const materialsTotal = status?.posttest?.materials?.total ?? 0
 
-  const posttestUnlocked = Boolean(status?.posttest?.unlocked || (status?.posttest?.available && pretestDone && (materialsTotal === 0 || materialsDone >= materialsTotal)))
+  // Posttest unlocked when available and materials requirement is satisfied
+  const posttestUnlocked = Boolean(status?.posttest?.unlocked || (status?.posttest?.available && (materialsTotal === 0 || materialsDone >= materialsTotal)))
 
-  const posttestNeedsPretest = !pretestDone
+  // No longer require pretest to be done for posttest
+  const posttestNeedsPretest = false
   const posttestNeedsMaterials = materialsTotal > 0 && materialsDone < materialsTotal
 
   return (
