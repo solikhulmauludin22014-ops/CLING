@@ -949,69 +949,49 @@ export default function GuruDashboard() {
       return Math.max(max, questionCount)
     }, 0)
 
-    const exportRows = filteredExamScoreRows.map((row, index) => {
+    // Ensure we have at least 10 columns for the S1..S10 format if there are fewer questions
+    const cols = Math.max(10, maxQuestions)
+
+    const exportRows: any[] = []
+
+    // 1. Subheader row
+    const subheaderRow: Record<string, any> = {
+      'No.': '',
+      'Nama Siswa': `Skor Maks: 10 / soal | Total: ${cols * 10}`,
+      'Kode': '',
+    }
+    for (let q = 1; q <= cols; q++) {
+      subheaderRow[`S${q}`] = '0-10'
+    }
+    exportRows.push(subheaderRow)
+
+    // 2. Data rows
+    filteredExamScoreRows.forEach((row, index) => {
       const baseRow: Record<string, any> = {
-        No: index + 1,
-        'Jenis Ujian': row.exam_type,
-        Ujian: row.exam_title,
-        Siswa: row.student_name,
-        Kelas: row.kelas || '-',
-        NIS: row.nis || '-',
+        'No.': index + 1,
+        'Nama Siswa': row.student_name,
+        'Kode': row.nis || '-',
       }
 
       // Add per-question score columns
-      for (let q = 1; q <= maxQuestions; q++) {
+      for (let q = 1; q <= cols; q++) {
         const answerForQ = row.answer_scores?.find((a) => a.order_number === q)
-        baseRow[`Soal ${q}`] = answerForQ ? Number(answerForQ.answer_score.toFixed(2)) : '-'
+        baseRow[`S${q}`] = answerForQ ? Number(answerForQ.answer_score.toFixed(2)) : '-'
       }
 
-      baseRow['Skor Akhir'] = Number(row.final_score.toFixed(2))
-      baseRow['Waktu Submit'] = '05 Jun 2026'
-
-      return baseRow
+      exportRows.push(baseRow)
     })
-
-    const summaryScore =
-      filteredExamScoreRows.length > 0
-        ? filteredExamScoreRows.reduce((sum, row) => sum + row.final_score, 0) / filteredExamScoreRows.length
-        : 0
-
-    const summaryRow: Record<string, any> = {
-      No: '',
-      'Jenis Ujian': '',
-      Ujian: 'RINGKASAN',
-      Siswa: `${filteredExamScoreRows.length} submission`,
-      Kelas: '-',
-      NIS: '-',
-    }
-    for (let q = 1; q <= maxQuestions; q++) {
-      // Calculate average per question
-      const scoresForQ = filteredExamScoreRows
-        .map((row) => row.answer_scores?.find((a) => a.order_number === q)?.answer_score)
-        .filter((s): s is number => s !== undefined)
-      summaryRow[`Soal ${q}`] = scoresForQ.length > 0
-        ? Number((scoresForQ.reduce((a, b) => a + b, 0) / scoresForQ.length).toFixed(2))
-        : '-'
-    }
-    summaryRow['Skor Akhir'] = Number(summaryScore.toFixed(2))
-    summaryRow['Waktu Submit'] = '05 Jun 2026'
-    exportRows.push(summaryRow)
 
     const worksheet = XLSX.utils.json_to_sheet(exportRows)
     const colWidths = [
-      { wch: 5 },   // No
-      { wch: 12 },  // Jenis Ujian
-      { wch: 24 },  // Ujian
-      { wch: 25 },  // Siswa
-      { wch: 12 },  // Kelas
-      { wch: 15 },  // NIS
+      { wch: 5 },   // No.
+      { wch: 35 },  // Nama Siswa
+      { wch: 15 },  // Kode
     ]
     // Add column width for each question
-    for (let q = 1; q <= maxQuestions; q++) {
-      colWidths.push({ wch: 10 })
+    for (let q = 1; q <= cols; q++) {
+      colWidths.push({ wch: 8 }) // S1..S10
     }
-    colWidths.push({ wch: 12 })  // Skor Akhir
-    colWidths.push({ wch: 20 })  // Waktu Submit
     worksheet['!cols'] = colWidths
 
     const workbook = XLSX.utils.book_new()
