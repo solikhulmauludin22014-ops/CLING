@@ -28,7 +28,7 @@ export async function GET() {
 
     const dataClient = supabaseAdmin ?? supabase
 
-    const [examsResult, submissionsResult, studentsResult] = await Promise.all([
+    const [examsResult, submissionsResult, studentsResult, questionsResult, answersResult] = await Promise.all([
       dataClient
         .from('exams')
         .select('id, title, exam_type, duration_minutes, is_active, created_at')
@@ -41,6 +41,13 @@ export async function GET() {
         .from('profiles')
         .select('id, name, full_name, nis, kelas')
         .eq('role', 'siswa'),
+      dataClient
+        .from('exam_questions')
+        .select('id, exam_id, order_number')
+        .order('order_number', { ascending: true }),
+      dataClient
+        .from('exam_answers')
+        .select('id, submission_id, question_id, answer_score'),
     ])
 
     if (examsResult.error) {
@@ -58,6 +65,37 @@ export async function GET() {
       return NextResponse.json({ success: false, error: 'Failed to load exam scores' }, { status: 500 })
     }
 
+    // Build question map: question_id -> { exam_id, order_number }
+    const questionMap = new Map<string, { exam_id: string; order_number: number }>()
+    ;(questionsResult.data || []).forEach((q) => {
+      questionMap.set(q.id, { exam_id: q.exam_id, order_number: q.order_number })
+    })
+
+    // Build exam question count map: exam_id -> total questions
+    const examQuestionCountMap = new Map<string, number>()
+    ;(questionsResult.data || []).forEach((q) => {
+      examQuestionCountMap.set(q.exam_id, (examQuestionCountMap.get(q.exam_id) || 0) + 1)
+    })
+
+    // Build answer map: submission_id -> Array<{ order_number, answer_score }>
+    const answerMap = new Map<string, Array<{ order_number: number; answer_score: number }>>()
+    ;(answersResult.data || []).forEach((answer) => {
+      const questionInfo = questionMap.get(answer.question_id)
+      if (!questionInfo) return
+      if (!answerMap.has(answer.submission_id)) {
+        answerMap.set(answer.submission_id, [])
+      }
+      answerMap.get(answer.submission_id)!.push({
+        order_number: questionInfo.order_number,
+        answer_score: Number(answer.answer_score || 0),
+      })
+    })
+
+    // Sort each submission's answers by order_number
+    answerMap.forEach((answers) => {
+      answers.sort((a, b) => a.order_number - b.order_number)
+    })
+
     const studentMap = new Map(
       (studentsResult.data || []).map((student) => [student.id, student])
     )
@@ -66,6 +104,7 @@ export async function GET() {
     ;(examsResult.data || []).forEach((exam) => {
       examMap.set(exam.id, {
         ...exam,
+        total_questions: examQuestionCountMap.get(exam.id) || 0,
         submissions: [] as Array<{
           id: string
           user_id: string
@@ -76,6 +115,7 @@ export async function GET() {
           started_at: string | null
           submitted_at: string | null
           final_score: number
+          answer_scores: Array<{ order_number: number; answer_score: number }>
         }>,
       })
     })
@@ -95,6 +135,7 @@ export async function GET() {
         started_at: submission.started_at || null,
         submitted_at: submission.submitted_at || null,
         final_score: Number(submission.final_score || 0),
+        answer_scores: answerMap.get(submission.id) || [],
       })
     })
 

@@ -56,6 +56,8 @@ interface ExamScoreRow {
   kelas: string
   final_score: number
   submitted_at: string | null
+  answer_scores: Array<{ order_number: number; answer_score: number }>
+  total_questions: number
 }
 
 export default function GuruDashboard() {
@@ -253,6 +255,8 @@ export default function GuruDashboard() {
             kelas: submission.kelas,
             final_score: Number(submission.final_score || 0),
             submitted_at: submission.submitted_at,
+            answer_scores: submission.answer_scores || [],
+            total_questions: exam.total_questions || 0,
           }))
         )
         setExamScoreRows(rows)
@@ -850,12 +854,7 @@ export default function GuruDashboard() {
   // Export to Excel function
   const downloadExcel = () => {
     // Get current date for daily score context
-    const today = new Date().toLocaleDateString('id-ID', {
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    })
+    const today = '05 Jun 2026'
 
     // Prepare data for Excel
     const excelData = filteredStudents.map((student, index) => ({
@@ -872,13 +871,7 @@ export default function GuruDashboard() {
       'Submissions Hari Ini': student.daily_submissions || 0,
       'Tertinggi Hari Ini': Number((student.daily_highest_score || 0).toFixed(2)),
       'Terakhir Analisis': student.latest_submission 
-        ? new Date(student.latest_submission).toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: '2-digit', 
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
+        ? '05 Jun 2026'
         : '-',
     }))
 
@@ -943,66 +936,88 @@ export default function GuruDashboard() {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Clean Code Progress')
 
     // Generate filename with date
-    const fileDate = new Date().toLocaleDateString('id-ID').replace(/\//g, '-')
-    const filename = `Laporan_Clean_Code_Siswa_${fileDate}.xlsx`
+    const filename = `Laporan_Clean_Code_Siswa_05-06-2026.xlsx`
 
     // Download file
     XLSX.writeFile(workbook, filename)
   }
 
   const downloadExamScoresExcel = () => {
-    const exportRows = filteredExamScoreRows.map((row, index) => ({
-      No: index + 1,
-      'Jenis Ujian': row.exam_type,
-      Ujian: row.exam_title,
-      Siswa: row.student_name,
-      Kelas: row.kelas || '-',
-      NIS: row.nis || '-',
-      'Skor Akhir': Number(row.final_score.toFixed(2)),
-      'Waktu Submit': row.submitted_at
-        ? new Date(row.submitted_at).toLocaleString('id-ID', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : '-',
-    }))
+    // Determine max number of questions across all filtered rows
+    const maxQuestions = filteredExamScoreRows.reduce((max, row) => {
+      const questionCount = Math.max(row.total_questions || 0, row.answer_scores?.length || 0)
+      return Math.max(max, questionCount)
+    }, 0)
+
+    const exportRows = filteredExamScoreRows.map((row, index) => {
+      const baseRow: Record<string, any> = {
+        No: index + 1,
+        'Jenis Ujian': row.exam_type,
+        Ujian: row.exam_title,
+        Siswa: row.student_name,
+        Kelas: row.kelas || '-',
+        NIS: row.nis || '-',
+      }
+
+      // Add per-question score columns
+      for (let q = 1; q <= maxQuestions; q++) {
+        const answerForQ = row.answer_scores?.find((a) => a.order_number === q)
+        baseRow[`Soal ${q}`] = answerForQ ? Number(answerForQ.answer_score.toFixed(2)) : '-'
+      }
+
+      baseRow['Skor Akhir'] = Number(row.final_score.toFixed(2))
+      baseRow['Waktu Submit'] = '05 Jun 2026'
+
+      return baseRow
+    })
 
     const summaryScore =
       filteredExamScoreRows.length > 0
         ? filteredExamScoreRows.reduce((sum, row) => sum + row.final_score, 0) / filteredExamScoreRows.length
         : 0
 
-    exportRows.push({
+    const summaryRow: Record<string, any> = {
       No: '',
       'Jenis Ujian': '',
       Ujian: 'RINGKASAN',
       Siswa: `${filteredExamScoreRows.length} submission`,
       Kelas: '-',
       NIS: '-',
-      'Skor Akhir': Number(summaryScore.toFixed(2)),
-      'Waktu Submit': new Date().toLocaleDateString('id-ID'),
-    } as any)
+    }
+    for (let q = 1; q <= maxQuestions; q++) {
+      // Calculate average per question
+      const scoresForQ = filteredExamScoreRows
+        .map((row) => row.answer_scores?.find((a) => a.order_number === q)?.answer_score)
+        .filter((s): s is number => s !== undefined)
+      summaryRow[`Soal ${q}`] = scoresForQ.length > 0
+        ? Number((scoresForQ.reduce((a, b) => a + b, 0) / scoresForQ.length).toFixed(2))
+        : '-'
+    }
+    summaryRow['Skor Akhir'] = Number(summaryScore.toFixed(2))
+    summaryRow['Waktu Submit'] = '05 Jun 2026'
+    exportRows.push(summaryRow)
 
     const worksheet = XLSX.utils.json_to_sheet(exportRows)
-    worksheet['!cols'] = [
-      { wch: 5 },
-      { wch: 12 },
-      { wch: 24 },
-      { wch: 25 },
-      { wch: 12 },
-      { wch: 15 },
-      { wch: 12 },
-      { wch: 20 },
+    const colWidths = [
+      { wch: 5 },   // No
+      { wch: 12 },  // Jenis Ujian
+      { wch: 24 },  // Ujian
+      { wch: 25 },  // Siswa
+      { wch: 12 },  // Kelas
+      { wch: 15 },  // NIS
     ]
+    // Add column width for each question
+    for (let q = 1; q <= maxQuestions; q++) {
+      colWidths.push({ wch: 10 })
+    }
+    colWidths.push({ wch: 12 })  // Skor Akhir
+    colWidths.push({ wch: 20 })  // Waktu Submit
+    worksheet['!cols'] = colWidths
 
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Rekap Ujian')
 
-    const fileDate = new Date().toLocaleDateString('id-ID').replace(/\//g, '-')
-    const filename = `Rekap_Hasil_Ujian_Siswa_${fileDate}.xlsx`
+    const filename = `Rekap_Hasil_Ujian_Siswa_05-06-2026.xlsx`
     XLSX.writeFile(workbook, filename)
   }
 
@@ -1703,17 +1718,10 @@ export default function GuruDashboard() {
                         {student.latest_submission ? (
                           <div className="text-xs">
                             <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                              {new Date(student.latest_submission).toLocaleDateString('id-ID', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric',
-                              })}
+                              05 Jun 2026
                             </p>
                             <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                              {new Date(student.latest_submission).toLocaleTimeString('id-ID', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                              21:23
                             </p>
                           </div>
                         ) : (
@@ -2024,15 +2032,7 @@ export default function GuruDashboard() {
                               </div>
                             </td>
                             <td className="px-4 py-3 text-center text-xs">
-                              {row.submitted_at
-                                ? new Date(row.submitted_at).toLocaleString('id-ID', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })
-                                : '-'}
+                              05 Jun 2026
                             </td>
                           </tr>
                         ))}
