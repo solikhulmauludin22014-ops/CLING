@@ -1284,15 +1284,93 @@ export default function GuruDashboard() {
                 <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
                   {userName.charAt(0).toUpperCase()}
                 </div>
-              </div>
+              </a>
             </div>
           </div>
         </div>
       </nav>
 
-      </div>
+      {/* Sidebar Overlay */}
+      {showSidebar && (
+        <button
+          onClick={() => setShowSidebar(false)}
+          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
+          aria-label="Close navigation menu"
+        />
+      )}
 
-      {/* Main Content */}
+      {/* Sidebar */}
+      <aside
+        className={`fixed left-0 top-0 z-40 h-screen w-72 max-w-[88vw] pt-24 px-4 pb-4 border-r shadow-xl transition-all duration-300 transform ${
+          showSidebar ? 'translate-x-0 opacity-100' : '-translate-x-[120%] opacity-0 pointer-events-none'
+        } ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}
+      >
+        <div className={`h-full rounded-2xl border p-3 overflow-y-auto ${theme === 'dark' ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-purple-100'}`}>
+          <div className="space-y-2">
+            <p className={`text-xs font-semibold uppercase tracking-wide px-2 mb-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
+              {tr('Menu Navigasi', 'Navigation Menu')}
+            </p>
+
+            <button
+              onClick={() => { setActiveTab('students'); setShowSidebar(false) }}
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-left font-semibold ${
+                activeTab === 'students'
+                  ? theme === 'dark' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                  : theme === 'dark' ? 'bg-slate-700/50 hover:bg-slate-700 text-slate-300' : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+              }`}
+            >
+              👥 {tr('Progress Siswa', 'Student Progress')}
+            </button>
+
+            <button
+              onClick={() => { setActiveTab('materials'); setShowSidebar(false) }}
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-left font-semibold ${
+                activeTab === 'materials'
+                  ? theme === 'dark' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                  : theme === 'dark' ? 'bg-slate-700/50 hover:bg-slate-700 text-slate-300' : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+              }`}
+            >
+              📚 {tr('Materi Pembelajaran', 'Learning Materials')}
+            </button>
+
+            <button
+              onClick={() => { setActiveTab('exams'); setShowSidebar(false) }}
+              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-left font-semibold ${
+                activeTab === 'exams'
+                  ? theme === 'dark' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                  : theme === 'dark' ? 'bg-slate-700/50 hover:bg-slate-700 text-slate-300' : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
+              }`}
+            >
+              📝 {tr('Ujian', 'Exams')}
+            </button>
+
+            <div className={`my-3 border-t ${theme === 'dark' ? 'border-slate-700' : 'border-purple-100'}`} />
+
+            <a
+              href="/guru/profile"
+              className={`flex items-center justify-between gap-3 px-4 py-2 rounded-xl transition-all cursor-pointer ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
+            >
+              <div>
+                <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
+                <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Guru</p>
+              </div>
+              <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+            </a>
+
+            <button
+              onClick={confirmLogout}
+              className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300 text-left"
+            >
+              🚪 {tr('Keluar', 'Logout')}
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content — shifts right when sidebar is open on large screens */}
+      <div className={`transition-all duration-300 ${showSidebar ? 'lg:ml-72' : 'lg:ml-0'}`}>
       <div className="relative max-w-7xl mx-auto px-6 py-8">
         
         {/* Students Tab Content */}
