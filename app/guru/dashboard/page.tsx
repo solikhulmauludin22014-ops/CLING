@@ -74,9 +74,8 @@ export default function GuruDashboard() {
     highest_score: 0,
   })
   
-  // Tab / Sidebar state
+  // Tab state
   const [activeTab, setActiveTab] = useState<'students' | 'materials' | 'exams'>('students')
-  const [showSidebar, setShowSidebar] = useState(false)
   
   // Material states
   const [materials, setMaterials] = useState<Material[]>([])
@@ -528,12 +527,12 @@ export default function GuruDashboard() {
   const getFileIcon = (type: string) => {
     switch (type) {
       case 'pdf':
-        return '≡ƒôò'
+        return '📕'
       case 'ppt':
       case 'pptx':
-        return '≡ƒôè'
+        return '📊'
       default:
-        return '≡ƒôä'
+        return '📄'
     }
   }
 
@@ -978,7 +977,7 @@ export default function GuruDashboard() {
           ></div>
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-center">
-              <div className="text-6xl mb-4">≡ƒÜ¬</div>
+              <div className="text-6xl mb-4">🚪</div>
               <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Keluar?', 'Logout?')}</h3>
               <p className={`mb-6 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin keluar dari aplikasi?', 'Are you sure you want to logout from the app?')}</p>
               <div className="flex gap-4 justify-center">
@@ -986,13 +985,13 @@ export default function GuruDashboard() {
                   onClick={cancelLogout}
                   className="px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  {tr('Γ¥î Tidak', 'Γ¥î No')}
+                  {tr('❌ Tidak', '❌ No')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
-                  {tr('Γ£à Ya, Keluar', 'Γ£à Yes, Logout')}
+                  {tr('✅ Ya, Keluar', '✅ Yes, Logout')}
                 </button>
               </div>
             </div>
@@ -1009,7 +1008,7 @@ export default function GuruDashboard() {
           ></div>
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
             <div className="text-center">
-              <div className="text-6xl mb-4">≡ƒùæ∩╕Å</div>
+              <div className="text-6xl mb-4">🗑️</div>
               <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Hapus Materi?', 'Delete Material?')}</h3>
               <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin menghapus materi:', 'Are you sure you want to delete material:')}</p>
               <p className="text-purple-600 font-semibold mb-6">&quot;{materialToDelete.title}&quot;</p>
@@ -1018,13 +1017,13 @@ export default function GuruDashboard() {
                   onClick={() => setShowDeleteModal(false)}
                   className="px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  {tr('Γ¥î Batal', 'Γ¥î Cancel')}
+                  {tr('❌ Batal', '❌ Cancel')}
                 </button>
                 <button
                   onClick={handleDeleteMaterial}
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
-                  {tr('≡ƒùæ∩╕Å Ya, Hapus', '≡ƒùæ∩╕Å Yes, Delete')}
+                  {tr('🗑️ Ya, Hapus', '🗑️ Yes, Delete')}
                 </button>
               </div>
             </div>
@@ -1041,7 +1040,7 @@ export default function GuruDashboard() {
           ></div>
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-red-100'}`}>
             <div className="text-center">
-              <div className="text-6xl mb-4">ΓÜá∩╕Å</div>
+              <div className="text-6xl mb-4">⚠️</div>
               <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Hapus Akun Siswa?', 'Delete Student Account?')}</h3>
               <p className={`mb-2 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>{tr('Apakah Anda yakin ingin menghapus akun siswa:', 'Are you sure you want to delete this student account:')}</p>
               <div className={`mb-4 p-3 rounded-xl ${theme === 'dark' ? 'bg-slate-700' : 'bg-red-50'}`}>
@@ -1049,7 +1048,7 @@ export default function GuruDashboard() {
                 <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>NIS: {studentToDelete.nis} | Kelas: {studentToDelete.kelas}</p>
               </div>
               <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-red-400' : 'text-red-500'}`}>
-                {tr('ΓÜá∩╕Å Semua data siswa termasuk submissions, skor, dan leaderboard akan dihapus permanen!', 'ΓÜá∩╕Å All student data including submissions, scores, and leaderboard entries will be permanently deleted!')}
+                {tr('⚠️ Semua data siswa termasuk submissions, skor, dan leaderboard akan dihapus permanen!', '⚠️ All student data including submissions, scores, and leaderboard entries will be permanently deleted!')}
               </p>
               <div className="flex gap-4 justify-center">
                 <button
@@ -1057,14 +1056,14 @@ export default function GuruDashboard() {
                   disabled={deleteStudentLoading}
                   className="px-6 py-3 bg-slate-500 hover:bg-slate-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  {tr('Γ¥î Batal', 'Γ¥î Cancel')}
+                  {tr('❌ Batal', '❌ Cancel')}
                 </button>
                 <button
                   onClick={handleDeleteStudent}
                   disabled={deleteStudentLoading}
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
-                  {deleteStudentLoading ? tr('ΓÅ│ Menghapus...', 'ΓÅ│ Deleting...') : tr('≡ƒùæ∩╕Å Ya, Hapus Akun', '≡ƒùæ∩╕Å Yes, Delete Account')}
+                  {deleteStudentLoading ? tr('⏳ Menghapus...', '⏳ Deleting...') : tr('🗑️ Ya, Hapus Akun', '🗑️ Yes, Delete Account')}
                 </button>
               </div>
             </div>
@@ -1080,7 +1079,7 @@ export default function GuruDashboard() {
           ></div>
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-yellow-100'}`}>
             <div className="text-center">
-              <div className="text-6xl mb-4">≡ƒöä</div>
+              <div className="text-6xl mb-4">🔄</div>
               <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
                 {tr('Reset Progress Siswa?', 'Reset Student Progress?')}
               </h3>
@@ -1095,8 +1094,8 @@ export default function GuruDashboard() {
               </div>
               <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-600'}`}>
                 {tr(
-                  'ΓÜá∩╕Å Semua submission, skor, dan leaderboard siswa ini akan direset menjadi 0. Akun tetap ada.',
-                  'ΓÜá∩╕Å All submissions, scores, and leaderboard data will be reset to 0. The account remains.'
+                  '⚠️ Semua submission, skor, dan leaderboard siswa ini akan direset menjadi 0. Akun tetap ada.',
+                  '⚠️ All submissions, scores, and leaderboard data will be reset to 0. The account remains.'
                 )}
               </p>
               <div className="flex gap-4 justify-center">
@@ -1105,14 +1104,14 @@ export default function GuruDashboard() {
                   disabled={resetProgressLoading}
                   className="px-6 py-3 bg-slate-500 hover:bg-slate-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  {tr('Γ¥î Batal', 'Γ¥î Cancel')}
+                  {tr('❌ Batal', '❌ Cancel')}
                 </button>
                 <button
                   onClick={handleResetProgress}
                   disabled={resetProgressLoading}
                   className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-yellow-500/30"
                 >
-                  {resetProgressLoading ? tr('ΓÅ│ Mereset...', 'ΓÅ│ Resetting...') : tr('≡ƒöä Ya, Reset', '≡ƒöä Yes, Reset')}
+                  {resetProgressLoading ? tr('⏳ Mereset...', '⏳ Resetting...') : tr('🔄 Ya, Reset', '🔄 Yes, Reset')}
                 </button>
               </div>
             </div>
@@ -1128,7 +1127,7 @@ export default function GuruDashboard() {
           ></div>
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-yellow-100'}`}>
             <div className="text-center">
-              <div className="text-6xl mb-4">≡ƒöä</div>
+              <div className="text-6xl mb-4">🔄</div>
               <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
                 {tr('Reset Semua Progress?', 'Reset All Progress?')}
               </h3>
@@ -1139,7 +1138,7 @@ export default function GuruDashboard() {
                 )}
               </p>
               <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-600'}`}>
-                {tr('ΓÜá∩╕Å Aksi ini tidak bisa dibatalkan.', 'ΓÜá∩╕Å This action cannot be undone.')}
+                {tr('⚠️ Aksi ini tidak bisa dibatalkan.', '⚠️ This action cannot be undone.')}
               </p>
               <div className="flex gap-4 justify-center">
                 <button
@@ -1147,14 +1146,14 @@ export default function GuruDashboard() {
                   disabled={resetAllLoading}
                   className="px-6 py-3 bg-slate-500 hover:bg-slate-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  {tr('Γ¥î Batal', 'Γ¥î Cancel')}
+                  {tr('❌ Batal', '❌ Cancel')}
                 </button>
                 <button
                   onClick={handleResetAllProgress}
                   disabled={resetAllLoading}
                   className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-yellow-500/30"
                 >
-                  {resetAllLoading ? tr('ΓÅ│ Mereset...', 'ΓÅ│ Resetting...') : tr('≡ƒöä Ya, Reset Semua', '≡ƒöä Yes, Reset All')}
+                  {resetAllLoading ? tr('⏳ Mereset...', '⏳ Resetting...') : tr('🔄 Ya, Reset Semua', '🔄 Yes, Reset All')}
                 </button>
               </div>
             </div>
@@ -1170,7 +1169,7 @@ export default function GuruDashboard() {
           ></div>
           <div className={`relative rounded-2xl p-8 border shadow-2xl max-w-md w-full mx-4 ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-red-100'}`}>
             <div className="text-center">
-              <div className="text-6xl mb-4">ΓÜá∩╕Å</div>
+              <div className="text-6xl mb-4">⚠️</div>
               <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
                 {tr('Hapus Banyak Akun?', 'Delete Multiple Accounts?')}
               </h3>
@@ -1185,13 +1184,13 @@ export default function GuruDashboard() {
                   {selectedStudents.map((student) => (
                     <div key={student.id} className="flex justify-between gap-2">
                       <span className="font-medium truncate">{student.name}</span>
-                      <span className="text-[10px] text-slate-400">{student.nis} ΓÇó {student.kelas}</span>
+                      <span className="text-[10px] text-slate-400">{student.nis} • {student.kelas}</span>
                     </div>
                   ))}
                 </div>
               )}
               <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-red-400' : 'text-red-500'}`}>
-                {tr('ΓÜá∩╕Å Semua data siswa terpilih akan dihapus permanen!', 'ΓÜá∩╕Å All selected student data will be permanently deleted!')}
+                {tr('⚠️ Semua data siswa terpilih akan dihapus permanen!', '⚠️ All selected student data will be permanently deleted!')}
               </p>
               <div className="flex gap-4 justify-center">
                 <button
@@ -1199,14 +1198,14 @@ export default function GuruDashboard() {
                   disabled={bulkDeleteLoading}
                   className="px-6 py-3 bg-slate-500 hover:bg-slate-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300"
                 >
-                  {tr('Γ¥î Batal', 'Γ¥î Cancel')}
+                  {tr('❌ Batal', '❌ Cancel')}
                 </button>
                 <button
                   onClick={handleBulkDeleteStudents}
                   disabled={bulkDeleteLoading}
                   className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-red-500/30"
                 >
-                  {bulkDeleteLoading ? tr('ΓÅ│ Menghapus...', 'ΓÅ│ Deleting...') : tr('≡ƒùæ∩╕Å Ya, Hapus Akun', '≡ƒùæ∩╕Å Yes, Delete Accounts')}
+                  {bulkDeleteLoading ? tr('⏳ Menghapus...', '⏳ Deleting...') : tr('🗑️ Ya, Hapus Akun', '🗑️ Yes, Delete Accounts')}
                 </button>
               </div>
             </div>
@@ -1224,28 +1223,10 @@ export default function GuruDashboard() {
       )}
 
       {/* Navbar */}
-      <nav className={`relative z-50 border-b shadow-sm ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
+      <nav className={`relative border-b shadow-sm ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              {/* Hamburger Button */}
-              <button
-                onClick={() => setShowSidebar(prev => !prev)}
-                className={`p-2 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 ${
-                  showSidebar ? 'rotate-90' : 'rotate-0'
-                } ${theme === 'dark' ? 'bg-purple-900/85 hover:bg-purple-800 text-purple-200 border border-purple-400/40' : 'bg-purple-600 hover:bg-purple-700 text-white border border-purple-500'}`}
-                aria-label="Toggle navigation menu"
-              >
-                {showSidebar ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                )}
-              </button>
               <div className="bg-purple-600 text-white p-3 rounded-xl shadow-lg shadow-purple-500/30">
                 <svg
                   className="w-6 h-6"
@@ -1263,7 +1244,7 @@ export default function GuruDashboard() {
               </div>
               <div>
                 <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                  ≡ƒæ¿ΓÇì≡ƒÅ½ {tr('Dashboard Guru', 'Teacher Dashboard')}
+                  👨‍🏫 {tr('Dashboard Guru', 'Teacher Dashboard')}
                 </h1>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
                   {tr('Monitor Progress Clean Code Siswa', 'Monitor Student Clean Code Progress')}
@@ -1285,92 +1266,54 @@ export default function GuruDashboard() {
                   {userName.charAt(0).toUpperCase()}
                 </div>
               </a>
+              <button
+                onClick={confirmLogout}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300"
+              >
+                🚪 {tr('Keluar', 'Logout')}
+              </button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Sidebar Overlay */}
-      {showSidebar && (
-        <button
-          onClick={() => setShowSidebar(false)}
-          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
-          aria-label="Close navigation menu"
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed left-0 top-0 z-40 h-screen w-72 max-w-[88vw] pt-24 px-4 pb-4 border-r shadow-xl transition-all duration-300 transform ${
-          showSidebar ? 'translate-x-0 opacity-100' : '-translate-x-[120%] opacity-0 pointer-events-none'
-        } ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}
-      >
-        <div className={`h-full rounded-2xl border p-3 overflow-y-auto ${theme === 'dark' ? 'bg-slate-800/90 border-slate-700' : 'bg-white border-purple-100'}`}>
-          <div className="space-y-2">
-            <p className={`text-xs font-semibold uppercase tracking-wide px-2 mb-3 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
-              {tr('Menu Navigasi', 'Navigation Menu')}
-            </p>
-
-            <button
-              onClick={() => { setActiveTab('students'); setShowSidebar(false) }}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-left font-semibold ${
-                activeTab === 'students'
-                  ? theme === 'dark' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-                  : theme === 'dark' ? 'bg-slate-700/50 hover:bg-slate-700 text-slate-300' : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
-              }`}
-            >
-              👥 {tr('Progress Siswa', 'Student Progress')}
-            </button>
-
-            <button
-              onClick={() => { setActiveTab('materials'); setShowSidebar(false) }}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-left font-semibold ${
-                activeTab === 'materials'
-                  ? theme === 'dark' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-                  : theme === 'dark' ? 'bg-slate-700/50 hover:bg-slate-700 text-slate-300' : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
-              }`}
-            >
-              📚 {tr('Materi Pembelajaran', 'Learning Materials')}
-            </button>
-
-            <button
-              onClick={() => { setActiveTab('exams'); setShowSidebar(false) }}
-              className={`w-full px-4 py-3 rounded-xl transition-all flex items-center gap-2 text-left font-semibold ${
-                activeTab === 'exams'
-                  ? theme === 'dark' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-                  : theme === 'dark' ? 'bg-slate-700/50 hover:bg-slate-700 text-slate-300' : 'bg-purple-50 hover:bg-purple-100 text-purple-700'
-              }`}
-            >
-              📝 {tr('Ujian', 'Exams')}
-            </button>
-
-            <div className={`my-3 border-t ${theme === 'dark' ? 'border-slate-700' : 'border-purple-100'}`} />
-
-            <a
-              href="/guru/profile"
-              className={`flex items-center justify-between gap-3 px-4 py-2 rounded-xl transition-all cursor-pointer ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-purple-50 hover:bg-purple-100'}`}
-            >
-              <div>
-                <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{userName}</p>
-                <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Guru</p>
-              </div>
-              <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-            </a>
-
-            <button
-              onClick={confirmLogout}
-              className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all duration-300 text-left"
-            >
-              🚪 {tr('Keluar', 'Logout')}
-            </button>
-          </div>
+      {/* Tab Navigation */}
+      <div className="relative max-w-7xl mx-auto px-6 pt-6">
+        <div className={`flex gap-2 p-2 rounded-2xl border w-fit ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-purple-50 border-purple-100'}`}>
+          <button
+            onClick={() => setActiveTab('students')}
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+              activeTab === 'students'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                : theme === 'dark' ? 'text-slate-400 hover:text-white hover:bg-slate-700' : 'text-slate-600 hover:text-purple-700 hover:bg-purple-100'
+            }`}
+          >
+            👥 Progress Siswa 
+          </button>
+          <button
+            onClick={() => setActiveTab('materials')}
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+              activeTab === 'materials'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                : theme === 'dark' ? 'text-slate-400 hover:text-white hover:bg-slate-700' : 'text-slate-600 hover:text-purple-700 hover:bg-purple-100'
+            }`}
+          >
+            📚 Materi Pembelajaran
+          </button>
+          <button
+            onClick={() => setActiveTab('exams')}
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+              activeTab === 'exams'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
+                : theme === 'dark' ? 'text-slate-400 hover:text-white hover:bg-slate-700' : 'text-slate-600 hover:text-purple-700 hover:bg-purple-100'
+            }`}
+          >
+            📝 {tr('Ujian', 'Exams')}
+          </button>
         </div>
-      </aside>
+      </div>
 
-      {/* Main Content — shifts right when sidebar is open on large screens */}
-      <div className={`transition-all duration-300 ${showSidebar ? 'lg:ml-72' : 'lg:ml-0'}`}>
+      {/* Main Content */}
       <div className="relative max-w-7xl mx-auto px-6 py-8">
         
         {/* Students Tab Content */}
@@ -1387,7 +1330,7 @@ export default function GuruDashboard() {
                 </p>
               </div>
               <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">
-                ≡ƒæÑ
+                👥
               </div>
             </div>
           </div>
@@ -1401,7 +1344,7 @@ export default function GuruDashboard() {
                 </p>
               </div>
               <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center text-3xl">
-                ≡ƒô¥
+                📝
               </div>
             </div>
           </div>
@@ -1415,7 +1358,7 @@ export default function GuruDashboard() {
                 </p>
               </div>
               <div className="w-14 h-14 bg-yellow-100 rounded-xl flex items-center justify-center text-3xl">
-                ≡ƒôè
+                📊
               </div>
             </div>
           </div>
@@ -1429,7 +1372,7 @@ export default function GuruDashboard() {
                 </p>
               </div>
               <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-3xl">
-                ≡ƒÅå
+                🏆
               </div>
             </div>
           </div>
@@ -1439,12 +1382,12 @@ export default function GuruDashboard() {
         <div className={`rounded-2xl p-6 border shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <h2 className={`text-xl font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-              ≡ƒôï Progress Clean Code Siswa
+              📋 Progress Clean Code Siswa
             </h2>
           <div className="flex flex-wrap items-center gap-4">
               {/* Search Input */}
               <div className="relative">
-                <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>≡ƒöì</span>
+                <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>🔍</span>
                 <input
                   type="text"
                   placeholder="Cari nama, NIS, kelas..."
@@ -1461,14 +1404,14 @@ export default function GuruDashboard() {
                   onChange={(e) => setSelectedKelas(e.target.value)}
                   className={`px-4 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer pr-10 ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
                 >
-                  <option value="all" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒôÜ Semua Kelas</option>
+                  <option value="all" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>📚 Semua Kelas</option>
                   {kelasOptions.map((kelas) => (
                     <option key={kelas} value={kelas} className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>
-                      ≡ƒÅ½ {kelas}
+                      🏫 {kelas}
                     </option>
                   ))}
                 </select>
-                <span className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Γû╝</span>
+                <span className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>▼</span>
               </div>
 
               {/* Filter NIS */}
@@ -1478,14 +1421,14 @@ export default function GuruDashboard() {
                   onChange={(e) => setSelectedNIS(e.target.value)}
                   className={`px-4 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer pr-10 ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
                 >
-                  <option value="all" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒöó Semua NIS</option>
+                  <option value="all" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>🔢 Semua NIS</option>
                   {nisOptions.map((nis) => (
                     <option key={nis} value={nis} className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>
-                      ≡ƒôï {nis}
+                      📋 {nis}
                     </option>
                   ))}
                 </select>
-                <span className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Γû╝</span>
+                <span className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>▼</span>
               </div>
 
               {/* Sort by Score */}
@@ -1495,13 +1438,13 @@ export default function GuruDashboard() {
                   onChange={(e) => setSortOrder(e.target.value)}
                   className={`px-4 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer pr-10 ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
                 >
-                  <option value="default" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒôè Urutkan</option>
-                  <option value="score-high" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>Γ¼å∩╕Å Skor Tertinggi</option>
-                  <option value="score-low" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>Γ¼ç∩╕Å Skor Terendah</option>
-                  <option value="avg-high" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒôê Rata-rata Tertinggi</option>
-                  <option value="avg-low" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒôë Rata-rata Terendah</option>
+                  <option value="default" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>📊 Urutkan</option>
+                  <option value="score-high" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>⬆️ Skor Tertinggi</option>
+                  <option value="score-low" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>⬇️ Skor Terendah</option>
+                  <option value="avg-high" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>📈 Rata-rata Tertinggi</option>
+                  <option value="avg-low" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>📉 Rata-rata Terendah</option>
                 </select>
-                <span className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Γû╝</span>
+                <span className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>▼</span>
               </div>
 
               {/* Result Count */}
@@ -1516,39 +1459,39 @@ export default function GuruDashboard() {
                 disabled={filteredStudents.length === 0}
                 className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl transition-all duration-300 shadow-lg flex items-center gap-2"
               >
-                ≡ƒôÑ Download Excel
+                📥 Download Excel
               </button>
               <button
                 onClick={loadStudentData}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition-all duration-300 shadow-lg"
               >
-                ≡ƒöä Refresh
+                🔄 Refresh
               </button>
               <button
                 onClick={confirmResetAllProgress}
                 disabled={students.length === 0 || loading}
                 className="bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl transition-all duration-300 shadow-lg"
               >
-                ≡ƒöä {tr('Reset Semua', 'Reset All')}
+                🔄 {tr('Reset Semua', 'Reset All')}
               </button>
               <button
                 onClick={confirmBulkDeleteStudents}
                 disabled={selectedStudentIds.length === 0}
                 className="bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl transition-all duration-300 shadow-lg"
               >
-                ≡ƒùæ∩╕Å {tr('Hapus Akun', 'Delete Accounts')}{selectedStudentIds.length > 0 ? ` (${selectedStudentIds.length})` : ''}
+                🗑️ {tr('Hapus Akun', 'Delete Accounts')}{selectedStudentIds.length > 0 ? ` (${selectedStudentIds.length})` : ''}
               </button>
             </div>
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="text-6xl animate-bounce mb-4">≡ƒôè</div>
+              <div className="text-6xl animate-bounce mb-4">📊</div>
               <p className={theme === 'dark' ? 'text-white' : 'text-slate-600'}>Memuat data siswa...</p>
             </div>
           ) : filteredStudents.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">≡ƒô¡</div>
+              <div className="text-6xl mb-4">📭</div>
               <p className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>Belum ada data siswa.</p>
             </div>
           ) : (
@@ -1577,7 +1520,7 @@ export default function GuruDashboard() {
                     <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>Tertinggi</th>
                     <th className={`text-center py-3 px-2 font-semibold whitespace-nowrap ${theme === 'dark' ? 'text-purple-300' : 'text-purple-700'}`}>
                       <div className="flex flex-col items-center leading-tight">
-                        <span>≡ƒôè Skor</span>
+                        <span>📊 Skor</span>
                         <span className="text-[10px] text-yellow-500 font-normal">(Hari Ini)</span>
                       </div>
                     </th>
@@ -1710,7 +1653,7 @@ export default function GuruDashboard() {
                           </span>
                           {(student.daily_submissions || 0) > 0 && (
                             <span className={`text-[10px] leading-tight ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                              {student.daily_submissions}x ΓÇó max: {(student.daily_highest_score || 0).toFixed(1)}
+                              {student.daily_submissions}x • max: {(student.daily_highest_score || 0).toFixed(1)}
                             </span>
                           )}
                         </div>
@@ -1766,7 +1709,7 @@ export default function GuruDashboard() {
                             className="px-2.5 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105"
                             title={tr(`Reset progress ${student.name}`, `Reset progress ${student.name}`)}
                           >
-                            ≡ƒöä {tr('Reset', 'Reset')}
+                            🔄 {tr('Reset', 'Reset')}
                           </button>
 
                           <button
@@ -1774,7 +1717,7 @@ export default function GuruDashboard() {
                             className="px-2.5 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105"
                             title={`Hapus akun ${student.name}`}
                           >
-                            ≡ƒùæ∩╕Å {tr('Hapus', 'Delete')}
+                            🗑️ {tr('Hapus', 'Delete')}
                           </button>
                         </div>
                       </td>
@@ -1797,7 +1740,7 @@ export default function GuruDashboard() {
         <div className={`mt-8 rounded-2xl p-6 border ${theme === 'dark' ? 'bg-purple-500/10 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="text-4xl">≡ƒÆí</span>
+              <span className="text-4xl">💡</span>
               <div>
                 <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Tips Mengajar Clean Code</h3>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
@@ -1812,7 +1755,7 @@ export default function GuruDashboard() {
               </div>
               <div className={`w-px ${theme === 'dark' ? 'bg-purple-500/30' : 'bg-purple-200'}`}></div>
               <div className="text-center">
-                <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{stats.class_average >= 7 ? 'Γ£à' : '≡ƒôê'}</p>
+                <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{stats.class_average >= 7 ? '✅' : '📈'}</p>
                 <p className={`text-xs ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{stats.class_average >= 7 ? 'Tercapai' : 'Progress'}</p>
               </div>
             </div>
@@ -1826,7 +1769,7 @@ export default function GuruDashboard() {
           <div className="space-y-6">
             <div className={`rounded-2xl p-6 border shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
               <div className="flex items-center justify-between">
-                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>≡ƒô¥ {tr('Ujian', 'Exams')}</h2>
+                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>📝 {tr('Ujian', 'Exams')}</h2>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => {
@@ -1835,13 +1778,13 @@ export default function GuruDashboard() {
                     }}
                     className="text-purple-600 hover:text-purple-700"
                   >
-                    ≡ƒöä Refresh
+                    🔄 Refresh
                   </button>
                   <button
                     onClick={openCreateExamModal}
                     className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl"
                   >
-                    Γ₧ò {tr('Buat Ujian', 'Create Exam')}
+                    ➕ {tr('Buat Ujian', 'Create Exam')}
                   </button>
                 </div>
               </div>
@@ -1858,7 +1801,7 @@ export default function GuruDashboard() {
                         <div className="flex items-start justify-between">
                           <div>
                             <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{exam.title}</h3>
-                            <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{exam.exam_type} ΓÇó {exam.duration_minutes} menit</p>
+                            <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{exam.exam_type} • {exam.duration_minutes} menit</p>
                           </div>
                           <div className="text-right">
                             <p className={`text-sm ${theme === 'dark' ? 'text-slate-300' : 'text-slate-500'}`}>{new Date(exam.created_at).toLocaleDateString()}</p>
@@ -1884,7 +1827,7 @@ export default function GuruDashboard() {
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                   <div>
                     <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                      ≡ƒôè Rekap Skor Ujian Siswa
+                      📊 Rekap Skor Ujian Siswa
                     </h3>
                     <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                       Nilai akhir diambil dari rata-rata skor tiap soal yang dihitung dengan analisis Pylint.
@@ -1956,7 +1899,7 @@ export default function GuruDashboard() {
                       disabled={filteredExamScoreRows.length === 0}
                       className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl transition-all duration-300 shadow-lg flex items-center gap-2"
                     >
-                      ≡ƒôÑ Download Excel
+                      📥 Download Excel
                     </button>
                     <button
                       onClick={() => {
@@ -2127,7 +2070,7 @@ export default function GuruDashboard() {
             {/* Upload Section */}
             <div className={`rounded-2xl p-6 border shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
               <h2 className={`text-xl font-bold flex items-center gap-2 mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                ≡ƒôñ Upload Materi Baru
+                📤 Upload Materi Baru
               </h2>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -2168,12 +2111,12 @@ export default function GuruDashboard() {
                       onChange={(e) => setUploadForm({ ...uploadForm, category: e.target.value })}
                       className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-purple-200 text-slate-800'}`}
                     >
-                      <option value="Umum" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒôÜ Umum</option>
-                      <option value="Clean Code" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>Γ£¿ Clean Code</option>
-                      <option value="Python Dasar" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒÉì Python Dasar</option>
-                      <option value="Algoritma" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒº« Algoritma</option>
-                      <option value="Best Practices" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒÄ» Best Practices</option>
-                      <option value="Debugging" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>≡ƒÉ¢ Debugging</option>
+                      <option value="Umum" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>📚 Umum</option>
+                      <option value="Clean Code" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>✨ Clean Code</option>
+                      <option value="Python Dasar" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>🐍 Python Dasar</option>
+                      <option value="Algoritma" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>🧮 Algoritma</option>
+                      <option value="Best Practices" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>🎯 Best Practices</option>
+                      <option value="Debugging" className={theme === 'dark' ? 'bg-slate-800' : 'bg-white'}>🐛 Debugging</option>
                     </select>
                   </div>
                 </div>
@@ -2202,7 +2145,7 @@ export default function GuruDashboard() {
                     {selectedFile ? (
                       <div className="space-y-3">
                         <div className="text-5xl">
-                          {selectedFile.name.endsWith('.pdf') ? '≡ƒôò' : '≡ƒôè'}
+                          {selectedFile.name.endsWith('.pdf') ? '📕' : '📊'}
                         </div>
                         <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{selectedFile.name}</p>
                         <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{formatFileSize(selectedFile.size)}</p>
@@ -2219,7 +2162,7 @@ export default function GuruDashboard() {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        <div className="text-5xl">≡ƒôü</div>
+                        <div className="text-5xl">📁</div>
                         <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Klik untuk memilih file</p>
                         <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                           Format: PDF, PPT, PPTX (Maks. 50MB)
@@ -2248,7 +2191,7 @@ export default function GuruDashboard() {
                       </>
                     ) : (
                       <>
-                        ≡ƒôñ Upload Materi
+                        📤 Upload Materi
                       </>
                     )}
                   </button>
@@ -2260,13 +2203,13 @@ export default function GuruDashboard() {
             <div className={`rounded-2xl p-6 border shadow-lg ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-purple-100'}`}>
               <div className="flex justify-between items-center mb-6">
                 <h2 className={`text-xl font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                  ≡ƒôÜ Daftar Materi ({materials.length})
+                  📚 Daftar Materi ({materials.length})
                 </h2>
                 <button
                   onClick={loadMaterials}
                   className="text-purple-600 hover:text-purple-700 transition-colors flex items-center gap-2"
                 >
-                  ≡ƒöä Refresh
+                  🔄 Refresh
                 </button>
               </div>
 
@@ -2277,7 +2220,7 @@ export default function GuruDashboard() {
                 </div>
               ) : materials.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="text-6xl mb-4">≡ƒô¡</div>
+                  <div className="text-6xl mb-4">📭</div>
                   <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Belum ada materi yang diupload</p>
                   <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>Upload materi pertama Anda di form di atas</p>
                 </div>
@@ -2327,14 +2270,14 @@ export default function GuruDashboard() {
                           rel="noopener noreferrer"
                           className={`flex-1 py-2 rounded-lg text-center text-sm font-medium transition-colors border ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-200'}`}
                         >
-                          ≡ƒæü∩╕Å Lihat
+                          👁️ Lihat
                         </a>
                         <a
                           href={material.file_url}
                           download
                           className={`flex-1 py-2 rounded-lg text-center text-sm font-medium transition-colors border ${theme === 'dark' ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/30' : 'bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-200'}`}
                         >
-                          ≡ƒôÑ Unduh
+                          📥 Unduh
                         </a>
                         <button
                           onClick={() => confirmDeleteMaterial(material)}
@@ -2342,7 +2285,7 @@ export default function GuruDashboard() {
                           aria-label={`Hapus materi ${material.title}`}
                           title={`Hapus materi ${material.title}`}
                         >
-                          ≡ƒùæ∩╕Å <span>Hapus</span>
+                          🗑️ <span>Hapus</span>
                         </button>
                       </div>
                     </div>
@@ -2355,7 +2298,7 @@ export default function GuruDashboard() {
             <div className={`rounded-2xl p-6 border ${theme === 'dark' ? 'bg-purple-500/10 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-4xl">≡ƒÆí</span>
+                  <span className="text-4xl">💡</span>
                   <div>
                     <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Tips Upload Materi</h3>
                     <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
@@ -2380,7 +2323,6 @@ export default function GuruDashboard() {
             </div>
           </div>
         )}
-      </div>
       </div>
     </div>
   )
