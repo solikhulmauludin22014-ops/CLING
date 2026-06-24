@@ -58,11 +58,27 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
     
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Get current user, with fallback to Authorization header
+    const authHeader = request.headers.get('Authorization')
+    let user = null
+    let authError = null
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7)
+      const res = await supabase.auth.getUser(token)
+      user = res.data.user
+      authError = res.error
+    } else {
+      const res = await supabase.auth.getUser()
+      user = res.data.user
+      authError = res.error
+    }
     
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      console.error('Auth error in POST /api/materials:', authError)
+      return NextResponse.json({ 
+        error: `Unauthorized: ${authError?.message || 'Session expired or missing'}` 
+      }, { status: 401 })
     }
 
     // Check if user is guru
@@ -119,13 +135,10 @@ export async function POST(request: NextRequest) {
     const safeName = fileName.replace(/[^a-z0-9.-]/gi, '_')
     const storagePath = `materials/${user.id}/${timestamp}_${safeName}`
 
-    // Menggunakan arrayBuffer secara langsung (Buffer tidak direkomendasikan di Edge/Webpack)
-    const arrayBuffer = await file.arrayBuffer()
-
-    // Upload ke Supabase Storage
+    // Upload file langsung ke Supabase Storage (menggunakan objek File)
     const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
       .from('materials')
-      .upload(storagePath, arrayBuffer, {
+      .upload(storagePath, file, {
         contentType: file.type,
         upsert: false,
       })
@@ -195,8 +208,21 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Material ID required' }, { status: 400 })
     }
 
-    // Ambil user yang sedang login
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Ambil user yang sedang login, fallback to Authorization header
+    const authHeader = request.headers.get('Authorization')
+    let user = null
+    let authError = null
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7)
+      const res = await supabase.auth.getUser(token)
+      user = res.data.user
+      authError = res.error
+    } else {
+      const res = await supabase.auth.getUser()
+      user = res.data.user
+      authError = res.error
+    }
     
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

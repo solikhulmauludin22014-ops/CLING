@@ -455,8 +455,14 @@ export default function GuruDashboard() {
 
       setUploadProgress(30)
 
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
       const response = await fetch('/api/materials', {
         method: 'POST',
+        headers: {
+          ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {})
+        },
         body: formData,
       })
 
@@ -496,8 +502,14 @@ export default function GuruDashboard() {
     if (!materialToDelete) return
 
     try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
       const response = await fetch(`/api/materials?id=${materialToDelete.id}`, {
         method: 'DELETE',
+        headers: {
+          ...(session?.access_token ? { 'Authorization': `Bearer ${session.access_token}` } : {})
+        },
       })
 
       const data = await response.json()
