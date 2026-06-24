@@ -67,29 +67,29 @@ export async function GET() {
 
     // Build question map: question_id -> { exam_id, order_number }
     const questionMap = new Map<string, { exam_id: string; order_number: number }>()
-    ;(questionsResult.data || []).forEach((q) => {
-      questionMap.set(q.id, { exam_id: q.exam_id, order_number: q.order_number })
-    })
+      ; (questionsResult.data || []).forEach((q) => {
+        questionMap.set(q.id, { exam_id: q.exam_id, order_number: q.order_number })
+      })
 
     // Build exam question count map: exam_id -> total questions
     const examQuestionCountMap = new Map<string, number>()
-    ;(questionsResult.data || []).forEach((q) => {
-      examQuestionCountMap.set(q.exam_id, (examQuestionCountMap.get(q.exam_id) || 0) + 1)
-    })
+      ; (questionsResult.data || []).forEach((q) => {
+        examQuestionCountMap.set(q.exam_id, (examQuestionCountMap.get(q.exam_id) || 0) + 1)
+      })
 
     // Build answer map: submission_id -> Array<{ order_number, answer_score }>
     const answerMap = new Map<string, Array<{ order_number: number; answer_score: number }>>()
-    ;(answersResult.data || []).forEach((answer) => {
-      const questionInfo = questionMap.get(answer.question_id)
-      if (!questionInfo) return
-      if (!answerMap.has(answer.submission_id)) {
-        answerMap.set(answer.submission_id, [])
-      }
-      answerMap.get(answer.submission_id)!.push({
-        order_number: questionInfo.order_number,
-        answer_score: Number(answer.answer_score || 0),
+      ; (answersResult.data || []).forEach((answer) => {
+        const questionInfo = questionMap.get(answer.question_id)
+        if (!questionInfo) return
+        if (!answerMap.has(answer.submission_id)) {
+          answerMap.set(answer.submission_id, [])
+        }
+        answerMap.get(answer.submission_id)!.push({
+          order_number: questionInfo.order_number,
+          answer_score: Number(answer.answer_score || 0),
+        })
       })
-    })
 
     // Sort each submission's answers by order_number
     answerMap.forEach((answers) => {
@@ -101,43 +101,43 @@ export async function GET() {
     )
 
     const examMap = new Map()
-    ;(examsResult.data || []).forEach((exam) => {
-      examMap.set(exam.id, {
-        ...exam,
-        total_questions: examQuestionCountMap.get(exam.id) || 0,
-        submissions: [] as Array<{
-          id: string
-          user_id: string
-          student_name: string
-          nis: string
-          kelas: string
-          is_submitted: boolean
-          started_at: string | null
-          submitted_at: string | null
-          final_score: number
-          answer_scores: Array<{ order_number: number; answer_score: number }>
-        }>,
+      ; (examsResult.data || []).forEach((exam) => {
+        examMap.set(exam.id, {
+          ...exam,
+          total_questions: examQuestionCountMap.get(exam.id) || 0,
+          submissions: [] as Array<{
+            id: string
+            user_id: string
+            student_name: string
+            nis: string
+            kelas: string
+            is_submitted: boolean
+            started_at: string | null
+            submitted_at: string | null
+            final_score: number
+            answer_scores: Array<{ order_number: number; answer_score: number }>
+          }>,
+        })
       })
-    })
 
-    ;(submissionsResult.data || []).forEach((submission) => {
-      const examEntry = examMap.get(submission.exam_id)
-      if (!examEntry) return
+      ; (submissionsResult.data || []).forEach((submission) => {
+        const examEntry = examMap.get(submission.exam_id)
+        if (!examEntry) return
 
-      const student = studentMap.get(submission.user_id)
-      examEntry.submissions.push({
-        id: submission.id,
-        user_id: submission.user_id,
-        student_name: student?.full_name || student?.name || 'Siswa',
-        nis: student?.nis || '-',
-        kelas: student?.kelas || '-',
-        is_submitted: Boolean(submission.is_submitted),
-        started_at: submission.started_at || null,
-        submitted_at: submission.submitted_at || null,
-        final_score: Number(submission.final_score || 0),
-        answer_scores: answerMap.get(submission.id) || [],
+        const student = studentMap.get(submission.user_id)
+        examEntry.submissions.push({
+          id: submission.id,
+          user_id: submission.user_id,
+          student_name: student?.full_name || student?.name || 'Siswa',
+          nis: student?.nis || '-',
+          kelas: student?.kelas || '-',
+          is_submitted: Boolean(submission.is_submitted),
+          started_at: submission.started_at || null,
+          submitted_at: submission.submitted_at || null,
+          final_score: Number(submission.final_score || 0),
+          answer_scores: answerMap.get(submission.id) || [],
+        })
       })
-    })
 
     const exams = Array.from(examMap.values()).map((exam) => {
       const scores = exam.submissions.map((submission: { final_score: number }) => submission.final_score)
