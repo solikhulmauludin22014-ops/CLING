@@ -119,21 +119,20 @@ export async function POST(request: NextRequest) {
     const safeName = fileName.replace(/[^a-z0-9.-]/gi, '_')
     const storagePath = `materials/${user.id}/${timestamp}_${safeName}`
 
-    // Konversi file ke buffer
+    // Menggunakan arrayBuffer secara langsung (Buffer tidak direkomendasikan di Edge/Webpack)
     const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
 
     // Upload ke Supabase Storage
     const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
       .from('materials')
-      .upload(storagePath, buffer, {
+      .upload(storagePath, arrayBuffer, {
         contentType: file.type,
         upsert: false,
       })
 
     if (uploadError) {
       console.error('Upload error:', uploadError)
-      return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
+      return NextResponse.json({ error: `Gagal mengupload ke storage: ${uploadError.message}` }, { status: 500 })
     }
 
     // Ambil URL publik
@@ -168,7 +167,7 @@ export async function POST(request: NextRequest) {
       console.error('Database error:', dbError)
       // Coba hapus file yang sudah diupload jika insert db gagal
       await supabaseAdmin.storage.from('materials').remove([storagePath])
-      return NextResponse.json({ error: 'Failed to save material info' }, { status: 500 })
+      return NextResponse.json({ error: `Gagal menyimpan info ke database: ${dbError.message}` }, { status: 500 })
     }
 
     return NextResponse.json({
@@ -234,11 +233,26 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Ekstrak path storage dari URL
-    const urlParts = material.file_url.split('/materials/')
-    if (urlParts.length > 1) {
-      const storagePath = urlParts[1]
+    // Contoh URL: https://[projectId].supabase.co/storage/v1/object/public/materials/materials/user_id/file.pdf
+    const publicUrlPrefix = `${supabaseUrl}/storage/v1/object/public/materials/`
+    let storagePath = ''
+    
+    if (material.file_url.startsWith(publicUrlPrefix)) {
+      storagePath = material.file_url.substring(publicUrlPrefix.length)
+    } else {
+      // Fallback
+      const urlParts = material.file_url.split('/materials/')
+      if (urlParts.length > 2) {
+        storagePath = urlParts.slice(2).join('/materials/')
+      } else if (urlParts.length === 2) {
+        storagePath = urlParts[1]
+      }
+    }
+
+    if (storagePath) {
       // Hapus dari storage
-      await supabaseAdmin.storage.from('materials').remove([storagePath])
+      const { error: removeError } = await supabaseAdmin.storage.from('materials').remove([storagePath])
+      if (removeError) console.error('Error removing file from storage:', removeError)
     }
 
     // Hapus dari database
