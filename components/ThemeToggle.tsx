@@ -1,6 +1,7 @@
 'use client'
 
 import { useTheme } from '@/lib/context/ThemeContext'
+import { useLanguage } from '@/lib/context/LanguageContext'
 
 interface ThemeToggleProps {
   className?: string
@@ -8,6 +9,9 @@ interface ThemeToggleProps {
 
 export default function ThemeToggle({ className = '' }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme()
+  const { language } = useLanguage()
+  const lightLabel = language === 'id' ? 'Mode Terang' : 'Light Mode'
+  const darkLabel = language === 'id' ? 'Mode Gelap' : 'Dark Mode'
 
   return (
     <button
@@ -17,7 +21,7 @@ export default function ThemeToggle({ className = '' }: ThemeToggleProps) {
           ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400'
           : 'bg-purple-100 hover:bg-purple-200 text-purple-600'
       } ${className}`}
-      title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+      title={theme === 'dark' ? lightLabel : darkLabel}
     >
       {theme === 'dark' ? (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -31,33 +31,10 @@ export default function SiswaCompilerPage() {
   const { language } = useLanguage()
   const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [userName, setUserName] = useState('Siswa')
-  const [code, setCode] = useState(`# 🎯 Selamat datang di Clean Code Analyzer!
-# Tulis kode Python yang bersih dan efisien
-
-def calculate_sum(numbers):
-    """Calculate the sum of a list of numbers."""
-    total = 0
-    for number in numbers:
-        total += number
-    return total
-
-
-def calculate_average(numbers):
-    """Calculate the average of a list of numbers."""
-    if not numbers:
-        return 0
-    total = calculate_sum(numbers)
-    return total / len(numbers)
-
-
-# Test the functions
-test_numbers = [1, 2, 3, 4, 5]
-result_sum = calculate_sum(test_numbers)
-result_avg = calculate_average(test_numbers)
-print(f"Numbers: {test_numbers}")
-print(f"Sum: {result_sum}")
-print(f"Average: {result_avg}")
-`)
+  const getDefaultCode = (lang: string) => lang === 'id'
+    ? `# 🎯 Selamat datang di Clean Code Analyzer!\n# Tulis kode Python yang bersih dan efisien\n\ndef hitung_jumlah(angka_angka):\n    """Menghitung jumlah dari daftar angka."""\n    total = 0\n    for angka in angka_angka:\n        total += angka\n    return total\n\n\ndef hitung_rata_rata(angka_angka):\n    """Menghitung rata-rata dari daftar angka."""\n    if not angka_angka:\n        return 0\n    total = hitung_jumlah(angka_angka)\n    return total / len(angka_angka)\n\n\n# Uji fungsi-fungsi di atas\ndaftar_angka = [1, 2, 3, 4, 5]\nhasil_jumlah = hitung_jumlah(daftar_angka)\nhasil_rata_rata = hitung_rata_rata(daftar_angka)\nprint(f"Angka: {daftar_angka}")\nprint(f"Jumlah: {hasil_jumlah}")\nprint(f"Rata-rata: {hasil_rata_rata}")\n`
+    : `# 🎯 Welcome to Clean Code Analyzer!\n# Write clean and efficient Python code\n\ndef calculate_sum(numbers):\n    """Calculate the sum of a list of numbers."""\n    total = 0\n    for number in numbers:\n        total += number\n    return total\n\n\ndef calculate_average(numbers):\n    """Calculate the average of a list of numbers."""\n    if not numbers:\n        return 0\n    total = calculate_sum(numbers)\n    return total / len(numbers)\n\n\n# Test the functions\ntest_numbers = [1, 2, 3, 4, 5]\nresult_sum = calculate_sum(test_numbers)\nresult_avg = calculate_average(test_numbers)\nprint(f"Numbers: {test_numbers}")\nprint(f"Sum: {result_sum}")\nprint(f"Average: {result_avg}")\n`
+  const [code, setCode] = useState(() => getDefaultCode(language))
   const [output, setOutput] = useState('')
   const [executionTime, setExecutionTime] = useState('')
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
@@ -246,7 +223,7 @@ print(f"Average: {result_avg}")
       const data = await response.json()
 
       if (data.success) {
-        setOutput(data.output || 'No output')
+        setOutput(data.output || tr('Tidak ada output', 'No output'))
         if (data.execution_time) {
           setExecutionTime(`⚡ ${data.execution_time}ms`)
         }
@@ -298,7 +275,7 @@ print(f"Average: {result_avg}")
           const now = new Date()
           setLastAnalysisTime(now.toISOString())
           showAlertMessage(
-            `🎉 Analisis selesai! Score: ${(data.analysis?.final_score || 0).toFixed(2)}/10`,
+            tr(`🎉 Analisis selesai! Skor: ${(data.analysis?.final_score || 0).toFixed(2)}/10`, `🎉 Analysis complete! Score: ${(data.analysis?.final_score || 0).toFixed(2)}/10`),
             'success'
           )
           setCleanCodeScore(data.analysis?.final_score || 0)
@@ -310,7 +287,7 @@ print(f"Average: {result_avg}")
           setLastAnalysisTime(new Date().toISOString())
         }
       } else {
-        showAlertMessage(tr('❌ Analisis gagal: ', '❌ Analysis failed: ') + (data.error || 'Unknown error'), 'error')
+        showAlertMessage(tr('❌ Analisis gagal: ', '❌ Analysis failed: ') + (data.error || tr('Error tidak diketahui', 'Unknown error')), 'error')
       }
     } catch (error) {
       showAlertMessage(tr('🌐 Network error. Silakan coba lagi.', '🌐 Network error. Please try again.'), 'error')
@@ -364,7 +341,7 @@ print(f"Average: {result_avg}")
     if (diffHours < 24) return language === 'id' ? `${diffHours} jam lalu` : `${diffHours} hours ago`
     if (diffDays < 7) return language === 'id' ? `${diffDays} hari lalu` : `${diffDays} days ago`
     
-    return date.toLocaleDateString('id-ID', {
+    return date.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -548,7 +525,7 @@ print(f"Average: {result_avg}")
                           <div>
                             <div className="flex items-center gap-2">
                               <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                                Score: {(entry.clean_code_score || 0).toFixed(2)}/10
+                                {tr('Skor', 'Score')}: {(entry.clean_code_score || 0).toFixed(2)}/10
                               </span>
                               <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                                 (entry.clean_code_score || 0) >= 8 ? 'bg-green-500/30 text-green-300' :

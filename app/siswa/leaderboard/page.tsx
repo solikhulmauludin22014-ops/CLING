@@ -289,8 +289,8 @@ export default function SiswaLeaderboardPage() {
                     <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Total Poin', 'Total Points')}</p>
                   </div>
                   <div>
-                    <p className="text-3xl font-bold text-green-500">{currentUserRank.total_submissions}</p>
-                    <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>Submissions</p>
+                    <p className={`text-3xl font-bold text-green-500`}>{currentUserRank.total_submissions}</p>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>{tr('Pengiriman', 'Submissions')}</p>
                   </div>
                   <div>
                     <p className={`text-3xl font-bold ${getGrade(currentUserRank.highest_score).color}`}>
@@ -420,7 +420,7 @@ export default function SiswaLeaderboardPage() {
                             <span className="ml-2 text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full">{tr('Kamu', 'You')}</span>
                           )}
                         </p>
-                        <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{entry.total_submissions} submissions</p>
+                        <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{entry.total_submissions} {tr('pengiriman', 'submissions')}</p>
                       </div>
                     </div>
 

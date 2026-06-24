@@ -105,7 +105,7 @@ export default function SiswaMateriPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+    return new Date(dateString).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -414,12 +414,12 @@ export default function SiswaMateriPage() {
                             // update local state
                             setCompletedMaterials(prev => new Set(prev).add(material.id))
                             // show toast
-                            setToastMessage('Progress tersimpan')
+                            setToastMessage(tr('Progress tersimpan', 'Progress saved'))
                             setTimeout(() => setToastMessage(null), 2500)
                           } catch (err) {
                             // ignore errors; still open material
                             console.error('Mark material progress error:', err)
-                            setToastMessage('Gagal menyimpan progress')
+                            setToastMessage(tr('Gagal menyimpan progress', 'Failed to save progress'))
                             setTimeout(() => setToastMessage(null), 2500)
                           } finally {
                             // open material in new tab
@@ -428,7 +428,7 @@ export default function SiswaMateriPage() {
                         }}
                       className={`flex-1 ${completedMaterials.has(material.id) ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-purple-600 hover:bg-purple-700'} text-white py-3 px-4 rounded-xl font-semibold text-center transition-all shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2`}
                     >
-                      {completedMaterials.has(material.id) ? '✅ Dikerjakan' : `👁️ ${tr('Lihat Materi', 'View Material')}`}
+                      {completedMaterials.has(material.id) ? `✅ ${tr('Dikerjakan', 'Completed')}` : `👁️ ${tr('Lihat Materi', 'View Material')}`}
                     </button>
                     
                     <a
