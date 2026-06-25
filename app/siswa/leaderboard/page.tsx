@@ -183,7 +183,7 @@ export default function SiswaLeaderboardPage() {
                 <span className="text-2xl">🏆</span>
               </div>
               <div>
-                <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>Leaderboard</h1>
+                <h1 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>{tr('Peringkat', 'Leaderboard')}</h1>
                 <p className={`text-sm ${theme === 'dark' ? 'text-purple-300' : 'text-purple-600'}`}>
                   {userKelas ? tr(`Peringkat Kelas ${userKelas}`, `Class Ranking ${userKelas}`) : tr('Peringkat Semua Siswa', 'All Students Ranking')}
                 </p>
