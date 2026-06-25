@@ -847,7 +847,7 @@ export default function SiswaCompilerPage() {
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
                   </div>
                   <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                    📝 Code Editor
+                    📝 {tr('Editor Kode', 'Code Editor')}
                   </h3>
                 </div>
                 <div className="flex gap-2">
@@ -915,7 +915,7 @@ export default function SiswaCompilerPage() {
                       : theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  💻 {tr('Output Console', 'Output Console')}
+                  💻 {tr('Hasil Kodingan', 'Output Console')}
                 </button>
                 <button
                   onClick={() => setActiveTab('analysis')}
