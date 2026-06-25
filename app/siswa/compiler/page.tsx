@@ -32,8 +32,30 @@ export default function SiswaCompilerPage() {
   const tr = (id: string, en: string) => (language === 'id' ? id : en)
   const [userName, setUserName] = useState('Siswa')
   const getDefaultCode = (lang: string) => lang === 'id'
-    ? `# 🎯 Selamat datang di Clean Code Analyzer!\n# Tulis kode Python yang bersih dan efisien\n\ndef hitung_jumlah(angka_angka):\n    """Menghitung jumlah dari daftar angka."""\n    total = 0\n    for angka in angka_angka:\n        total += angka\n    return total\n\n\ndef hitung_rata_rata(angka_angka):\n    """Menghitung rata-rata dari daftar angka."""\n    if not angka_angka:\n        return 0\n    total = hitung_jumlah(angka_angka)\n    return total / len(angka_angka)\n\n\n# Uji fungsi-fungsi di atas\ndaftar_angka = [1, 2, 3, 4, 5]\nhasil_jumlah = hitung_jumlah(daftar_angka)\nhasil_rata_rata = hitung_rata_rata(daftar_angka)\nprint(f"Angka: {daftar_angka}")\nprint(f"Jumlah: {hasil_jumlah}")\nprint(f"Rata-rata: {hasil_rata_rata}")\n`
-    : `# 🎯 Welcome to Clean Code Analyzer!\n# Write clean and efficient Python code\n\ndef calculate_sum(numbers):\n    """Calculate the sum of a list of numbers."""\n    total = 0\n    for number in numbers:\n        total += number\n    return total\n\n\ndef calculate_average(numbers):\n    """Calculate the average of a list of numbers."""\n    if not numbers:\n        return 0\n    total = calculate_sum(numbers)\n    return total / len(numbers)\n\n\n# Test the functions\ntest_numbers = [1, 2, 3, 4, 5]\nresult_sum = calculate_sum(test_numbers)\nresult_avg = calculate_average(test_numbers)\nprint(f"Numbers: {test_numbers}")\nprint(f"Sum: {result_sum}")\nprint(f"Average: {result_avg}")\n`
+    ? `def main():
+    """Fungsi utama untuk kalkulasi total pembayaran buku."""
+    # Kalkulasi pembayaran
+    harga_buku = 45000
+    jumlah_beli = 2
+    diskon = 5000
+    total_bayar = (harga_buku * jumlah_beli) - diskon
+    print(total_bayar)
+
+if __name__ == "__main__":
+    main()
+`
+    : `def main():
+    """Main function to calculate total book payment."""
+    # Payment calculation
+    book_price = 45000
+    quantity = 2
+    discount = 5000
+    total_payment = (book_price * quantity) - discount
+    print(total_payment)
+
+if __name__ == "__main__":
+    main()
+`
   const [code, setCode] = useState(() => getDefaultCode(language))
   const [output, setOutput] = useState('')
   const [executionTime, setExecutionTime] = useState('')
