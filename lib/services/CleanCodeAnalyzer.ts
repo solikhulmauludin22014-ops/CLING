@@ -484,9 +484,13 @@ export class CleanCodeAnalyzer {
     // Hitung skor menggunakan rumus yang diminta:
     // max(0, 0 if fatal else 10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10))
     const statements = Math.max(1, pylint.statements)
+    const totalErrors = errors.length
+    const totalWarnings = warnings.length
+    const totalRefactors = refactors.length
+    const totalConventions = conventions.length
     const score10 = pylint.fatal 
       ? 0 
-      : Math.max(0, 10.0 - ((5 * pylint.error + pylint.warning + pylint.refactor + pylint.convention) / statements) * 10)
+      : Math.max(0, 10.0 - ((5 * totalErrors + totalWarnings + totalRefactors + totalConventions) / statements) * 10)
     const scoreRounded = Math.round(score10 * 100) / 100
 
     // Tentukan grade category
